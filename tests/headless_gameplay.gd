@@ -53,13 +53,28 @@ func run() -> void:
 	await create_timer(0.1).timeout
 	var start: Button = menu.menu_container.get_child(3)
 	check(start.text == "START GAME", "start button exists")
+	check(start.has_focus(), "start receives keyboard focus")
+	await create_timer(0.2).timeout
+	check(start.scale.x > 1.0, "selection animation highlights focused button")
+	menu._open_options()
+	var dialog: AcceptDialog = menu.options_dialog
+	menu._open_options()
+	check(menu.options_dialog == dialog and dialog.visible, "Options reuses one visible dialog")
+	dialog.hide()
 	start.pressed.emit()
-	await process_frame
-	await process_frame
+	check(menu.transitioning and start.disabled, "transition prevents duplicate activation")
+	await create_timer(0.3).timeout
 	var game := current_scene
 	check(game.name == "Main", "menu button transitions to gameplay")
 	var player := get_first_node_in_group("player")
 	check(player != null, "player initialized")
+	var hud = game.get_node("UI")
+	await process_frame
+	check(hud.health_label.text.count("●") == 3, "HUD shows initial health")
+	check(hud.saturate_label.text.contains("READY"), "HUD shows SATURATE ready")
+	check(not hud.boss_panel.visible, "boss HUD hidden before spawn")
+	check(hud.health_label.mouse_filter == Control.MOUSE_FILTER_IGNORE, "HUD leaves playfield pointer input unobstructed")
+	check(game.health_label == hud.health_label and game.time_label == hud.timer_label, "game uses existing HUD references")
 	check(game.music_player == game.get_node("MusicPlayer"), "script finds the existing music node")
 	check(game.music_player is AudioStreamPlayer and game.music_player.playing, "music playback starts")
 	check(game.music_player.stream != null, "original music stream remains assigned")
@@ -83,6 +98,12 @@ func run() -> void:
 	check(game.boss_spawned and is_instance_valid(game.boss), "boss spawns after drop time")
 	var boss = game.boss
 	check(boss.song_section == 1, "boss enters arrival section")
+	check(hud.boss_panel.visible and hud.boss_bar.max_value == boss.max_health, "boss bar binds to spawned boss")
+	boss.take_damage(10)
+	await create_timer(0.25).timeout
+	check(absf(hud.boss_bar.value - boss.health) < 0.1, "boss bar animates to signaled health")
+	check(hud.boss_bar.size.y <= 8, "boss bar stays compact")
+	check(hud.timer_label.text == "00:07", "HUD timer follows gameplay time")
 	var previous_elapsed: float = boss.elapsed
 	await create_timer(0.3).timeout
 	check(boss.elapsed > previous_elapsed, "boss timeline advances after spawn")
@@ -109,6 +130,7 @@ func run() -> void:
 	await process_frame
 	key(KEY_X, false)
 	check(player.saturate_used, "X activates SATURATE")
+	check(hud.saturate_label.text.contains("USED"), "HUD shows SATURATE used")
 	var beam_count := 0
 	for child in game.get_children():
 		if child.scene_file_path == "res://scenes/rainbow_beam.tscn":
@@ -125,6 +147,23 @@ func run() -> void:
 	await create_timer(1.8).timeout
 	check(not is_instance_valid(boss), "SATURATE sweep damages and defeats boss")
 	check(not is_instance_valid(target_bullet), "SATURATE sweep clears enemy projectile")
+	check(not hud.boss_panel.visible, "boss HUD hides on defeat")
+	player.invincible = false
+	player.take_damage(3)
+	await create_timer(0.35).timeout
+	check(paused and hud.end_screen.visible, "game-over UI appears while gameplay is paused")
+	check(hud.health_label.text.count("●") == 0, "HUD shows depleted health")
+	var retry: Button = game.restart_button
+	check(retry.visible and retry.has_focus(), "existing Retry button remains accessible while paused")
+	game.music_player.stop()
+	retry.pressed.emit()
+	await process_frame
+	await process_frame
+	game = current_scene
+	hud = game.get_node("UI")
+	await process_frame
+	check(not paused and not game.game_over, "Retry restarts existing gameplay")
+	check(not hud.end_screen.visible and hud.saturate_label.text.contains("READY"), "Retry resets HUD state")
 	# Exercise the boss validity guard once it has been freed by SATURATE.
 	await create_timer(0.1).timeout
 	# Let the audio mixer release the active MP3 playback before shutting down.
