@@ -187,7 +187,7 @@ func activate_saturate() -> void:
 	if get_tree().paused:
 		return
 
-	var scene_root := get_tree().current_scene
+	var scene_root := preload("res://scripts/systems/combat_context.gd").root_for(self)
 
 	if scene_root == null:
 		return
@@ -250,13 +250,13 @@ func _update_visual_effects() -> void:
 func shoot() -> void:
 	var bullet = bullet_scene.instantiate()
 
-	get_tree().current_scene.add_child(bullet)
+	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
 	bullet.global_position = global_position + Vector2(0, -25)
 
 
 func take_damage(amount: int) -> void:
 	# Ignore queued collision callbacks after the boss has been defeated.
-	if get_tree().current_scene.get("victory_started") == true:
+	if preload("res://scripts/systems/combat_context.gd").root_for(self).get("victory_started") == true:
 		return
 
 	if invincible:
@@ -272,7 +272,7 @@ func take_damage(amount: int) -> void:
 	_spawn_hit_particles(false)
 
 	# Trigger screen shake through main.gd.
-	var main = get_tree().current_scene
+	var main = preload("res://scripts/systems/combat_context.gd").root_for(self)
 
 	if main != null:
 		var current_shake = main.get("shake_time")
@@ -312,7 +312,7 @@ func _spawn_hit_particles(is_death: bool) -> void:
 	particles.process_mode = Node.PROCESS_MODE_ALWAYS
 	particles.z_index = 20
 
-	var scene_root := get_tree().current_scene
+	var scene_root := preload("res://scripts/systems/combat_context.gd").root_for(self)
 
 	if scene_root == null:
 		particles.free()

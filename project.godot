@@ -1,5 +1,5 @@
 ; Engine configuration file.
-; Reconstructed from the existing main menu and 540 x 900 level background.
+; Widescreen presentation; combat_host keeps the original 540 x 900 arena.
 config_version=5
 
 [application]
@@ -9,8 +9,15 @@ run/main_scene="res://scenes/main_menu.tscn"
 
 [display]
 
-window/size/viewport_width=540
-window/size/viewport_height=900
+window/size/viewport_width=1280
+window/size/viewport_height=720
 
 ; Gameplay reads keys directly in scenes/player.gd; no custom InputMap actions
 ; are required. Keep the engine's built-in UI actions for menu navigation.
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[autoload]
+
+Session="*res://scripts/systems/session.gd"

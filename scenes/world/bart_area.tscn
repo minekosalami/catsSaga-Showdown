@@ -1,0 +1,208 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/area.gd" id="area"]
+
+[ext_resource type="Script" path="res://scripts/world/placeholder.gd" id="visual"]
+
+[ext_resource type="Script" path="res://scripts/world/portal.gd" id="portal"]
+
+[ext_resource type="Script" path="res://scripts/world/npc.gd" id="npc"]
+
+[sub_resource type="RectangleShape2D" id="obstacle0"]
+size = Vector2(1600, 30)
+
+[sub_resource type="RectangleShape2D" id="obstacle1"]
+size = Vector2(1600, 30)
+
+[sub_resource type="RectangleShape2D" id="obstacle2"]
+size = Vector2(30, 900)
+
+[sub_resource type="RectangleShape2D" id="obstacle3"]
+size = Vector2(30, 900)
+
+[sub_resource type="RectangleShape2D" id="obstacle4"]
+size = Vector2(160, 160)
+
+[sub_resource type="RectangleShape2D" id="obstacle5"]
+size = Vector2(240, 140)
+
+[sub_resource type="RectangleShape2D" id="obstacle6"]
+size = Vector2(180, 170)
+
+[sub_resource type="RectangleShape2D" id="portal0"]
+size = Vector2(100, 150)
+
+[node name="bart_area" type="Node2D"]
+script = ExtResource("area")
+display_name = "Evil Bart's Area"
+map_size = Vector2(1600, 900)
+
+[node name="BackgroundPlaceholder" type="Node2D" parent="."]
+position = Vector2(800.0, 450.0)
+script = ExtResource("visual")
+box_size = Vector2(1600, 900)
+tint = Color(0.5098039215686274, 0.6, 0.6509803921568628, 1)
+caption = "TEMP FOREST MAP"
+
+[node name="PathPlaceholder" type="Node2D" parent="."]
+position = Vector2(800.0, 450.0)
+script = ExtResource("visual")
+box_size = Vector2(1520, 180)
+tint = Color(0.7568627450980392, 0.7294117647058823, 0.5450980392156862, 1)
+caption = "TEMP PATH"
+
+[node name="Entries" type="Node2D" parent="."]
+
+[node name="FromDeep" type="Marker2D" parent="Entries"]
+position = Vector2(280, 450)
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Block0" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(800.0, 15)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block0"]
+shape = SubResource("obstacle0")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block0"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(1600, 30)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = ""
+
+[node name="Block1" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(800.0, 885)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block1"]
+shape = SubResource("obstacle1")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block1"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(1600, 30)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = ""
+
+[node name="Block2" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(15, 450.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block2"]
+shape = SubResource("obstacle2")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block2"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(30, 900)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = ""
+
+[node name="Block3" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(1585, 450.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block3"]
+shape = SubResource("obstacle3")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block3"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(30, 900)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = ""
+
+[node name="Block4" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(600, 240.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block4"]
+shape = SubResource("obstacle4")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block4"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(160, 160)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = "TEMP OBSTACLE"
+
+[node name="Block5" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(900, 670.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block5"]
+shape = SubResource("obstacle5")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block5"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(240, 140)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = "TEMP OBSTACLE"
+
+[node name="Block6" type="StaticBody2D" parent="Obstacles"]
+position = Vector2(1250, 210.0)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Block6"]
+shape = SubResource("obstacle6")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Obstacles/Block6"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(180, 170)
+tint = Color(0.2784313725490196, 0.38823529411764707, 0.33725490196078434, 1)
+caption = "TEMP OBSTACLE"
+
+[node name="Portals" type="Node2D" parent="."]
+
+[node name="Exit0" type="Area2D" parent="Portals"]
+position = Vector2(120, 450)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("portal")
+destination = "deep_forest"
+entry = "FromBart"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/Exit0"]
+shape = SubResource("portal0")
+
+[node name="VisualPlaceholder" type="Node2D" parent="Portals/Exit0"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(100, 150)
+tint = Color(0.8274509803921568, 0.8431372549019608, 0.6078431372549019, 1)
+caption = "EXIT"
+
+[node name="DestinationLabel" type="Label" parent="Portals/Exit0"]
+offset_left = -85.0
+offset_top = -110.0
+offset_right = 85.0
+text = "TO DEEP FOREST"
+theme_override_colors/font_color = Color(0.05, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="Characters" type="Node2D" parent="."]
+
+[node name="EvilBart" type="Node2D" parent="Characters"]
+position = Vector2(1000, 450)
+script = ExtResource("npc")
+dialogue_id = "bart_encounter"
+starts_battle = true
+
+[node name="VisualPlaceholder" type="Node2D" parent="Characters/EvilBart"]
+position = Vector2(0, 0)
+script = ExtResource("visual")
+box_size = Vector2(100, 40)
+tint = Color(0.9019607843137255, 0.6313725490196078, 0.5843137254901961, 1)
+caption = "BART [TEMP]"
