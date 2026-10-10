@@ -1,18 +1,15 @@
-
 extends Control
 
 const SketchTheme = preload("res://scripts/ui/sketch_theme.gd")
 const SketchButton = preload("res://scripts/ui/sketch_button.gd")
-const SketchEmblem = preload("res://scripts/ui/sketch_emblem.gd")
 const SketchBackground = preload("res://scripts/ui/sketch_background.gd")
 
 var transitioning: bool = false
 var options_dialog: AcceptDialog
-
 var menu_container: VBoxContainer
 var title_label: Label
-var subtitle_label: Label
-
+var info_container: VBoxContainer
+var info_content: Label
 
 func _ready() -> void:
 	theme = SketchTheme.create()
@@ -21,87 +18,95 @@ func _ready() -> void:
 	create_tween().tween_property(menu_container, "modulate:a", 1.0, 0.35)
 	menu_container.get_node("StartButton").grab_focus()
 
-
 func _build_menu() -> void:
-	# Full-screen background.
 	var background := Control.new()
 	background.set_script(SketchBackground)
 	background.name = "Background"
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
-
-	# Center the menu on the screen.
 	var center := CenterContainer.new()
 	center.name = "CenterContainer"
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-
 	menu_container = VBoxContainer.new()
-	menu_container.name = "MenuContainer"
-	menu_container.custom_minimum_size = Vector2(400, 0)
-	menu_container.add_theme_constant_override("separation", 12)
+	menu_container.name = "Menu"
+	menu_container.custom_minimum_size.x = 400
+	menu_container.add_theme_constant_override("separation", 16)
 	center.add_child(menu_container)
-
-	var emblem := Control.new()
-	emblem.name = "Emblem"
-	emblem.set_script(SketchEmblem)
-	emblem.custom_minimum_size.y = 200
-	menu_container.add_child(emblem)
-
-	# Game title.
 	title_label = Label.new()
 	title_label.text = "catsSaga()"
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.add_theme_font_size_override("font_size", 64)
-	title_label.add_theme_font_override("font", SketchTheme.TITLE_FONT)
-	title_label.add_theme_color_override("font_color", SketchTheme.INK)
-	title_label.rotation = -0.012
-	title_label.add_theme_color_override("font_shadow_color", Color("#b9b3a9"))
-	title_label.add_theme_constant_override("shadow_offset_x", 1)
-	title_label.add_theme_constant_override("shadow_offset_y", 2)
+	title_label.add_theme_font_size_override("font_size", 52)
+	title_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	menu_container.add_child(title_label)
-
-	subtitle_label = Label.new()
-	subtitle_label.text = "A STRANGE LITTLE ADVENTURE"
-	subtitle_label.add_theme_color_override("font_color", Color("#5b5a58"))
-	subtitle_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
-	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle_label.add_theme_font_size_override("font_size", 12)
-	menu_container.add_child(subtitle_label)
-
-	# Space between title and buttons.
 	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 20
+	spacer.custom_minimum_size.y = 42
 	menu_container.add_child(spacer)
+	_button(menu_container, "START GAME", "StartButton", _start_game)
+	_button(menu_container, "OPTIONS", "OptionsButton", _open_options)
+	_button(menu_container, "INFO", "InfoButton", _show_info)
+	_button(menu_container, "QUIT", "QuitButton", _quit_game)
+	_build_info(center)
 
-	# Menu buttons.
-	_add_button("START GAME", _start_game)
-	_add_button("OPTIONS", _open_options)
-	_add_button("QUIT", _quit_game)
-
-	# Version text.
-	var version_label := Label.new()
-	version_label.text = "Z / SHOOT    X / SATURATE\nWASD / MOVE    SHIFT / FOCUS"
-	version_label.add_theme_color_override("font_color", Color("#6e6b66"))
-	version_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
-	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	version_label.add_theme_font_size_override("font_size", 12)
-	menu_container.add_child(version_label)
-
-
-func _add_button(button_text: String, action: Callable) -> void:
+func _button(parent: Node, text: String, node_name: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.set_script(SketchButton)
-	button.text = button_text
-	button.name = {"START GAME": "StartButton", "OPTIONS": "OptionsButton", "QUIT": "QuitButton"}[button_text]
-	button.custom_minimum_size = Vector2(360, 62)
+	button.name = node_name
+	button.text = text
+	button.custom_minimum_size = Vector2(360, 56)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	button.add_theme_font_size_override("font_size", 18)
-	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(action)
-	menu_container.add_child(button)
+	parent.add_child(button)
+	return button
 
+func _build_info(center: CenterContainer) -> void:
+	info_container = VBoxContainer.new()
+	info_container.name = "Info"
+	info_container.custom_minimum_size.x = 400
+	info_container.add_theme_constant_override("separation", 16)
+	center.add_child(info_container)
+	var heading := Label.new()
+	heading.text = "// INFO"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 28)
+	info_container.add_child(heading)
+	_button(info_container, "CONTROLS", "ControlsButton", _show_controls)
+	_button(info_container, "CREDITS", "CreditsButton", _show_credits)
+	info_content = Label.new()
+	info_content.name = "InfoContent"
+	info_content.custom_minimum_size = Vector2(400, 205)
+	info_content.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info_content.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_content.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	info_content.add_theme_font_size_override("font_size", 14)
+	info_container.add_child(info_content)
+	_button(info_container, "BACK", "BackButton", _back_to_menu)
+	info_container.hide()
+
+func _show_info() -> void:
+	menu_container.hide()
+	info_container.show()
+	_show_controls()
+	info_container.get_node("ControlsButton").grab_focus()
+	info_container.modulate.a = 0.0
+	create_tween().tween_property(info_container, "modulate:a", 1.0, 0.2)
+
+func _show_controls() -> void:
+	info_content.text = "WASD / ARROWS    Move\nZ                Shoot\nSHIFT            Focus movement\nX                SATURATE\n\nSATURATE is available once per run."
+
+func _show_credits() -> void:
+	info_content.text = "Credits coming soon."
+
+func _back_to_menu() -> void:
+	info_container.hide()
+	menu_container.show()
+	menu_container.get_node("InfoButton").grab_focus()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if info_container.visible and event.is_action_pressed("ui_cancel"):
+		_back_to_menu()
+		get_viewport().set_input_as_handled()
 
 func _start_game() -> void:
 	if transitioning:
@@ -122,17 +127,14 @@ func _start_game() -> void:
 			if child is Button:
 				child.disabled = false
 
-
 func _open_options() -> void:
 	if not is_instance_valid(options_dialog):
 		options_dialog = AcceptDialog.new()
 		options_dialog.title = "Options"
-		options_dialog.dialog_text = "Options menu coming soon.\n\nMove · WASD / arrows\nPrecision · Shift   Shoot · Z\nSATURATE · X (once per run)"
+		options_dialog.dialog_text = "Options coming soon."
 		options_dialog.theme = theme
-		options_dialog.add_theme_color_override("font_color", SketchTheme.INK)
 		add_child(options_dialog)
-	options_dialog.popup_centered(Vector2i(360, 230))
-
+	options_dialog.popup_centered(Vector2i(360, 180))
 
 func _quit_game() -> void:
 	get_tree().quit()

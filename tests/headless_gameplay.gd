@@ -42,7 +42,7 @@ func run() -> void:
 	await process_frame
 	check(root.size == Vector2i(540, 900), "540x900 display")
 	var menu := current_scene
-	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 8, "main menu controls initialize")
+	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 6, "main menu controls initialize")
 	await create_timer(0.1).timeout
 	check(menu.size == Vector2(540, 900), "menu root fills viewport")
 	check(menu.get_node("Background").size == menu.size, "background fills menu")
@@ -55,7 +55,23 @@ func run() -> void:
 	check(menu.size == Vector2(600, 1000), "menu follows viewport resize")
 	root.size = Vector2i(540, 900)
 	await create_timer(0.1).timeout
+	check(menu.menu_container.get_node_or_null("Emblem") == null, "menu has no decorative cat picture")
+	check(menu.title_label.get_theme_font("font") == load("res://assets/ui/fonts/DejaVuSansMono.ttf"), "menu title uses bundled coding font")
+	menu.menu_container.get_node("InfoButton").pressed.emit()
+	await create_timer(0.25).timeout
+	check(menu.info_container.visible and not menu.menu_container.visible, "Info opens within the menu")
+	check(menu.info_content.text.contains("WASD / ARROWS") and menu.info_content.text.contains("SHIFT") and menu.info_content.text.contains("SATURATE"), "Info Controls describes actual controls")
+	menu.info_container.get_node("CreditsButton").pressed.emit()
+	check(menu.info_content.text == "Credits coming soon.", "Info Credits stays a placeholder")
+	menu.info_container.get_node("BackButton").pressed.emit()
+	check(menu.menu_container.visible and not menu.info_container.visible, "Info Back returns to primary menu")
+	menu._show_info()
+	key(KEY_ESCAPE, true)
+	await process_frame
+	key(KEY_ESCAPE, false)
+	check(menu.menu_container.visible, "Escape returns from Info")
 	var start: Button = menu.menu_container.get_node("StartButton")
+	start.grab_focus()
 	check(start.text == "START GAME", "start button exists")
 	check(start.has_focus(), "start receives keyboard focus")
 	await create_timer(0.2).timeout
@@ -131,7 +147,25 @@ func run() -> void:
 			found = true
 	check(found, "shooting creates bullet scene")
 	key(KEY_Z, false)
-	await create_timer(7.2).timeout
+	check(get_nodes_in_group("opening_enemies").size() > 0, "opening enemies exist before the music drop")
+	# Observe the real music-triggered spawn rather than triggering it manually.
+	while not game.boss_spawned:
+		await process_frame
+	var entrance_time: float = game.elapsed_time
+	check(entrance_time >= 6.85 and entrance_time < 6.95, "boss entrance triggers at the first music drop")
+	check(get_nodes_in_group("opening_enemies").is_empty(), "all opening enemies are removed immediately")
+	check(hud.entrance_flash.modulate.a > 0.0, "white entrance flash starts on spawn")
+	check(game.boss.entrance_tween.is_running(), "boss bounce starts on spawn")
+	var entering_sprite: Sprite2D = game.boss.get_node("Sprite2D")
+	var entering_bounds := entering_sprite.global_transform * entering_sprite.get_rect()
+	check(entering_bounds.position.y > 146.0, "entrance artwork stays below the boss HUD")
+	await create_timer(0.55).timeout
+	check(hud.entrance_flash.modulate.a == 0.0, "entrance flash ends without repeats")
+	check(absf(game.boss.get_node("Sprite2D").scale.x - 0.14721654) < 0.001, "entrance restores sprite scale")
+	check(hud.boss_panel.modulate.a == 1.0, "boss health bar finishes smooth reveal")
+	game._spawn_enemies(10.0)
+	check(get_nodes_in_group("opening_enemies").is_empty(), "regular enemies cannot spawn during boss fight")
+	check(hud.boss_caption.text.begins_with("EVIL BART"), "HUD names Evil Bart beside health bar")
 	check(game.boss_spawned and is_instance_valid(game.boss), "boss spawns after drop time")
 	var boss = game.boss
 	check(boss.song_section == 1, "boss enters arrival section")
@@ -141,6 +175,8 @@ func run() -> void:
 	check(boss_bounds.position.y > hud.boss_panel.get_global_rect().end.y + 16.0, "boss sprite clears health bar")
 	var saved_position: Vector2 = boss.position
 	var saved_direction: float = boss.move_direction
+	var saved_velocity: float = boss.horizontal_velocity
+	var saved_movement_time: float = boss.movement_time
 	boss.position.x = 0.0
 	boss.move_boss(0.0)
 	boss_bounds = boss_sprite.global_transform * boss_sprite.get_rect()
@@ -151,6 +187,30 @@ func run() -> void:
 	check(boss_bounds.end.x <= 533.0, "boss remains fully visible at right movement bound")
 	boss.position = saved_position
 	boss.move_direction = saved_direction
+	boss.horizontal_velocity = saved_velocity
+	# Exercise many direction reversals with small, deterministic movement steps.
+	var reversals := 0
+	var previous_velocity: float = boss.horizontal_velocity
+	var previous_direction: float = boss.move_direction
+	var smooth_motion := true
+	var bounded_motion := true
+	for step in range(1800):
+		boss.move_boss(1.0 / 60.0)
+		if absf(boss.horizontal_velocity - previous_velocity) > 4.01:
+			smooth_motion = false
+		var rect: Rect2 = boss_sprite.global_transform * boss_sprite.get_rect()
+		if rect.position.x < 7.0 or rect.end.x > 533.0:
+			bounded_motion = false
+		if boss.move_direction != previous_direction:
+			reversals += 1
+		previous_velocity = boss.horizontal_velocity
+		previous_direction = boss.move_direction
+	check(smooth_motion and reversals >= 2, "boss eases through repeated direction changes without velocity jumps")
+	check(bounded_motion, "boss remains visible throughout smooth movement")
+	boss.position = saved_position
+	boss.move_direction = saved_direction
+	boss.horizontal_velocity = saved_velocity
+	boss.movement_time = saved_movement_time
 	check(hud.boss_panel.visible and hud.boss_bar.max_value == boss.max_health, "boss bar binds to spawned boss")
 	boss.take_damage(10)
 	await create_timer(0.25).timeout

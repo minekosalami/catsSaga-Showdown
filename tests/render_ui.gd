@@ -28,23 +28,36 @@ func run() -> void:
 	root.size = Vector2i(540, 900)
 	change_scene_to_file("res://scenes/main_menu.tscn")
 	await create_timer(1.0).timeout
-	await snapshot("overhaul-menu")
+	await snapshot("polish-menu")
+	current_scene._show_info()
+	await create_timer(0.3).timeout
+	await snapshot("polish-info-controls")
+	current_scene._show_credits()
+	await snapshot("polish-info-credits")
+	current_scene._back_to_menu()
 	current_scene._start_game()
 	await create_timer(0.5).timeout
 	var game = current_scene
 	game.player.invincible = true
-	await create_timer(7.0).timeout
-	await snapshot("overhaul-gameplay")
+	await create_timer(1.8).timeout
+	await snapshot("polish-opening")
+	while not game.boss_spawned:
+		await process_frame
+	await snapshot("polish-entrance")
+	await create_timer(0.15).timeout
+	await snapshot("polish-bounce")
+	await create_timer(0.5).timeout
+	await snapshot("polish-gameplay")
 	game.player.invincible = false
 	game.player.take_damage(1)
 	game.boss.take_damage(45)
 	await create_timer(0.4).timeout
-	await snapshot("overhaul-damaged")
+	await snapshot("polish-damaged")
 	game.player.invincible = true
 	game.player.unlimited_saturate = true
 	game.player.activate_saturate()
 	await create_timer(0.65).timeout
-	await snapshot("overhaul-saturate")
+	await snapshot("polish-saturate")
 	await create_timer(1.2).timeout
 	game.music_player.stop()
 	await create_timer(0.3).timeout

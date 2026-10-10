@@ -16,6 +16,8 @@ var bar_tween: Tween
 var health_card: PanelContainer
 var last_health: int = -1
 var health_tween: Tween
+var entrance_flash: ColorRect
+var entrance_tween: Tween
 
 func _label(parent: Node, text: String, font_size: int, color: Color = SketchTheme.PAPER) -> Label:
 	var label := Label.new()
@@ -52,7 +54,7 @@ func _ready() -> void:
 	var health_column := VBoxContainer.new()
 	health_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(health_column)
-	_label(health_column, "PLAYER / VITAL SIGNS", 10, SketchTheme.MUTED)
+	_label(health_column, "EVIL BART", 10, SketchTheme.MUTED)
 	health_label = get_node("HealthLabel")
 	health_label.reparent(health_column)
 	health_label.add_theme_font_size_override("font_size", 20)
@@ -70,7 +72,7 @@ func _ready() -> void:
 	boss_panel.add_child(boss_stack)
 	var boss_row := HBoxContainer.new()
 	boss_stack.add_child(boss_row)
-	boss_caption = _label(boss_row, "BART / PHASE 1", 12)
+	boss_caption = _label(boss_row, "EVIL BART / PHASE 1", 12)
 	boss_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	boss_value = _label(boss_row, "180 / 180", 11, SketchTheme.MUTED)
 	boss_bar = ProgressBar.new()
@@ -115,10 +117,17 @@ func _ready() -> void:
 	retry._ready()
 	retry.text = "TRY AGAIN"
 	retry.custom_minimum_size.y = 52
-	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.PAPER, SketchTheme.PAPER))
+	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.INK, SketchTheme.MUTED))
 	_ignore_pointer(root)
 	retry.mouse_filter = Control.MOUSE_FILTER_STOP
 	end_screen.hide()
+	entrance_flash = ColorRect.new()
+	entrance_flash.name = "EntranceFlash"
+	entrance_flash.color = Color.WHITE
+	entrance_flash.modulate.a = 0.0
+	entrance_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(entrance_flash)
+	entrance_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func _ignore_pointer(node: Node) -> void:
 	if node is Control:
@@ -152,6 +161,8 @@ func _process(_delta: float) -> void:
 		boss_bar.value = observed_boss.health
 		_boss_health_changed(observed_boss.health, observed_boss.max_health, observed_boss.phase)
 		boss_panel.show()
+		boss_panel.modulate.a = 0.0
+		create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).tween_property(boss_panel, "modulate:a", 1.0, 0.35)
 	if not is_instance_valid(game.boss):
 		boss_panel.hide()
 	if game.game_over and not end_screen.visible:
@@ -162,10 +173,16 @@ func _process(_delta: float) -> void:
 		retry.grab_focus()
 
 func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
-	boss_caption.text = "BART / PHASE %d" % phase
+	boss_caption.text = "EVIL BART / PHASE %d" % phase
 	boss_value.text = "%d / %d" % [health, maximum]
 	boss_bar.max_value = maximum
 	if is_instance_valid(bar_tween):
 		bar_tween.kill()
 	bar_tween = create_tween()
 	bar_tween.tween_property(boss_bar, "value", float(health), 0.18)
+
+func show_boss_entrance() -> void:
+	# One short pulse, called only by the guarded boss spawn at the music drop.
+	entrance_flash.modulate.a = 0.85
+	entrance_tween = create_tween()
+	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.10)

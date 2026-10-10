@@ -158,8 +158,8 @@ func _process(delta: float) -> void:
 		time_label.text = "Time: %d:%02d" % [minutes, seconds]
 
 	_update_screen_shake(delta)
-	_spawn_enemies(delta)
 	_update_boss()
+	_spawn_enemies(delta)
 
 
 func _spawn_enemies(delta: float) -> void:
@@ -196,6 +196,9 @@ func _update_boss() -> void:
 		push_warning("main.gd: Boss scene is missing.")
 		return
 
+	# Free only opening enemies synchronously, before the boss joins "enemies".
+	for opening_enemy in get_tree().get_nodes_in_group("opening_enemies"):
+		opening_enemy.free()
 	boss = boss_scene.instantiate()
 	# Leave clear space below the top HUD for the full boss sprite.
 	boss.position = Vector2(get_viewport_rect().size.x * 0.5, 240.0)
@@ -205,6 +208,9 @@ func _update_boss() -> void:
 	if "elapsed" in boss:
 		boss.elapsed = elapsed_time
 
+	boss.play_entrance()
+	if ui != null and ui.has_method("show_boss_entrance"):
+		ui.show_boss_entrance()
 	print("Boss spawned!")
 
 
