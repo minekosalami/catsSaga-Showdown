@@ -35,6 +35,8 @@ func _ready() -> void:
 	original_position = position
 
 	_find_scene_nodes()
+	if player != null:
+		player.position = Vector2(get_viewport_rect().size.x * 0.5, get_viewport_rect().size.y - 120.0)
 	_find_existing_ui()
 	_connect_player_signals()
 	_connect_restart_button()
@@ -195,6 +197,8 @@ func _update_boss() -> void:
 		return
 
 	boss = boss_scene.instantiate()
+	# Leave clear space below the top HUD for the full boss sprite.
+	boss.position = Vector2(get_viewport_rect().size.x * 0.5, 240.0)
 	add_child(boss)
 	boss_spawned = true
 

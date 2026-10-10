@@ -16,7 +16,7 @@ position = Vector2(270, 450)
 texture = ExtResource("2_jyhfs")
 
 [node name="Player" parent="." unique_id=860092324 instance=ExtResource("1_o5qli")]
-position = Vector2(2, -1)
+position = Vector2(270, 780)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1036593012]
 script = ExtResource("5_hud")
@@ -43,3 +43,5 @@ text = "RETRY?"
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=938782890]
 stream = ExtResource("3_sugp2")
+volume_db = 0.0
+bus = &"Master"

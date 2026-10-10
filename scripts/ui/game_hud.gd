@@ -7,11 +7,23 @@ var health_label: Label
 var timer_label: Label
 var saturate_label: Label
 var boss_caption: Label
+var boss_value: Label
 var boss_bar: ProgressBar
-var boss_panel: VBoxContainer
+var boss_panel: PanelContainer
 var end_screen: CenterContainer
 var observed_boss: Node
 var bar_tween: Tween
+var health_card: PanelContainer
+var last_health: int = -1
+var health_tween: Tween
+
+func _label(parent: Node, text: String, font_size: int, color: Color = SketchTheme.PAPER) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
+	parent.add_child(label)
+	return label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -26,49 +38,59 @@ func _ready() -> void:
 	margin.name = "TopMargin"
 	root.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_top", 12)
+	for side in ["left", "right", "top"]:
+		margin.add_theme_constant_override("margin_" + side, 12)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 6)
+	stack.add_theme_constant_override("separation", 8)
 	margin.add_child(stack)
+	health_card = PanelContainer.new()
+	health_card.name = "PlayerCard"
+	stack.add_child(health_card)
 	var row := HBoxContainer.new()
-	stack.add_child(row)
+	row.add_theme_constant_override("separation", 16)
+	health_card.add_child(row)
+	var health_column := VBoxContainer.new()
+	health_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(health_column)
+	_label(health_column, "PLAYER / VITAL SIGNS", 10, SketchTheme.MUTED)
 	health_label = get_node("HealthLabel")
-	health_label.reparent(row)
-	health_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	health_label.add_theme_font_size_override("font_size", 18)
-	timer_label = Label.new()
+	health_label.reparent(health_column)
+	health_label.add_theme_font_size_override("font_size", 20)
+	var time_column := VBoxContainer.new()
+	row.add_child(time_column)
+	_label(time_column, "RUN TIME", 10, SketchTheme.MUTED)
+	timer_label = _label(time_column, "00:00", 22)
 	timer_label.name = "TimeLabel"
-	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	timer_label.add_theme_font_size_override("font_size", 18)
-	row.add_child(timer_label)
 
-	boss_panel = VBoxContainer.new()
+	boss_panel = PanelContainer.new()
 	boss_panel.name = "BossPanel"
-	boss_panel.add_theme_constant_override("separation", 3)
 	stack.add_child(boss_panel)
-	boss_caption = Label.new()
-	boss_caption.add_theme_font_size_override("font_size", 11)
-	boss_panel.add_child(boss_caption)
+	var boss_stack := VBoxContainer.new()
+	boss_stack.add_theme_constant_override("separation", 7)
+	boss_panel.add_child(boss_stack)
+	var boss_row := HBoxContainer.new()
+	boss_stack.add_child(boss_row)
+	boss_caption = _label(boss_row, "BART / PHASE 1", 12)
+	boss_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	boss_value = _label(boss_row, "180 / 180", 11, SketchTheme.MUTED)
 	boss_bar = ProgressBar.new()
 	boss_bar.name = "BossHealthBar"
-	boss_bar.custom_minimum_size.y = 5
+	boss_bar.custom_minimum_size.y = 12
 	boss_bar.show_percentage = false
-	boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	boss_panel.add_child(boss_bar)
+	boss_stack.add_child(boss_bar)
 	boss_panel.hide()
 
-	saturate_label = Label.new()
+	var ability_card := PanelContainer.new()
+	ability_card.name = "AbilityCard"
+	root.add_child(ability_card)
+	ability_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	ability_card.offset_left = 12
+	ability_card.offset_right = -12
+	ability_card.offset_top = -52
+	ability_card.offset_bottom = -12
+	saturate_label = _label(ability_card, "", 13)
 	saturate_label.name = "SaturateLabel"
-	root.add_child(saturate_label)
-	saturate_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	saturate_label.offset_left = -200
-	saturate_label.offset_top = -38
-	saturate_label.offset_right = -18
-	saturate_label.offset_bottom = -14
-	saturate_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	saturate_label.add_theme_font_size_override("font_size", 13)
+	saturate_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	end_screen = CenterContainer.new()
 	end_screen.name = "EndScreen"
@@ -77,25 +99,23 @@ func _ready() -> void:
 	var card := PanelContainer.new()
 	end_screen.add_child(card)
 	var content := VBoxContainer.new()
-	content.custom_minimum_size.x = 300
-	content.add_theme_constant_override("separation", 16)
+	content.custom_minimum_size.x = 320
+	content.add_theme_constant_override("separation", 18)
 	card.add_child(content)
+	_label(content, "// SIGNAL LOST", 12, SketchTheme.ACCENT).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var game_over: Label = get_node("GameOverLabel")
 	game_over.reparent(content)
 	game_over.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	game_over.add_theme_font_size_override("font_size", 30)
-	var note := Label.new()
-	note.text = "MY PET DEAD."
-	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	note.modulate = SketchTheme.MUTED
-	content.add_child(note)
+	game_over.add_theme_font_override("font", SketchTheme.TITLE_FONT)
+	game_over.add_theme_font_size_override("font_size", 34)
+	_label(content, "MY PET DEAD.", 12, SketchTheme.MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var retry: Button = get_node("RestartButton")
 	retry.reparent(content)
 	retry.set_script(SketchButton)
-	# set_script on an already-ready node does not run its new _ready callback.
 	retry._ready()
 	retry.text = "TRY AGAIN"
 	retry.custom_minimum_size.y = 52
+	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.PAPER, SketchTheme.PAPER))
 	_ignore_pointer(root)
 	retry.mouse_filter = Control.MOUSE_FILTER_STOP
 	end_screen.hide()
@@ -110,10 +130,18 @@ func _process(_delta: float) -> void:
 	var game := get_parent()
 	var player: Node = game.get_node_or_null("Player")
 	if player != null:
-		health_label.text = "HP  " + "● ".repeat(player.health) + "○ ".repeat(maxi(0, 3 - player.health))
-		health_label.modulate = SketchTheme.ACCENT if player.health == 1 else SketchTheme.PAPER
-		saturate_label.text = "X  /  SATURATE " + ("— USED" if player.saturate_used else "— READY")
-		saturate_label.modulate = SketchTheme.MUTED if player.saturate_used else SketchTheme.ACCENT
+		health_label.text = "● ".repeat(player.health) + "○ ".repeat(maxi(0, 3 - player.health)) + " %d / 3" % player.health
+		health_label.modulate = SketchTheme.ACCENT if player.health <= 1 else SketchTheme.PAPER
+		if last_health != -1 and player.health < last_health:
+			if is_instance_valid(health_tween):
+				health_tween.kill()
+			health_card.modulate = SketchTheme.ACCENT
+			health_tween = create_tween()
+			health_tween.tween_property(health_card, "modulate", Color.WHITE, 0.3)
+		last_health = player.health
+		var ability_state := "[ UNLIMITED ]" if player.unlimited_saturate else ("[ USED ]" if player.saturate_used else "[ READY ]")
+		saturate_label.text = "X  /  SATURATE     " + ability_state
+		saturate_label.modulate = SketchTheme.MUTED if player.saturate_used and not player.unlimited_saturate else SketchTheme.ACCENT
 	var seconds := int(game.elapsed_time)
 	timer_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
 	if is_instance_valid(game.boss) and game.boss != observed_boss:
@@ -134,7 +162,8 @@ func _process(_delta: float) -> void:
 		retry.grab_focus()
 
 func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
-	boss_caption.text = "BART  /  PHASE %d" % phase
+	boss_caption.text = "BART / PHASE %d" % phase
+	boss_value.text = "%d / %d" % [health, maximum]
 	boss_bar.max_value = maximum
 	if is_instance_valid(bar_tween):
 		bar_tween.kill()

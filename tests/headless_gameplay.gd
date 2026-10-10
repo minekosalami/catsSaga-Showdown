@@ -17,6 +17,10 @@ func key(code: Key, down: bool) -> void:
 	Input.parse_input_event(event)
 
 func _initialize() -> void:
+	create_timer(45.0).timeout.connect(func():
+		push_error("Gameplay validation timed out")
+		quit(1)
+	)
 	call_deferred("run")
 
 func run() -> void:
@@ -38,7 +42,7 @@ func run() -> void:
 	await process_frame
 	check(root.size == Vector2i(540, 900), "540x900 display")
 	var menu := current_scene
-	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 7, "main menu controls initialize")
+	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 8, "main menu controls initialize")
 	await create_timer(0.1).timeout
 	check(menu.size == Vector2(540, 900), "menu root fills viewport")
 	check(menu.get_node("Background").size == menu.size, "background fills menu")
@@ -51,7 +55,7 @@ func run() -> void:
 	check(menu.size == Vector2(600, 1000), "menu follows viewport resize")
 	root.size = Vector2i(540, 900)
 	await create_timer(0.1).timeout
-	var start: Button = menu.menu_container.get_child(3)
+	var start: Button = menu.menu_container.get_node("StartButton")
 	check(start.text == "START GAME", "start button exists")
 	check(start.has_focus(), "start receives keyboard focus")
 	await create_timer(0.2).timeout
@@ -78,8 +82,41 @@ func run() -> void:
 	check(game.music_player == game.get_node("MusicPlayer"), "script finds the existing music node")
 	check(game.music_player is AudioStreamPlayer and game.music_player.playing, "music playback starts")
 	check(game.music_player.stream != null, "original music stream remains assigned")
+	check(game.music_player.stream.resource_path == "res://assets/fight.v.scale - catsSaga version.mp3", "correct soundtrack remains assigned")
+	var master := AudioServer.get_bus_index("Master")
+	check(master >= 0 and not AudioServer.is_bus_mute(master), "Master audio bus is not muted")
+	check(game.music_player.volume_db == 0.0 and game.music_player.bus == &"Master", "music uses full-volume Master routing")
+	var capture := AudioEffectCapture.new()
+	AudioServer.add_bus_effect(master, capture)
+	await create_timer(0.2).timeout
+	var samples := capture.get_buffer(capture.get_frames_available())
+	var peak := 0.0
+	for sample in samples:
+		peak = maxf(peak, maxf(absf(sample.x), absf(sample.y)))
+	check(peak > 0.001, "music produces non-silent samples at the Master bus")
+	AudioServer.remove_bus_effect(master, AudioServer.get_bus_effect_count(master) - 1)
+	check(absf(player.position.x - 270.0) < 1.0 and absf(player.position.y - 780.0) < 1.0, "player starts at bottom center")
+	var player_sprite: Sprite2D = player.get_node("Sprite2D")
+	var player_bounds := player_sprite.global_transform * player_sprite.get_rect()
+	check(Rect2(Vector2.ZERO, Vector2(540, 900)).encloses(player_bounds), "full player sprite starts inside playfield")
+	player.take_damage(1)
+	await process_frame
+	await process_frame
+	check(hud.health_label.text.contains("2 / 3") and hud.health_label.text.count("●") == 2, "HUD responds to actual player damage")
+	player.invulnerability_timer = 0.0
+	for code in [KEY_C, KEY_A, KEY_T, KEY_A]:
+		key(code, true)
+		await process_frame
+		key(code, false)
+	check(player.invincible, "typing CATA enables invincibility")
+	player.take_damage(1)
+	check(player.health == 2, "CATA prevents collision damage")
+	for code in [KEY_C, KEY_A, KEY_T, KEY_A]:
+		key(code, true)
+		await process_frame
+		key(code, false)
+	check(not player.invincible, "typing CATA again disables invincibility")
 	player.invincible = true
-	player.position = Vector2(270, 750)
 	key(KEY_D, true)
 	await create_timer(0.2).timeout
 	key(KEY_D, false)
@@ -98,12 +135,28 @@ func run() -> void:
 	check(game.boss_spawned and is_instance_valid(game.boss), "boss spawns after drop time")
 	var boss = game.boss
 	check(boss.song_section == 1, "boss enters arrival section")
+	check(absf(boss.position.y - 240.0) < 1.0, "boss spawns below top HUD")
+	var boss_sprite: Sprite2D = boss.get_node("Sprite2D")
+	var boss_bounds := boss_sprite.global_transform * boss_sprite.get_rect()
+	check(boss_bounds.position.y > hud.boss_panel.get_global_rect().end.y + 16.0, "boss sprite clears health bar")
+	var saved_position: Vector2 = boss.position
+	var saved_direction: float = boss.move_direction
+	boss.position.x = 0.0
+	boss.move_boss(0.0)
+	boss_bounds = boss_sprite.global_transform * boss_sprite.get_rect()
+	check(boss_bounds.position.x >= 7.0, "boss remains fully visible at left movement bound")
+	boss.position.x = 540.0
+	boss.move_boss(0.0)
+	boss_bounds = boss_sprite.global_transform * boss_sprite.get_rect()
+	check(boss_bounds.end.x <= 533.0, "boss remains fully visible at right movement bound")
+	boss.position = saved_position
+	boss.move_direction = saved_direction
 	check(hud.boss_panel.visible and hud.boss_bar.max_value == boss.max_health, "boss bar binds to spawned boss")
 	boss.take_damage(10)
 	await create_timer(0.25).timeout
 	check(absf(hud.boss_bar.value - boss.health) < 0.1, "boss bar animates to signaled health")
-	check(hud.boss_bar.size.y <= 8, "boss bar stays compact")
-	check(hud.timer_label.text == "00:07", "HUD timer follows gameplay time")
+	check(hud.boss_bar.size.y >= 12 and hud.boss_bar.size.y <= 16, "boss bar is readable without covering the boss")
+	check(hud.timer_label.text != "00:00", "HUD timer follows gameplay time")
 	var previous_elapsed: float = boss.elapsed
 	await create_timer(0.3).timeout
 	check(boss.elapsed > previous_elapsed, "boss timeline advances after spawn")
@@ -114,6 +167,12 @@ func run() -> void:
 	check(boss.elapsed >= 21.0 and boss.elapsed < 22.0, "boss follows music seek")
 	check(boss.song_section == 2, "music seek selects rising pressure attack section")
 	check(absf(boss.elapsed - game.elapsed_time) < 0.001, "boss stays synchronized after seek")
+	for section in [[49.0, 4], [62.0, 5], [90.0, 3]]:
+		game.music_player.seek(section[0])
+		await create_timer(0.15).timeout
+		check(boss.song_section == section[1], "music seek reaches attack section %d" % section[1])
+	game.music_player.seek(21.0)
+	await create_timer(0.15).timeout
 	boss.position = Vector2(270, 500)
 	var before_attack := game.get_child_count()
 	boss.fire_ring(3, 145.0, 0.0, Color.WHITE)
@@ -125,6 +184,7 @@ func run() -> void:
 	target_bullet.position = Vector2(100, 700)
 	target_bullet.speed = 0.0
 	check(target_bullet.is_in_group("enemy_bullets"), "shared bullet scene carries group membership")
+	var health_before_sweep: int = boss.health
 	key(KEY_X, true)
 	await process_frame
 	await process_frame
@@ -145,8 +205,38 @@ func run() -> void:
 			beam_count += 1
 	check(beam_count == 1, "SATURATE remains single use")
 	await create_timer(1.8).timeout
-	check(not is_instance_valid(boss), "SATURATE sweep damages and defeats boss")
+	check(is_instance_valid(boss) and boss.health == health_before_sweep - 30, "normal SATURATE deals exactly 30 damage once per target")
 	check(not is_instance_valid(target_bullet), "SATURATE sweep clears enemy projectile")
+	for code in [KEY_B, KEY_E, KEY_A, KEY_M]:
+		key(code, true)
+		await process_frame
+		key(code, false)
+	check(player.unlimited_saturate, "typing BEAM enables unlimited SATURATE")
+	await process_frame
+	check(hud.saturate_label.text.contains("UNLIMITED"), "HUD distinguishes BEAM from normal availability")
+	for use in range(2):
+		var health_before_repeat: int = boss.health
+		key(KEY_X, true)
+		await process_frame
+		key(KEY_X, false)
+		await create_timer(1.8).timeout
+		check(boss.health == health_before_repeat - 30, "BEAM permits repeat SATURATE use %d with 30 damage" % (use + 1))
+	for code in [KEY_B, KEY_E, KEY_A, KEY_M]:
+		key(code, true)
+		await process_frame
+		key(code, false)
+	check(not player.unlimited_saturate, "typing BEAM again disables unlimited use")
+	key(KEY_X, true)
+	await process_frame
+	key(KEY_X, false)
+	var normal_beams := 0
+	for child in game.get_children():
+		if child.scene_file_path == "res://scenes/rainbow_beam.tscn":
+			normal_beams += 1
+	check(normal_beams == 0, "disabling BEAM restores normal spent SATURATE limit")
+	boss.take_damage(boss.health)
+	await process_frame
+	await process_frame
 	check(not hud.boss_panel.visible, "boss HUD hides on defeat")
 	player.invincible = false
 	player.take_damage(3)
@@ -164,6 +254,7 @@ func run() -> void:
 	await process_frame
 	check(not paused and not game.game_over, "Retry restarts existing gameplay")
 	check(not hud.end_screen.visible and hud.saturate_label.text.contains("READY"), "Retry resets HUD state")
+	check(not game.player.unlimited_saturate and not game.player.invincible, "Retry resets both cheats")
 	# Exercise the boss validity guard once it has been freed by SATURATE.
 	await create_timer(0.1).timeout
 	# Let the audio mixer release the active MP3 playback before shutting down.

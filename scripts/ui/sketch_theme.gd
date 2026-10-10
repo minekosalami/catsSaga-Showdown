@@ -1,9 +1,12 @@
 extends RefCounted
 
-const PAPER := Color("#eeeae2")
-const INK := Color("#18181b")
-const MUTED := Color("#92908c")
-const ACCENT := Color("#e28bcb")
+const PAPER := Color("#f4f0e7")
+const INK := Color("#101115")
+const MUTED := Color("#999890")
+const ACCENT := Color("#e498bc")
+
+const TITLE_FONT = preload("res://assets/ui/fonts/DejaVuSerifCondensed.ttf")
+const UI_FONT = preload("res://assets/ui/fonts/DejaVuSansMono.ttf")
 
 static func box(fill: Color, edge: Color, width: int = 1) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -17,25 +20,26 @@ static func box(fill: Color, edge: Color, width: int = 1) -> StyleBoxFlat:
 
 static func create() -> Theme:
 	var result := Theme.new()
+	result.default_font = UI_FONT
 	result.default_font_size = 16
 	result.set_color("font_color", "Label", PAPER)
 	result.set_color("font_shadow_color", "Label", INK)
 	result.set_constant("shadow_offset_x", "Label", 1)
 	result.set_constant("shadow_offset_y", "Label", 1)
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var fill := INK
-		var edge := MUTED
+		var fill := Color.TRANSPARENT
+		var edge := Color.TRANSPARENT
 		if state == "hover" or state == "pressed":
-			fill = PAPER
-			edge = PAPER
+			fill = INK
+			edge = INK
 		if state == "focus":
 			fill = Color.TRANSPARENT
 			edge = ACCENT
 		result.set_stylebox(state, "Button", box(fill, edge, 2 if state == "focus" else 1))
-	result.set_color("font_color", "Button", PAPER)
-	result.set_color("font_hover_color", "Button", INK)
-	result.set_color("font_pressed_color", "Button", INK)
-	result.set_color("font_focus_color", "Button", PAPER)
+	result.set_color("font_color", "Button", INK)
+	result.set_color("font_hover_color", "Button", PAPER)
+	result.set_color("font_pressed_color", "Button", PAPER)
+	result.set_color("font_focus_color", "Button", INK)
 	result.set_color("font_disabled_color", "Button", MUTED)
 	result.set_stylebox("panel", "PanelContainer", box(Color("#18181bf0"), MUTED))
 	var track := box(Color("#37373b"), MUTED)

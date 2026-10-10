@@ -3,6 +3,7 @@ extends Control
 
 const SketchTheme = preload("res://scripts/ui/sketch_theme.gd")
 const SketchButton = preload("res://scripts/ui/sketch_button.gd")
+const SketchEmblem = preload("res://scripts/ui/sketch_emblem.gd")
 const SketchBackground = preload("res://scripts/ui/sketch_background.gd")
 
 var transitioning: bool = false
@@ -18,7 +19,7 @@ func _ready() -> void:
 	_build_menu()
 	menu_container.modulate.a = 0.0
 	create_tween().tween_property(menu_container, "modulate:a", 1.0, 0.35)
-	menu_container.get_child(3).grab_focus()
+	menu_container.get_node("StartButton").grab_focus()
 
 
 func _build_menu() -> void:
@@ -38,25 +39,35 @@ func _build_menu() -> void:
 
 	menu_container = VBoxContainer.new()
 	menu_container.name = "MenuContainer"
-	menu_container.custom_minimum_size = Vector2(360, 0)
-	menu_container.add_theme_constant_override("separation", 16)
+	menu_container.custom_minimum_size = Vector2(400, 0)
+	menu_container.add_theme_constant_override("separation", 12)
 	center.add_child(menu_container)
+
+	var emblem := Control.new()
+	emblem.name = "Emblem"
+	emblem.set_script(SketchEmblem)
+	emblem.custom_minimum_size.y = 200
+	menu_container.add_child(emblem)
 
 	# Game title.
 	title_label = Label.new()
 	title_label.text = "catsSaga()"
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.add_theme_font_size_override("font_size", 54)
-	title_label.rotation = -0.018
-	title_label.add_theme_color_override("font_shadow_color", Color("#777570"))
+	title_label.add_theme_font_size_override("font_size", 64)
+	title_label.add_theme_font_override("font", SketchTheme.TITLE_FONT)
+	title_label.add_theme_color_override("font_color", SketchTheme.INK)
+	title_label.rotation = -0.012
+	title_label.add_theme_color_override("font_shadow_color", Color("#b9b3a9"))
 	title_label.add_theme_constant_override("shadow_offset_x", 1)
 	title_label.add_theme_constant_override("shadow_offset_y", 2)
 	menu_container.add_child(title_label)
 
 	subtitle_label = Label.new()
-	subtitle_label.text = "A strange little adventure"
+	subtitle_label.text = "A STRANGE LITTLE ADVENTURE"
+	subtitle_label.add_theme_color_override("font_color", Color("#5b5a58"))
+	subtitle_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle_label.add_theme_font_size_override("font_size", 16)
+	subtitle_label.add_theme_font_size_override("font_size", 12)
 	menu_container.add_child(subtitle_label)
 
 	# Space between title and buttons.
@@ -71,8 +82,9 @@ func _build_menu() -> void:
 
 	# Version text.
 	var version_label := Label.new()
-	version_label.text = "Z · SHOOT     X · SATURATE"
-	version_label.modulate = SketchTheme.MUTED
+	version_label.text = "Z / SHOOT    X / SATURATE\nWASD / MOVE    SHIFT / FOCUS"
+	version_label.add_theme_color_override("font_color", Color("#6e6b66"))
+	version_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	version_label.add_theme_font_size_override("font_size", 12)
 	menu_container.add_child(version_label)
@@ -82,9 +94,10 @@ func _add_button(button_text: String, action: Callable) -> void:
 	var button := Button.new()
 	button.set_script(SketchButton)
 	button.text = button_text
-	button.custom_minimum_size = Vector2(320, 58)
+	button.name = {"START GAME": "StartButton", "OPTIONS": "OptionsButton", "QUIT": "QuitButton"}[button_text]
+	button.custom_minimum_size = Vector2(360, 62)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	button.add_theme_font_size_override("font_size", 20)
+	button.add_theme_font_size_override("font_size", 18)
 	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(action)
 	menu_container.add_child(button)
@@ -116,6 +129,7 @@ func _open_options() -> void:
 		options_dialog.title = "Options"
 		options_dialog.dialog_text = "Options menu coming soon.\n\nMove · WASD / arrows\nPrecision · Shift   Shoot · Z\nSATURATE · X (once per run)"
 		options_dialog.theme = theme
+		options_dialog.add_theme_color_override("font_color", SketchTheme.INK)
 		add_child(options_dialog)
 	options_dialog.popup_centered(Vector2i(360, 230))
 
