@@ -183,6 +183,10 @@ func _spawn_enemies(delta: float) -> void:
 
 
 func _update_boss() -> void:
+	# Keep an existing boss on the same playback clock as the main scene.
+	if is_instance_valid(boss) and "elapsed" in boss:
+		boss.elapsed = elapsed_time
+
 	if game_over or boss_spawned or elapsed_time < 6.85:
 		return
 
