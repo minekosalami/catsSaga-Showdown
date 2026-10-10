@@ -2,6 +2,7 @@ extends Area2D
 
 signal health_changed(current_health: int, max_health: int, phase: int)
 signal defeated
+signal defeat_finished
 
 @export var enemy_bullet_scene: PackedScene = preload("res://scenes/enemybullet.tscn")
 
@@ -442,8 +443,23 @@ func take_damage(amount: int) -> void:
 
 	if health <= 0:
 		defeated_already = true
-		spiral_remaining = 0
-
+		stop_attacking()
+		set_deferred("monitoring", false)
+		set_deferred("monitorable", false)
 		print("BOSS DEFEATED!")
 		defeated.emit()
-		queue_free()
+		_play_defeat()
+
+func _play_defeat() -> void:
+	if is_instance_valid(entrance_tween):
+		entrance_tween.kill()
+	var sprite: Sprite2D = $Sprite2D
+	var resting_position := sprite.position
+	var animation := create_tween()
+	for offset in [8.0, -7.0, 5.0, -3.0, 0.0]:
+		animation.tween_property(sprite, "position:x", resting_position.x + offset, 0.05)
+		animation.parallel().tween_property(sprite, "modulate", Color(3, 3, 3) if offset > 0 else Color.WHITE, 0.05)
+	animation.tween_property(sprite, "modulate:a", 0.0, 0.4)
+	await animation.finished
+	defeat_finished.emit()
+	queue_free()

@@ -31,9 +31,9 @@ func run() -> void:
 	await snapshot("polish-menu")
 	current_scene._show_info()
 	await create_timer(0.3).timeout
-	await snapshot("polish-info-controls")
+	await snapshot("victory-info-controls")
 	current_scene._show_credits()
-	await snapshot("polish-info-credits")
+	await snapshot("victory-info-credits")
 	current_scene._back_to_menu()
 	current_scene._start_game()
 	await create_timer(0.5).timeout
@@ -59,6 +59,11 @@ func run() -> void:
 	await create_timer(0.65).timeout
 	await snapshot("polish-saturate")
 	await create_timer(1.2).timeout
+	game.boss.take_damage(game.boss.health)
+	await create_timer(0.15).timeout
+	await snapshot("victory-defeat")
+	await create_timer(1.2).timeout
+	await snapshot("victory-screen")
 	game.music_player.stop()
 	await create_timer(0.3).timeout
 	game.queue_free()

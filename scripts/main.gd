@@ -13,6 +13,9 @@ var shake_strength: float = 0.0
 var original_position: Vector2
 
 # Gameplay state
+var victory_started: bool = false
+var victory_navigation: bool = false
+var victory_music_tween: Tween
 var game_over: bool = false
 var boss_spawned: bool = false
 var elapsed_time: float = 0.0
@@ -142,7 +145,7 @@ func _connect_restart_button() -> void:
 
 
 func _process(delta: float) -> void:
-	if game_over:
+	if game_over or victory_started:
 		return
 
 	elapsed_time += delta
@@ -163,7 +166,7 @@ func _process(delta: float) -> void:
 
 
 func _spawn_enemies(delta: float) -> void:
-	if game_over or boss_spawned or enemy_scene == null:
+	if game_over or victory_started or boss_spawned or enemy_scene == null:
 		return
 
 	enemy_spawn_timer -= delta
@@ -189,7 +192,7 @@ func _update_boss() -> void:
 	if is_instance_valid(boss) and "elapsed" in boss:
 		boss.elapsed = elapsed_time
 
-	if game_over or boss_spawned or elapsed_time < 6.85:
+	if game_over or victory_started or boss_spawned or elapsed_time < 6.85:
 		return
 
 	if boss_scene == null:
@@ -201,6 +204,8 @@ func _update_boss() -> void:
 		opening_enemy.free()
 	boss = boss_scene.instantiate()
 	# Leave clear space below the top HUD for the full boss sprite.
+	boss.defeated.connect(_on_boss_defeated)
+	boss.defeat_finished.connect(_on_boss_defeat_finished)
 	boss.position = Vector2(get_viewport_rect().size.x * 0.5, 240.0)
 	add_child(boss)
 	boss_spawned = true
@@ -235,7 +240,7 @@ func _on_health_changed(new_health: int) -> void:
 
 
 func _on_game_over() -> void:
-	if game_over:
+	if game_over or victory_started:
 		return
 
 	game_over = true
@@ -253,3 +258,43 @@ func _on_game_over() -> void:
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+func _on_boss_defeated() -> void:
+	if victory_started or game_over or not is_instance_valid(boss) or boss.health > 0:
+		return
+	victory_started = true
+	position = original_position
+	shake_time = 0.0
+	# Disable input/movement without pausing the defeat tween or audio mixer.
+	player.process_mode = Node.PROCESS_MODE_DISABLED
+	player.set_deferred("monitoring", false)
+	player.set_deferred("monitorable", false)
+	for projectile in get_tree().get_nodes_in_group("enemy_bullets"):
+		projectile.process_mode = Node.PROCESS_MODE_DISABLED
+		projectile.set_deferred("monitoring", false)
+		projectile.queue_free()
+	if music_player != null:
+		victory_music_tween = create_tween()
+		victory_music_tween.tween_property(music_player, "volume_db", -60.0, 1.2)
+		victory_music_tween.tween_callback(music_player.stop)
+
+func _on_boss_defeat_finished() -> void:
+	if victory_started:
+		ui.show_victory()
+
+func navigate_victory(to_menu: bool) -> void:
+	if not victory_started or victory_navigation:
+		return
+	victory_navigation = true
+	if is_instance_valid(victory_music_tween):
+		victory_music_tween.kill()
+	var fade := create_tween().set_parallel(true)
+	fade.tween_property(ui.victory_screen, "modulate:a", 0.0, 0.2)
+	if music_player != null:
+		fade.tween_property(music_player, "volume_db", -60.0, 0.2)
+	await fade.finished
+	get_tree().paused = false
+	if to_menu:
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	else:
+		get_tree().reload_current_scene()

@@ -9,6 +9,8 @@ var options_dialog: AcceptDialog
 var menu_container: VBoxContainer
 var title_label: Label
 var info_container: VBoxContainer
+var controls_panel: MarginContainer
+var controls_grids: Array[GridContainer] = []
 var info_content: Label
 
 func _ready() -> void:
@@ -81,6 +83,7 @@ func _build_info(center: CenterContainer) -> void:
 	info_content.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	info_content.add_theme_font_size_override("font_size", 14)
 	info_container.add_child(info_content)
+	_build_controls()
 	_button(info_container, "BACK", "BackButton", _back_to_menu)
 	info_container.hide()
 
@@ -93,10 +96,14 @@ func _show_info() -> void:
 	create_tween().tween_property(info_container, "modulate:a", 1.0, 0.2)
 
 func _show_controls() -> void:
-	info_content.text = "WASD / ARROWS    Move\nZ                Shoot\nSHIFT            Focus movement\nX                SATURATE\n\nSATURATE is available once per run."
+	info_content.hide()
+	controls_panel.show()
 
 func _show_credits() -> void:
-	info_content.text = "Credits coming soon."
+	controls_panel.hide()
+	info_content.show()
+	info_content.add_theme_font_size_override("font_size", 20)
+	info_content.text = "LLiosette — Creator"
 
 func _back_to_menu() -> void:
 	info_container.hide()
@@ -138,3 +145,40 @@ func _open_options() -> void:
 
 func _quit_game() -> void:
 	get_tree().quit()
+
+func _build_controls() -> void:
+	controls_panel = MarginContainer.new()
+	controls_panel.name = "ControlsContent"
+	for side in ["left", "right", "top", "bottom"]:
+		controls_panel.add_theme_constant_override("margin_" + side, 20)
+	info_container.add_child(controls_panel)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 20)
+	controls_panel.add_child(content)
+	for section in [
+		["// MOVEMENT", [["WASD / ARROWS", "Move"], ["SHIFT", "Focus movement"]]],
+		["// ATTACK", [["Z", "Shoot"], ["X", "SATURATE"]]]
+	]:
+		var heading := Label.new()
+		heading.text = section[0]
+		heading.add_theme_font_size_override("font_size", 12)
+		heading.add_theme_color_override("font_color", SketchTheme.MUTED)
+		content.add_child(heading)
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 24)
+		grid.add_theme_constant_override("v_separation", 18)
+		content.add_child(grid)
+		controls_grids.append(grid)
+		for binding in section[1]:
+			for column in range(2):
+				var label := Label.new()
+				label.text = binding[column]
+				label.custom_minimum_size = Vector2(140 if column == 0 else 160, 32)
+				label.add_theme_font_size_override("font_size", 15)
+				grid.add_child(label)
+	var note := Label.new()
+	note.text = "SATURATE: once per run."
+	note.add_theme_font_size_override("font_size", 13)
+	note.add_theme_color_override("font_color", SketchTheme.MUTED)
+	content.add_child(note)
