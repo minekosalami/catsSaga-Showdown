@@ -7,7 +7,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="5_hud"]
 
-[node name="Main" type="Node2D" unique_id=1036784788]
+[node name="Main" type="Node2D" unique_id=1036784788 groups=["combat_root"]]
 script = ExtResource("1_0wfyh")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=870112457]
@@ -41,7 +41,7 @@ offset_right = 298.0
 offset_bottom = 380.0
 text = "RETRY?"
 
-[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=938782890]
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=938782890 groups=["combat_music"]]
 stream = ExtResource("3_sugp2")
 volume_db = 0.0
 bus = &"Master"

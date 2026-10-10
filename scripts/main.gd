@@ -257,7 +257,11 @@ func _on_game_over() -> void:
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
-	get_tree().reload_current_scene()
+	var host := get_tree().current_scene
+	if host.has_method("retry"):
+		host.retry()
+	else:
+		get_tree().reload_current_scene()
 
 func _on_boss_defeated() -> void:
 	if victory_started or game_over or not is_instance_valid(boss) or boss.health > 0:
@@ -280,6 +284,9 @@ func _on_boss_defeated() -> void:
 
 func _on_boss_defeat_finished() -> void:
 	if victory_started:
+		var host := get_tree().current_scene
+		if host.has_method("record_victory"):
+			host.record_victory()
 		ui.show_victory()
 
 func navigate_victory(to_menu: bool) -> void:
@@ -294,7 +301,13 @@ func navigate_victory(to_menu: bool) -> void:
 		fade.tween_property(music_player, "volume_db", -60.0, 0.2)
 	await fade.finished
 	get_tree().paused = false
-	if to_menu:
+	var host := get_tree().current_scene
+	if host.has_method("retry"):
+		if to_menu:
+			host.main_menu()
+		else:
+			host.retry()
+	elif to_menu:
 		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 	else:
 		get_tree().reload_current_scene()

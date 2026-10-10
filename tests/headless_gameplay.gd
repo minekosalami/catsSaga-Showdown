@@ -17,7 +17,7 @@ func key(code: Key, down: bool) -> void:
 	Input.parse_input_event(event)
 
 func _initialize() -> void:
-	create_timer(45.0).timeout.connect(func():
+	create_timer(65.0).timeout.connect(func():
 		push_error("Gameplay validation timed out")
 		quit(1)
 	)
@@ -40,20 +40,20 @@ func run() -> void:
 	check(change_scene_to_file(ProjectSettings.get_setting("application/run/main_scene")) == OK, "configured startup scene loads")
 	await process_frame
 	await process_frame
-	check(root.size == Vector2i(540, 900), "540x900 display")
+	check(root.size == Vector2i(1280, 720), "1280x720 widescreen display")
 	var menu := current_scene
 	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 6, "main menu controls initialize")
 	await create_timer(0.1).timeout
-	check(menu.size == Vector2(540, 900), "menu root fills viewport")
+	check(menu.size == Vector2(1280, 720), "menu root fills viewport")
 	check(menu.get_node("Background").size == menu.size, "background fills menu")
 	check(menu.get_node("CenterContainer").size == menu.size, "center container fills menu")
 	var menu_center: Vector2 = menu.menu_container.get_global_rect().get_center()
-	check(menu_center.distance_to(Vector2(270, 450)) <= 1.0, "menu content centered")
+	check(menu_center.distance_to(Vector2(640, 360)) <= 1.0, "menu content centered")
 	check(menu.get_child_count() == 2, "existing menu UI is not duplicated")
-	root.size = Vector2i(600, 1000)
+	root.size = Vector2i(1920, 1080)
 	await create_timer(0.1).timeout
-	check(menu.size == Vector2(600, 1000), "menu follows viewport resize")
-	root.size = Vector2i(540, 900)
+	check(menu.size == Vector2(1280, 720), "widescreen stretch keeps UI logical size on larger window")
+	root.size = Vector2i(1280, 720)
 	await create_timer(0.1).timeout
 	check(menu.menu_container.get_node_or_null("Emblem") == null, "menu has no decorative cat picture")
 	check(menu.title_label.get_theme_font("font") == load("res://assets/ui/fonts/DejaVuSansMono.ttf"), "menu title uses bundled coding font")
@@ -67,7 +67,7 @@ func run() -> void:
 		for label in grid.get_children():
 			control_text += label.text + " "
 	check(control_text == "WASD / ARROWS Move SHIFT Focus movement Z Shoot X SATURATE ", "Controls describes actual script keybindings")
-	check(Rect2(Vector2.ZERO, Vector2(540, 900)).encloses(menu.info_container.get_global_rect()), "Controls and Back fit inside 540x900")
+	check(Rect2(Vector2.ZERO, Vector2(1280, 720)).encloses(menu.info_container.get_global_rect()), "Controls and Back fit inside widescreen")
 	for grid in menu.controls_grids:
 		check(grid.get_child(2).position.y - grid.get_child(0).position.y >= 50, "control rows do not overlap")
 	menu.info_container.get_node("CreditsButton").pressed.emit()
@@ -92,9 +92,15 @@ func run() -> void:
 	dialog.hide()
 	start.pressed.emit()
 	check(menu.transitioning and start.disabled, "transition prevents duplicate activation")
-	await create_timer(0.3).timeout
-	var game := current_scene
-	check(game.name == "Main", "menu button transitions to gameplay")
+	await create_timer(0.45).timeout
+	check(current_scene.name == "Overworld", "menu Start transitions to overworld")
+	await root.get_node("Session").transition_to("res://scenes/combat_host.tscn")
+	var host := current_scene
+	check(host.arena.size == Vector2i(540, 900), "combat viewport remains exactly 540x900")
+	check(host.arena_container.scale.is_equal_approx(Vector2(0.8, 0.8)), "arena scales uniformly to 0.8")
+	check(host.arena_container.position.is_equal_approx(Vector2(424, 0)), "432x720 arena is horizontally centered")
+	var game: Node = current_scene.battle
+	check(game.name == "Main", "host instances the original battle")
 	var player := get_first_node_in_group("player")
 	check(player != null, "player initialized")
 	var hud = game.get_node("UI")
@@ -344,8 +350,8 @@ func run() -> void:
 	hud.victory_retry.pressed.emit()
 	hud.victory_retry.pressed.emit()
 	check(game.victory_navigation, "victory navigation guards repeated activation")
-	await create_timer(0.35).timeout
-	game = current_scene
+	await create_timer(0.65).timeout
+	game = current_scene.battle
 	hud = game.get_node("UI")
 	player = game.player
 	check(not game.victory_started and player.health == 3 and game.music_player.playing, "victory Retry creates a fresh playable run")
@@ -360,9 +366,8 @@ func run() -> void:
 	check(retry.visible and retry.has_focus(), "existing Retry button remains accessible while paused")
 	game.music_player.stop()
 	retry.pressed.emit()
-	await process_frame
-	await process_frame
-	game = current_scene
+	await create_timer(0.45).timeout
+	game = current_scene.battle
 	hud = game.get_node("UI")
 	await process_frame
 	check(not paused and not game.game_over, "Retry restarts existing gameplay")
@@ -377,18 +382,19 @@ func run() -> void:
 	await create_timer(2.7).timeout
 	check(game.victory_started and hud.victory_screen.visible, "lethal SATURATE also completes the victory sequence")
 	hud.victory_menu.pressed.emit()
-	await create_timer(0.35).timeout
+	await create_timer(0.65).timeout
 	check(current_scene.name == "Mainmenu" and current_scene.menu_container.visible, "victory Main Menu returns to original menu")
 	check(current_scene.menu_container.get_node("StartButton").has_focus(), "returned menu restores keyboard navigation")
 	current_scene._start_game()
-	await create_timer(0.3).timeout
-	game = current_scene
-	check(not game.victory_started and game.player.health == 3, "Start works again after victory Main Menu")
+	await create_timer(0.45).timeout
+	check(current_scene.name == "Overworld", "Start works again after victory Main Menu")
+	await root.get_node("Session").transition_to("res://scenes/combat_host.tscn")
+	game = current_scene.battle
 
 	await create_timer(0.1).timeout
 	# Let the audio mixer release the active MP3 playback before shutting down.
 	game.music_player.stop()
-	game.queue_free()
-	await create_timer(0.1).timeout
+	current_scene.queue_free()
+	await create_timer(0.25).timeout
 	print("FUNCTIONAL VALIDATION: ", failures, " failures")
 	quit(0 if failures == 0 else 1)

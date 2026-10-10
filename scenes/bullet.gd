@@ -74,7 +74,7 @@ func _spawn_impact_spark() -> void:
 	spark.polygon = points
 	spark.color = Color("#FF8BE8")
 
-	var scene_root := get_tree().current_scene
+	var scene_root := preload("res://scripts/systems/combat_context.gd").root_for(self)
 	if scene_root == null:
 		spark.free()
 		return

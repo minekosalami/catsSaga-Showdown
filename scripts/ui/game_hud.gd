@@ -13,6 +13,7 @@ var boss_panel: PanelContainer
 var victory_screen: Control
 var victory_retry: Button
 var victory_menu: Button
+var victory_continue: Button
 var end_screen: CenterContainer
 var observed_boss: Node
 var bar_tween: Tween
@@ -229,6 +230,18 @@ func _build_victory(root: Control) -> void:
 			victory_menu = button
 		else:
 			victory_retry = button
+	victory_continue = Button.new()
+	victory_continue.set_script(SketchButton)
+	victory_continue.text = "RETURN TO FOREST"
+	victory_continue.custom_minimum_size = Vector2(360, 56)
+	victory_continue.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	victory_continue.pressed.connect(func():
+		if not Session.busy:
+			get_tree().current_scene.return_to_forest()
+	)
+	content.add_child(victory_continue)
+	content.move_child(victory_continue, 4)
+	victory_continue.visible = Session.encounter_active
 	victory_screen.hide()
 
 func show_victory() -> void:
@@ -238,4 +251,7 @@ func show_victory() -> void:
 	victory_screen.show()
 	victory_screen.modulate.a = 0.0
 	create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).tween_property(victory_screen, "modulate:a", 1.0, 0.35)
-	victory_retry.grab_focus()
+	if victory_continue.visible:
+		victory_continue.grab_focus()
+	else:
+		victory_retry.grab_focus()

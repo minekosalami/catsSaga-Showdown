@@ -36,7 +36,7 @@ func shoot_at_player() -> void:
 		return
 
 	var bullet = enemy_bullet_scene.instantiate()
-	get_tree().current_scene.add_child(bullet)
+	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
 
 	bullet.global_position = global_position
 	bullet.direction = (player.global_position - global_position).normalized()
