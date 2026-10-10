@@ -37,6 +37,11 @@ var invincible: bool = false
 var cheat_progress: int = 0
 const CHEAT_CODE: String = "CATA"
 
+# BEAM grants repeatable SATURATE without changing its normal single-use rule.
+var unlimited_saturate: bool = false
+var beam_cheat_progress: int = 0
+const BEAM_CHEAT_CODE: String = "BEAM"
+
 
 func _ready() -> void:
 	add_to_group("player")
@@ -70,7 +75,18 @@ func _input(event: InputEvent) -> void:
 
 	if key_text.length() != 1 or not key_text in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
 		cheat_progress = 0
+		beam_cheat_progress = 0
 		return
+
+	var beam_letter := BEAM_CHEAT_CODE.substr(beam_cheat_progress, 1)
+	if key_text == beam_letter:
+		beam_cheat_progress += 1
+	else:
+		beam_cheat_progress = 1 if key_text == "B" else 0
+	if beam_cheat_progress >= BEAM_CHEAT_CODE.length():
+		unlimited_saturate = not unlimited_saturate
+		beam_cheat_progress = 0
+		print("BEAM cheat: Unlimited SATURATE ", "ON" if unlimited_saturate else "OFF")
 
 	var expected_letter := CHEAT_CODE.substr(cheat_progress, 1)
 
@@ -165,7 +181,7 @@ func _process(delta: float) -> void:
 
 
 func activate_saturate() -> void:
-	if saturate_used or health <= 0:
+	if (saturate_used and not unlimited_saturate) or health <= 0:
 		return
 
 	if get_tree().paused:

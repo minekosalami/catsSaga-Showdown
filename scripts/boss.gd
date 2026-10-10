@@ -88,25 +88,30 @@ func stop_attacking() -> void:
 func move_boss(delta: float) -> void:
 	position.x += move_direction * move_speed * delta
 
-	var screen_width = get_viewport_rect().size.x
+	var screen_width: float = get_viewport_rect().size.x
+	# The actual sprite extends farther than the old 55px movement margin.
+	var sprite: Sprite2D = $Sprite2D
+	var sprite_bounds := sprite.transform * sprite.get_rect()
+	var min_x := 8.0 - sprite_bounds.position.x
+	var max_x := screen_width - 8.0 - sprite_bounds.end.x
 
-	if position.x >= screen_width - 55.0:
-		position.x = screen_width - 55.0
+	if position.x >= max_x:
+		position.x = max_x
 		move_direction = -1.0
-	elif position.x <= 55.0:
-		position.x = 55.0
+	elif position.x <= min_x:
+		position.x = min_x
 		move_direction = 1.0
 
 
 func update_song_section() -> void:
 	var new_section = 0
 
-	if elapsed >= FINAL_CLIMAX_TIME:
+	if elapsed >= SHOWDOWN_TIME:
+		new_section = 3
+	elif elapsed >= FINAL_CLIMAX_TIME:
 		new_section = 5
 	elif elapsed >= CALM_TIME:
 		new_section = 4
-	elif elapsed >= SHOWDOWN_TIME:
-		new_section = 3
 	elif elapsed >= SECOND_INSTRUMENT_TIME:
 		new_section = 2
 	elif elapsed >= DROP_TIME:

@@ -9,7 +9,7 @@ const SWEEP_TIME: float = 1.25
 const WALL_THICKNESS: float = 30.0
 const ORB_SPACING: float = 18.0
 const ORB_RADIUS: float = 11.0
-const DAMAGE: int = 1000
+const DAMAGE: int = 30
 
 var hit_targets: Array[Node] = []
 
