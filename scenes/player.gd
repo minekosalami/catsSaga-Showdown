@@ -255,6 +255,10 @@ func shoot() -> void:
 
 
 func take_damage(amount: int) -> void:
+	# Ignore queued collision callbacks after the boss has been defeated.
+	if get_tree().current_scene.get("victory_started") == true:
+		return
+
 	if invincible:
 		return
 

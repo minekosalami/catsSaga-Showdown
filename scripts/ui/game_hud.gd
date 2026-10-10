@@ -10,6 +10,9 @@ var boss_caption: Label
 var boss_value: Label
 var boss_bar: ProgressBar
 var boss_panel: PanelContainer
+var victory_screen: Control
+var victory_retry: Button
+var victory_menu: Button
 var end_screen: CenterContainer
 var observed_boss: Node
 var bar_tween: Tween
@@ -128,6 +131,7 @@ func _ready() -> void:
 	entrance_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(entrance_flash)
 	entrance_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_build_victory(root)
 
 func _ignore_pointer(node: Node) -> void:
 	if node is Control:
@@ -186,3 +190,52 @@ func show_boss_entrance() -> void:
 	entrance_flash.modulate.a = 0.85
 	entrance_tween = create_tween()
 	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.10)
+
+func _build_victory(root: Control) -> void:
+	victory_screen = Control.new()
+	victory_screen.name = "VictoryScreen"
+	root.add_child(victory_screen)
+	victory_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var background := Control.new()
+	background.set_script(preload("res://scripts/ui/sketch_background.gd"))
+	victory_screen.add_child(background)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var center := CenterContainer.new()
+	victory_screen.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var content := VBoxContainer.new()
+	content.custom_minimum_size.x = 400
+	content.add_theme_constant_override("separation", 24)
+	center.add_child(content)
+	_label(content, "// EXECUTION COMPLETE", 12, SketchTheme.MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var title := _label(content, "VICTORY()", 48)
+	title.name = "VictoryTitle"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(content, "Evil Bart defeated.", 18).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var spacer := Control.new()
+	spacer.custom_minimum_size.y = 20
+	content.add_child(spacer)
+	for to_menu in [false, true]:
+		var button := Button.new()
+		button.set_script(SketchButton)
+		button.text = "MAIN MENU" if to_menu else "RETRY"
+		button.name = "MainMenuButton" if to_menu else "VictoryRetry"
+		button.custom_minimum_size = Vector2(360, 56)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		button.pressed.connect(func(): get_parent().navigate_victory(to_menu))
+		content.add_child(button)
+		if to_menu:
+			victory_menu = button
+		else:
+			victory_retry = button
+	victory_screen.hide()
+
+func show_victory() -> void:
+	if victory_screen.visible:
+		return
+	boss_panel.hide()
+	victory_screen.show()
+	victory_screen.modulate.a = 0.0
+	create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).tween_property(victory_screen, "modulate:a", 1.0, 0.35)
+	victory_retry.grab_focus()

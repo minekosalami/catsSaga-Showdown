@@ -60,9 +60,18 @@ func run() -> void:
 	menu.menu_container.get_node("InfoButton").pressed.emit()
 	await create_timer(0.25).timeout
 	check(menu.info_container.visible and not menu.menu_container.visible, "Info opens within the menu")
-	check(menu.info_content.text.contains("WASD / ARROWS") and menu.info_content.text.contains("SHIFT") and menu.info_content.text.contains("SATURATE"), "Info Controls describes actual controls")
+	check(menu.controls_panel.visible and not menu.info_content.visible, "Controls uses one dedicated layout")
+	var control_text := ""
+	for grid in menu.controls_grids:
+		check(grid.columns == 2 and grid.get_theme_constant("v_separation") >= 18, "control rows have two columns and generous spacing")
+		for label in grid.get_children():
+			control_text += label.text + " "
+	check(control_text == "WASD / ARROWS Move SHIFT Focus movement Z Shoot X SATURATE ", "Controls describes actual script keybindings")
+	check(Rect2(Vector2.ZERO, Vector2(540, 900)).encloses(menu.info_container.get_global_rect()), "Controls and Back fit inside 540x900")
+	for grid in menu.controls_grids:
+		check(grid.get_child(2).position.y - grid.get_child(0).position.y >= 50, "control rows do not overlap")
 	menu.info_container.get_node("CreditsButton").pressed.emit()
-	check(menu.info_content.text == "Credits coming soon.", "Info Credits stays a placeholder")
+	check(menu.info_content.visible and not menu.controls_panel.visible and menu.info_content.text == "LLiosette — Creator", "Credits shows only LLiosette — Creator")
 	menu.info_container.get_node("BackButton").pressed.emit()
 	check(menu.menu_container.visible and not menu.info_container.visible, "Info Back returns to primary menu")
 	menu._show_info()
@@ -93,6 +102,7 @@ func run() -> void:
 	check(hud.health_label.text.count("●") == 3, "HUD shows initial health")
 	check(hud.saturate_label.text.contains("READY"), "HUD shows SATURATE ready")
 	check(not hud.boss_panel.visible, "boss HUD hidden before spawn")
+	check(not game.victory_started and not hud.victory_screen.visible, "opening gameplay has no victory screen")
 	check(hud.health_label.mouse_filter == Control.MOUSE_FILTER_IGNORE, "HUD leaves playfield pointer input unobstructed")
 	check(game.health_label == hud.health_label and game.time_label == hud.timer_label, "game uses existing HUD references")
 	check(game.music_player == game.get_node("MusicPlayer"), "script finds the existing music node")
@@ -294,10 +304,53 @@ func run() -> void:
 		if child.scene_file_path == "res://scenes/rainbow_beam.tscn":
 			normal_beams += 1
 	check(normal_beams == 0, "disabling BEAM restores normal spent SATURATE limit")
+	check(not game.victory_started and not hud.victory_screen.visible, "regular gameplay and nonlethal damage never trigger victory")
+	game._on_boss_defeated()
+	check(not game.victory_started, "positive boss health rejects accidental victory callback")
+	var defeat_count := [0]
+	boss.defeated.connect(func(): defeat_count[0] += 1)
+	boss.fire_ring(3, 0.0, 0.0, Color.WHITE)
 	boss.take_damage(boss.health)
+	check(game.victory_started and boss.attacks_stopped and boss.spiral_remaining == 0, "zero boss health starts victory and stops attacks")
+	check(is_instance_valid(boss) and not hud.victory_screen.visible, "boss remains for brief defeat animation before victory screen")
+	check(game.music_player.playing, "music continues during start of defeat fade")
+	boss.take_damage(1)
+	game._on_boss_defeated()
+	check(defeat_count[0] == 1, "defeat triggers exactly once")
+	player.invincible = false
+	player.invulnerability_timer = 0.0
+	var surviving_health: int = player.health
+	player.take_damage(3)
+	check(player.health == surviving_health and not paused, "queued lethal collision cannot interrupt victory")
 	await process_frame
 	await process_frame
-	check(not hud.boss_panel.visible, "boss HUD hides on defeat")
+	check(get_nodes_in_group("enemy_bullets").is_empty(), "victory clears every enemy projectile safely")
+	var ending_position: Vector2 = player.position
+	key(KEY_D, true)
+	key(KEY_Z, true)
+	key(KEY_X, true)
+	await create_timer(0.3).timeout
+	key(KEY_D, false)
+	key(KEY_Z, false)
+	key(KEY_X, false)
+	check(player.position == ending_position, "victory disables player movement")
+	check(game.music_player.playing and game.music_player.volume_db < -1.0, "soundtrack fades instead of abruptly stopping")
+	await create_timer(1.0).timeout
+	check(not is_instance_valid(boss) and hud.victory_screen.visible and hud.victory_screen.modulate.a == 1.0, "defeat animation ends in fully revealed victory screen")
+	check(not hud.boss_panel.visible and not hud.end_screen.visible, "victory hides boss HUD without showing game over")
+	check(not game.music_player.playing, "soundtrack stops only after graceful fade")
+	check(hud.victory_retry.has_focus(), "victory Retry receives keyboard focus")
+	check(Rect2(Vector2.ZERO, Vector2(540, 900)).encloses(hud.victory_retry.get_global_rect()), "victory navigation fits viewport")
+	hud.victory_retry.pressed.emit()
+	hud.victory_retry.pressed.emit()
+	check(game.victory_navigation, "victory navigation guards repeated activation")
+	await create_timer(0.35).timeout
+	game = current_scene
+	hud = game.get_node("UI")
+	player = game.player
+	check(not game.victory_started and player.health == 3 and game.music_player.playing, "victory Retry creates a fresh playable run")
+	check(not player.unlimited_saturate and not player.invincible, "victory Retry resets cheats")
+
 	player.invincible = false
 	player.take_damage(3)
 	await create_timer(0.35).timeout
@@ -315,7 +368,23 @@ func run() -> void:
 	check(not paused and not game.game_over, "Retry restarts existing gameplay")
 	check(not hud.end_screen.visible and hud.saturate_label.text.contains("READY"), "Retry resets HUD state")
 	check(not game.player.unlimited_saturate and not game.player.invincible, "Retry resets both cheats")
-	# Exercise the boss validity guard once it has been freed by SATURATE.
+	# Reach a second victory to exercise its Main Menu button.
+	game.player.invincible = true
+	game.music_player.seek(7.0)
+	await create_timer(0.2).timeout
+	game.boss.health = 30
+	game.player.activate_saturate()
+	await create_timer(2.7).timeout
+	check(game.victory_started and hud.victory_screen.visible, "lethal SATURATE also completes the victory sequence")
+	hud.victory_menu.pressed.emit()
+	await create_timer(0.35).timeout
+	check(current_scene.name == "Mainmenu" and current_scene.menu_container.visible, "victory Main Menu returns to original menu")
+	check(current_scene.menu_container.get_node("StartButton").has_focus(), "returned menu restores keyboard navigation")
+	current_scene._start_game()
+	await create_timer(0.3).timeout
+	game = current_scene
+	check(not game.victory_started and game.player.health == 3, "Start works again after victory Main Menu")
+
 	await create_timer(0.1).timeout
 	# Let the audio mixer release the active MP3 playback before shutting down.
 	game.music_player.stop()
