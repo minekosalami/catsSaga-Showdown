@@ -4,8 +4,8 @@ var selection_tween: Tween
 
 func _draw() -> void:
 	var selected := has_focus() or is_hovered()
-	var ink := Color("#f4f0e7") if is_hovered() else Color("#303136")
-	draw_line(Vector2(18, size.y - 3), Vector2(size.x - 18, size.y - 4), Color(0.1, 0.1, 0.12, 0.25), 1.0, true)
+	var ink := Color("#f4f0e7")
+	draw_line(Vector2(18, size.y - 3), Vector2(size.x - 18, size.y - 4), Color(0.8, 0.8, 0.85, 0.12), 1.0, true)
 	if selected:
 		draw_polyline(PackedVector2Array([Vector2(22, size.y * 0.5 - 6), Vector2(29, size.y * 0.5), Vector2(22, size.y * 0.5 + 6)]), ink, 2.0, true)
 		draw_circle(Vector2(size.x - 25, size.y * 0.5), 2.5, Color("#b6557f"))

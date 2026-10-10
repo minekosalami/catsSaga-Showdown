@@ -5,8 +5,8 @@ const INK := Color("#101115")
 const MUTED := Color("#999890")
 const ACCENT := Color("#e498bc")
 
-const TITLE_FONT = preload("res://assets/ui/fonts/DejaVuSerifCondensed.ttf")
 const UI_FONT = preload("res://assets/ui/fonts/DejaVuSansMono.ttf")
+const TITLE_FONT = UI_FONT
 
 static func box(fill: Color, edge: Color, width: int = 1) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -30,16 +30,16 @@ static func create() -> Theme:
 		var fill := Color.TRANSPARENT
 		var edge := Color.TRANSPARENT
 		if state == "hover" or state == "pressed":
-			fill = INK
-			edge = INK
+			fill = Color("#23242a")
+			edge = Color.TRANSPARENT
 		if state == "focus":
 			fill = Color.TRANSPARENT
-			edge = ACCENT
+			edge = Color.TRANSPARENT
 		result.set_stylebox(state, "Button", box(fill, edge, 2 if state == "focus" else 1))
-	result.set_color("font_color", "Button", INK)
+	result.set_color("font_color", "Button", PAPER)
 	result.set_color("font_hover_color", "Button", PAPER)
 	result.set_color("font_pressed_color", "Button", PAPER)
-	result.set_color("font_focus_color", "Button", INK)
+	result.set_color("font_focus_color", "Button", PAPER)
 	result.set_color("font_disabled_color", "Button", MUTED)
 	result.set_stylebox("panel", "PanelContainer", box(Color("#18181bf0"), MUTED))
 	var track := box(Color("#37373b"), MUTED)

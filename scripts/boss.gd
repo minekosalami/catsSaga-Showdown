@@ -12,6 +12,10 @@ var health: int = 180
 var phase: int = 1
 var move_direction: float = 1.0
 var move_speed: float = 70.0
+var horizontal_velocity: float = 0.0
+var movement_time: float = 0.0
+var entrance_tween: Tween
+var sprite_resting_scale: Vector2
 
 # This value is synchronized by main.gd with the music.
 var elapsed: float = 0.0
@@ -40,6 +44,7 @@ var song_section: int = 0
 
 
 func _ready() -> void:
+	sprite_resting_scale = $Sprite2D.scale
 	add_to_group("enemies")
 	health_changed.emit(health, max_health, phase)
 
@@ -85,22 +90,37 @@ func stop_attacking() -> void:
 	print("BART: FIGHT ENDED")
 
 
-func move_boss(delta: float) -> void:
-	position.x += move_direction * move_speed * delta
-
-	var screen_width: float = get_viewport_rect().size.x
-	# The actual sprite extends farther than the old 55px movement margin.
+func play_entrance() -> void:
+	# Animate only the artwork, keeping collision shapes and shot origins stable.
 	var sprite: Sprite2D = $Sprite2D
-	var sprite_bounds := sprite.transform * sprite.get_rect()
-	var min_x := 8.0 - sprite_bounds.position.x
-	var max_x := screen_width - 8.0 - sprite_bounds.end.x
+	var resting_scale := sprite.scale
+	var resting_position := sprite.position
+	sprite.position.y += 28.0
+	sprite.scale = resting_scale * Vector2(0.82, 1.18)
+	entrance_tween = create_tween().set_parallel(true)
+	entrance_tween.tween_property(sprite, "position", resting_position, 0.48).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	entrance_tween.tween_property(sprite, "scale", resting_scale, 0.42).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-	if position.x >= max_x:
-		position.x = max_x
+
+func move_boss(delta: float) -> void:
+	var screen_width: float = get_viewport_rect().size.x
+	var sprite: Sprite2D = $Sprite2D
+	# Fixed visual bounds exclude the temporary entrance squash/stretch.
+	var half_width: float = sprite.texture.get_width() * sprite_resting_scale.x * 0.5
+	var min_x := 8.0 - sprite.position.x + half_width
+	var max_x := screen_width - 8.0 - sprite.position.x - half_width
+	movement_time += delta
+	# Reverse the target early; actual velocity decelerates through zero smoothly.
+	if position.x >= max_x - 16.0:
 		move_direction = -1.0
-	elif position.x <= min_x:
-		position.x = min_x
+	elif position.x <= min_x + 16.0:
 		move_direction = 1.0
+	var distance := max_x - position.x if move_direction > 0.0 else position.x - min_x
+	var ease_speed := smoothstep(0.0, 60.0, maxf(distance, 0.0))
+	var drift := 0.9 + 0.1 * sin(movement_time * 0.8)
+	var desired_velocity := move_direction * move_speed * ease_speed * drift
+	horizontal_velocity = move_toward(horizontal_velocity, desired_velocity, 240.0 * delta)
+	position.x = clampf(position.x + horizontal_velocity * delta, min_x, max_x)
 
 
 func update_song_section() -> void:

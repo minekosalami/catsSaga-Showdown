@@ -10,19 +10,10 @@ var shoot_timer: float = 1.0
 func _ready() -> void:
 	add_to_group("enemies")
 
-	var visual = Polygon2D.new()
-	visual.polygon = PackedVector2Array([
-		Vector2(-18, -10),
-		Vector2(-18, -22),
-		Vector2(-5, -15),
-		Vector2(5, -15),
-		Vector2(18, -22),
-		Vector2(18, -10),
-		Vector2(15, 12),
-		Vector2(0, 19),
-		Vector2(-15, 12)
-	])
-	visual.color = Color.MEDIUM_PURPLE
+	add_to_group("opening_enemies")
+	var visual := Node2D.new()
+	visual.name = "InkToken"
+	visual.set_script(preload("res://scripts/ui/opening_enemy_visual.gd"))
 	add_child(visual)
 
 func _process(delta: float) -> void:
