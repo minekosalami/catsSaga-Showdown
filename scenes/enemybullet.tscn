@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://csth23lee5mka"]
+
+[ext_resource type="Script" uid="uid://cowpx0e4d7a24" path="res://scripts/enemybullet.gd" id="1_fw86s"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sfeay"]
+radius = 20.22375
+
+[node name="EnemyBullet" type="Area2D" unique_id=148110196]
+script = ExtResource("1_fw86s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1952489550]
+shape = SubResource("CircleShape2D_sfeay")

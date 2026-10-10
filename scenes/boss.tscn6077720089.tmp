@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://se8ervf63pih"]
+
+[ext_resource type="Script" uid="uid://du20ubfnxx2r0" path="res://scripts/boss.gd" id="1_eynm2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sfeay"]
+radius = 88.20431
+
+[node name="Boss" type="Area2D" unique_id=874141831]
+script = ExtResource("1_eynm2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1988453472]
+shape = SubResource("CircleShape2D_sfeay")

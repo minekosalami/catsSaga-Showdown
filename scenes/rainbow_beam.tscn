@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://o1as0inhn46s"]
+
+[ext_resource type="Script" uid="uid://bfc5mqyqumheq" path="res://scripts/rainbow_beam.gd" id="1_6yp0h"]
+
+[node name="RainbowBeam" type="Node2D" unique_id=986313040]
+script = ExtResource("1_6yp0h")

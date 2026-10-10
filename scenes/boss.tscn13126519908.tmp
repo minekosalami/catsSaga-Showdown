@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://se8ervf63pih"]
+
+[ext_resource type="Script" uid="uid://du20ubfnxx2r0" path="res://scripts/boss.gd" id="1_eynm2"]
+[ext_resource type="Texture2D" uid="uid://c0ks0b30kbgxb" path="res://assets/bartboss.png" id="2_neq0i"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sfeay"]
+radius = 74.02702
+
+[node name="Boss" type="Area2D" unique_id=874141831]
+script = ExtResource("1_eynm2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1988453472]
+position = Vector2(2, 1)
+shape = SubResource("CircleShape2D_sfeay")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=683858699]
+position = Vector2(-11, 9)
+scale = Vector2(0.14721654, 0.10603448)
+texture = ExtResource("2_neq0i")
