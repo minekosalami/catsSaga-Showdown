@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-# Per-playthrough state. No inventory or disk save system is introduced.
+# Progression remains in one Session; save storage is a reusable helper.
 var area_id: String = "entrance"
 var entry_marker: String = "Start"
 var return_position: Vector2
@@ -8,6 +8,14 @@ var restore_position: bool = false
 var evil_bart_defeated: bool = false
 var encounter_active: bool = false
 var busy: bool = false
+@export_range(0.3, 0.5) var transition_duration: float = 0.36
+var story_flags: Dictionary = {}
+var saves := preload("res://scripts/systems/save_manager.gd").new()
+var pause_menu: CanvasLayer
+var options_dialog: AcceptDialog
+var confirmation: ConfirmationDialog
+var suspended_modes: Dictionary = {}
+var last_save_message: String = ""
 var curtain: ColorRect
 
 func _ready() -> void:
@@ -18,8 +26,19 @@ func _ready() -> void:
 	add_child(curtain)
 	curtain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	curtain.hide()
+	pause_menu = CanvasLayer.new()
+	pause_menu.set_script(preload("res://scripts/ui/pause_menu.gd"))
+	add_child(pause_menu)
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if pause_menu.opened:
+			if not is_instance_valid(confirmation) and not (is_instance_valid(options_dialog) and options_dialog.visible):
+				close_pause()
+				get_viewport().set_input_as_handled()
+		elif can_pause():
+			open_pause()
+			get_viewport().set_input_as_handled()
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
 		toggle_fullscreen()
 		get_viewport().set_input_as_handled()
@@ -35,8 +54,10 @@ func new_game() -> void:
 	entry_marker = "Start"
 	restore_position = false
 	evil_bart_defeated = false
+	story_flags.clear()
 	encounter_active = false
-	await transition_to("res://scenes/world/overworld.tscn")
+	if await transition_to("res://scenes/world/overworld.tscn"):
+		save_current()
 
 func travel(destination: String, marker: String) -> void:
 	if busy:
@@ -44,7 +65,8 @@ func travel(destination: String, marker: String) -> void:
 	area_id = destination
 	entry_marker = marker
 	restore_position = false
-	await transition_to("res://scenes/world/overworld.tscn")
+	if await transition_to("res://scenes/world/overworld.tscn"):
+		save_current()
 
 func begin_battle(position_before_battle: Vector2) -> void:
 	if busy or evil_bart_defeated:
@@ -58,7 +80,8 @@ func return_to_forest() -> void:
 		return
 	restore_position = true
 	encounter_active = false
-	await transition_to("res://scenes/world/overworld.tscn")
+	if await transition_to("res://scenes/world/overworld.tscn"):
+		save_current()
 
 func main_menu() -> void:
 	if busy:
@@ -70,23 +93,142 @@ func transition_to(scene_path: String) -> bool:
 	if busy:
 		return false
 	busy = true
+	close_pause()
 	get_tree().paused = false
 	curtain.show()
 	curtain.modulate.a = 0.0
 	var fade := create_tween()
-	fade.tween_property(curtain, "modulate:a", 1.0, 0.18)
+	fade.tween_property(curtain, "modulate:a", 1.0, transition_duration * 0.5)
 	await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
 		audio.stop()
-	var error := get_tree().change_scene_to_file(scene_path)
+	var error := ERR_FILE_NOT_FOUND
+	if ResourceLoader.exists(scene_path):
+		error = get_tree().change_scene_to_file(scene_path)
 	if error != OK:
-		push_error("Transition could not load " + scene_path)
+		last_save_message = "Transition could not load " + scene_path
 	else:
 		await get_tree().scene_changed
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 0.0, 0.18)
+	fade.tween_property(curtain, "modulate:a", 0.0, transition_duration * 0.5)
 	await fade.finished
 	curtain.hide()
 	busy = false
 	return error == OK
+
+func snapshot(area: String, point: Vector2) -> Dictionary:
+	return {"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate()}
+
+func save_current() -> bool:
+	var world := get_tree().current_scene
+	if busy or world == null or world.name != "Overworld" or world.dialogue.active:
+		saves.last_error = "Save unavailable during dialogue, transitions or combat."
+		return false
+	var ok := saves.write_save(snapshot(area_id, world.player.position))
+	last_save_message = "Saved." if ok else saves.last_error
+	return ok
+
+func save_boss_victory() -> void:
+	# Save only the known overworld return point, never combat runtime objects.
+	if encounter_active and evil_bart_defeated:
+		var ok := saves.write_save(snapshot(area_id, return_position))
+		last_save_message = "Progress saved." if ok else saves.last_error
+
+func has_unsaved_progress() -> bool:
+	var world := get_tree().current_scene
+	if world == null:
+		return false
+	if world.name == "Overworld":
+		return snapshot(area_id, world.player.position) != saves.read_save()
+	if encounter_active:
+		return snapshot(area_id, return_position) != saves.read_save()
+	return false
+
+func load_game() -> bool:
+	if busy:
+		return false
+	var data := saves.read_save()
+	if data.is_empty():
+		if pause_menu.opened:
+			pause_menu.status.text = saves.last_error
+		return false
+	area_id = data.area
+	return_position = Vector2(data.position[0], data.position[1])
+	restore_position = true
+	evil_bart_defeated = data.evil_bart_defeated
+	story_flags = data.story_flags.duplicate()
+	encounter_active = false
+	return await transition_to("res://scenes/world/overworld.tscn")
+
+func can_pause() -> bool:
+	var scene := get_tree().current_scene
+	if busy or scene == null or get_tree().paused:
+		return false
+	if scene.name == "Overworld":
+		return not scene.dialogue.active
+	if scene.has_method("record_victory"):
+		return not scene.battle.game_over and not scene.battle.victory_started
+	return false
+
+func open_pause() -> void:
+	if not can_pause() or pause_menu.opened:
+		return
+	var scene := get_tree().current_scene
+	var in_combat := scene.has_method("record_victory")
+	if in_combat:
+		_suspend_always(scene.battle)
+	else:
+		scene.hide_interaction()
+	get_tree().paused = true
+	pause_menu.show_menu(in_combat)
+
+func _suspend_always(node: Node) -> void:
+	if node.process_mode == Node.PROCESS_MODE_ALWAYS:
+		suspended_modes[node] = node.process_mode
+		node.process_mode = Node.PROCESS_MODE_PAUSABLE
+	for child in node.get_children():
+		_suspend_always(child)
+
+func close_pause() -> void:
+	if pause_menu != null:
+		pause_menu.hide_menu()
+	for node in suspended_modes:
+		if is_instance_valid(node):
+			node.process_mode = suspended_modes[node]
+	suspended_modes.clear()
+	get_tree().paused = false
+
+func open_options() -> void:
+	if not is_instance_valid(options_dialog):
+		options_dialog = AcceptDialog.new()
+		options_dialog.set_script(preload("res://scripts/ui/options_dialog.gd"))
+		add_child(options_dialog)
+	options_dialog.open()
+
+func confirm_action(message: String, action: Callable) -> void:
+	if is_instance_valid(confirmation):
+		return
+	confirmation = ConfirmationDialog.new()
+	confirmation.process_mode = Node.PROCESS_MODE_ALWAYS
+	confirmation.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	confirmation.title = "Confirm"
+	confirmation.dialog_text = message
+	add_child(confirmation)
+	var dialog := confirmation
+	dialog.confirmed.connect(func():
+		confirmation = null
+		dialog.queue_free()
+		action.call()
+	)
+	dialog.canceled.connect(func():
+		confirmation = null
+		dialog.queue_free()
+	)
+	dialog.popup_centered(Vector2i(440, 180))
+
+func request_main_menu() -> void:
+	if has_unsaved_progress():
+		confirm_action("Return to the main menu and discard unsaved progress?", main_menu)
+	else:
+		main_menu()

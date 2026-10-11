@@ -26,6 +26,11 @@ func _initialize() -> void:
 func run() -> void:
 	# --script with the headless dummy display starts at 64x64.
 	# Apply the configured dimensions to exercise gameplay in its intended viewport.
+	var save_manager = root.get_node("Session").saves
+	save_manager.save_path = "user://validation-headless_gameplay.json"
+	for suffix in ["", ".bak", ".tmp"]:
+		if FileAccess.file_exists(save_manager.save_path + suffix):
+			DirAccess.remove_absolute(save_manager.save_path + suffix)
 	root.size = Vector2i(ProjectSettings.get_setting("display/window/size/viewport_width"), ProjectSettings.get_setting("display/window/size/viewport_height"))
 	var presets := ConfigFile.new()
 	check(presets.load("res://export_presets.cfg") == OK, "export config parses without invented presets")
@@ -42,7 +47,7 @@ func run() -> void:
 	await process_frame
 	check(root.size == Vector2i(1280, 720), "1280x720 widescreen display")
 	var menu := current_scene
-	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 6, "main menu controls initialize")
+	check(menu.name == "Mainmenu" and menu.menu_container.get_child_count() == 7, "main menu controls initialize")
 	await create_timer(0.1).timeout
 	check(menu.size == Vector2(1280, 720), "menu root fills viewport")
 	check(menu.get_node("Background").size == menu.size, "background fills menu")
@@ -386,6 +391,8 @@ func run() -> void:
 	check(current_scene.name == "Mainmenu" and current_scene.menu_container.visible, "victory Main Menu returns to original menu")
 	check(current_scene.menu_container.get_node("StartButton").has_focus(), "returned menu restores keyboard navigation")
 	current_scene._start_game()
+	check(root.get_node("Session").confirmation != null, "new game asks before replacing save")
+	root.get_node("Session").confirmation.confirmed.emit()
 	await create_timer(0.45).timeout
 	check(current_scene.name == "Overworld", "Start works again after victory Main Menu")
 	await root.get_node("Session").transition_to("res://scenes/combat_host.tscn")

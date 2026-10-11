@@ -45,6 +45,8 @@ func _build_menu() -> void:
 	spacer.custom_minimum_size.y = 42
 	menu_container.add_child(spacer)
 	_button(menu_container, "START GAME", "StartButton", _start_game)
+	var continue_button := _button(menu_container, "CONTINUE()", "ContinueButton", _continue_game)
+	continue_button.disabled = Session.saves.read_save().is_empty()
 	_button(menu_container, "OPTIONS", "OptionsButton", _open_options)
 	_button(menu_container, "INFO", "InfoButton", _show_info)
 	_button(menu_container, "QUIT", "QuitButton", _quit_game)
@@ -118,38 +120,32 @@ func _unhandled_input(event: InputEvent) -> void:
 func _start_game() -> void:
 	if transitioning or Session.busy:
 		return
+	if not Session.saves.read_save().is_empty():
+		Session.confirm_action("Start a new game? The current save will be replaced.", _begin_new_game)
+	else:
+		_begin_new_game()
+
+func _begin_new_game() -> void:
+	if transitioning or Session.busy:
+		return
 	transitioning = true
 	for child in menu_container.get_children():
 		if child is Button:
 			child.disabled = true
 	Session.new_game()
 
+func _continue_game() -> void:
+	if transitioning or Session.busy:
+		return
+	if Session.saves.read_save().is_empty():
+		menu_container.get_node("ContinueButton").disabled = true
+		return
+	transitioning = true
+	Session.load_game()
 
 func _open_options() -> void:
-	if not is_instance_valid(options_dialog):
-		options_dialog = AcceptDialog.new()
-		options_dialog.title = "Options"
-		options_dialog.dialog_text = ""
-		var content := VBoxContainer.new()
-		content.add_theme_constant_override("separation", 12)
-		options_dialog.add_child(content)
-		var hint := Label.new()
-		hint.text = "F11 toggles fullscreen at any time."
-		content.add_child(hint)
-		var fullscreen := CheckButton.new()
-		fullscreen.name = "FullscreenToggle"
-		fullscreen.text = "Fullscreen"
-		fullscreen.button_pressed = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-		fullscreen.toggled.connect(func(enabled: bool):
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if enabled else DisplayServer.WINDOW_MODE_WINDOWED)
-		)
-		content.add_child(fullscreen)
-
-		options_dialog.theme = theme
-		add_child(options_dialog)
-	var toggle := options_dialog.find_child("FullscreenToggle", true, false) as CheckButton
-	toggle.set_pressed_no_signal(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
-	options_dialog.popup_centered(Vector2i(360, 180))
+	Session.open_options()
+	options_dialog = Session.options_dialog
 
 func _quit_game() -> void:
 	get_tree().quit()
@@ -186,7 +182,7 @@ func _build_controls() -> void:
 				label.add_theme_font_size_override("font_size", 15)
 				grid.add_child(label)
 	var note := Label.new()
-	note.text = "SATURATE: once per run.\nOverworld: E / ENTER — dialogue\nF11 — fullscreen / windowed"
+	note.text = "SATURATE: once per run.\nOverworld: E / ENTER — dialogue\nSHIFT — sprint   ESC — pause\nF11 — fullscreen / windowed"
 	note.add_theme_font_size_override("font_size", 13)
 	note.add_theme_color_override("font_color", SketchTheme.MUTED)
 	content.add_child(note)

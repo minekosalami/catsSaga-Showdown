@@ -45,6 +45,11 @@ func mouse_click(position: Vector2) -> void:
 		await process_frame
 
 func run() -> void:
+	var save_manager = root.get_node("Session").saves
+	save_manager.save_path = "user://validation-render_ui.json"
+	for suffix in ["", ".bak", ".tmp"]:
+		if FileAccess.file_exists(save_manager.save_path + suffix):
+			DirAccess.remove_absolute(save_manager.save_path + suffix)
 	root.size = Vector2i(1280, 720)
 	session = root.get_node("Session")
 	change_scene_to_file("res://scenes/main_menu.tscn")
@@ -82,7 +87,20 @@ func run() -> void:
 	current_scene._start_game()
 	await create_timer(0.5).timeout
 	check(current_scene.name == "Overworld", "widescreen menu enters forest")
-	await snapshot("rpg-entrance")
+	await snapshot("qol-entrance")
+	current_scene.player.position = Vector2(450, 445)
+	await create_timer(0.5).timeout
+	await snapshot("qol-indicator")
+	session.open_pause()
+	await create_timer(0.2).timeout
+	check(paused and session.pause_menu.opened, "graphical pause overlay freezes gameplay")
+	await snapshot("qol-pause")
+	session.pause_menu.buttons.Save.pressed.emit()
+	await snapshot("qol-saved")
+	session.close_pause()
+	current_scene.dialogue.start_lines([{"speaker": "TREE", "text": "It's a tree."}, {"speaker": "TREE", "text": "Probably."}])
+	await create_timer(0.5).timeout
+	await snapshot("qol-inspection")
 	await session.travel("deep_forest", "FromEntrance")
 	current_scene.player.position = Vector2(900, 490)
 	await create_timer(0.5).timeout
@@ -106,6 +124,10 @@ func run() -> void:
 		await process_frame
 	await create_timer(0.6).timeout
 	await snapshot("rpg-combat-boss")
+	session.open_pause()
+	await create_timer(0.2).timeout
+	await snapshot("qol-combat-pause")
+	session.close_pause()
 	# Test resizing on a larger PC display using the configured canvas stretch.
 	root.size = Vector2i(1600, 900)
 	await create_timer(0.2).timeout
