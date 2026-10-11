@@ -153,7 +153,7 @@ func run() -> void:
 	game.set_process(false)
 	game.player.set_process(false)
 	var shape: CircleShape2D = game.player.get_node("CollisionShape2D").shape
-	check(shape.radius == 7 and game.player.get_node("CollisionShape2D").position.is_equal_approx(game.player.get_node("Sprite2D").position), "one authoritative damage circle centered on battle sprite with radius 7")
+	check(shape.radius == 7.5 and game.player.get_node("CollisionShape2D").position.is_equal_approx(game.player.get_node("Sprite2D").position), "one authoritative damage circle centered on battle sprite with radius 7.5")
 	check(game.player.get_children().filter(func(child): return child is CollisionShape2D).size() == 1, "no duplicate player damage shapes")
 	var sprite: Sprite2D = game.player.get_node("Sprite2D")
 	check(sprite.scale.is_equal_approx(Vector2(0.19719388,0.1398545)) and game.player.speed == 450 and game.player.focus_speed == 150, "battle sprite and movement speeds unchanged")
@@ -176,7 +176,7 @@ func run() -> void:
 	var second: Node = load("res://scenes/player.tscn").instantiate()
 	game.add_child(second)
 	second.set_process(false)
-	check(second.get_node("CollisionShape2D").shape.radius == 7 and second.get_node("CollisionShape2D").shape != shape, "hitbox tuning does not mutate other player instances")
+	check(second.get_node("CollisionShape2D").shape.radius == 7.5 and second.get_node("CollisionShape2D").shape != shape, "hitbox tuning does not mutate other player instances")
 	second.queue_free()
 	await process_frame
 	await bullet_probe(game, Vector2.ZERO)

@@ -1,4 +1,5 @@
 extends Area2D
+const Energy = preload("res://scripts/ui/energy_laser_style.gd")
 
 @export_range(8.0, 40.0, 1.0) var beam_width := 20.0
 @export var beam_top := 270.0
@@ -10,6 +11,9 @@ var energy_time := 0.0
 var collision: CollisionShape2D
 @export_range(0.0,1.0,0.05) var glow_strength := 0.65
 var activation_clock := 0.0
+var deactivation_clock := -10.0
+@export var charge_duration := 1.2
+var warning_clock := 0.0
 
 func _ready() -> void:
 	collision_layer = 4
@@ -27,8 +31,12 @@ func _configure_shape() -> void:
 
 func present(x: float, dangerous: bool, show_warning: bool, span: Rect2, clock: float) -> void:
 	position.x = x
+	if show_warning and not warning:
+		warning_clock = clock
 	if dangerous and not active:
 		activation_clock = clock
+	if active and not dangerous:
+		deactivation_clock = clock
 	active = dangerous
 	warning = show_warning
 	warning_span = span
@@ -63,25 +71,12 @@ func _draw() -> void:
 		# A red dashed locator contrasts with the later continuous blue core.
 		for y in range(int(beam_top),int(beam_bottom),32):
 			draw_line(Vector2(0,y),Vector2(0,y+13),Color(1,0.55,0.58,0.85),2,true)
-	if not active:
+		var charge := smoothstep(0,maxf(0.1,charge_duration),energy_time-warning_clock)
+		draw_line(Vector2(0,beam_top),Vector2(0,beam_bottom),Color(0.5,0.85,1,charge*0.4),3,true)
+	var tail := 1-smoothstep(0.0,0.18,energy_time-deactivation_clock)
+	if not active and (warning or tail <= 0):
 		return
-	var height := beam_bottom-beam_top
 	var wake := smoothstep(0.0,0.18,maxf(0,energy_time-activation_clock))
-	for extra in [12.0,7.0,3.0]:
-		draw_rect(Rect2(-beam_width/2-extra,beam_top,beam_width+extra*2,height),Color(0.05,0.5,1,0.065*glow_strength*(0.6+0.4*wake)))
-	# The solid dangerous width is immediately visible when damage activates.
-	draw_rect(Rect2(-beam_width/2,beam_top,beam_width,height),Color(0.015,0.36,0.96,0.96))
-	draw_rect(Rect2(-beam_width*0.32,beam_top,beam_width*0.64,height),Color(0.12,0.63,1,0.7))
-	draw_rect(Rect2(-beam_width*0.16,beam_top,beam_width*0.32,height),Color(0.86,0.98,1,0.65+0.3*wake))
-	for side in [-1,1]:
-		draw_line(Vector2(side*beam_width/2,beam_top),Vector2(side*beam_width/2,beam_bottom),Color(0.35,0.75,1),1,true)
-	for i in range(16):
-		var y := beam_top+fposmod(i*43.0+energy_time*95,height)
-		var x := sin(energy_time*2+i)*beam_width*0.22
-		draw_line(Vector2(x,y),Vector2(-x,y+11),Color(0.65,0.95,1,0.45),1.3,true)
-	# Six procedural origin sparks, with no particle nodes or per-beam shader.
-	for i in range(6):
-		var cycle := fposmod(energy_time*0.9+float(i)/6,1.0)
-		var angle := float(i)*TAU/6+energy_time*0.5
-		var point := Vector2(cos(angle)*beam_width*(0.25+cycle*0.6),beam_top-12*cycle)
-		draw_circle(point,1.2,Color(0.55,0.88,1,(1-cycle)*0.6*glow_strength),true,-1,true)
+	draw_set_transform(Vector2(0,(beam_top+beam_bottom)/2),PI/2)
+	Energy.draw_beam(self,beam_bottom-beam_top,beam_width,Color("#167DFF"),energy_time,wake,glow_strength,1.0 if active else tail*0.35)
+	draw_set_transform(Vector2.ZERO)

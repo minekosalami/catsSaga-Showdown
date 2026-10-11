@@ -33,7 +33,7 @@ func present(title: String, tint: Color, playback: float, emphasis: bool = false
 	dramatic = emphasis
 	duration = 1.1 if emphasis else 0.85
 	label.text = title
-	label.add_theme_font_size_override("font_size",32 if emphasis else 24)
+	label.add_theme_font_size_override("font_size",40 if title == "NOW DIE!" else (32 if emphasis else 24))
 	label.add_theme_color_override("font_color",tint.lightened(0.25))
 	label.show()
 	update_clock(playback)
@@ -45,7 +45,7 @@ func update_clock(playback: float) -> void:
 	var fade_out := 1-smoothstep(duration-0.3,duration,age)
 	label.modulate.a = fade_in * fade_out * 0.92
 	label.pivot_offset = label.size * 0.5
-	label.scale = Vector2.ONE * (1 + 0.045 * (1-smoothstep(0.0,0.3,age)))
+	label.scale = Vector2.ONE * (1 + (0.10 if dramatic else 0.045) * (1-smoothstep(0.0,0.3,age)))
 	if age >= duration:
 		label.hide()
 	queue_redraw()

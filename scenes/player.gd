@@ -4,7 +4,7 @@ signal health_changed(new_health: int)
 signal game_over
 
 # The sole enemy-projectile damage shape uses internal battle pixels.
-@export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 7.0:
+@export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 7.5:
 	set(value):
 		damage_hitbox_radius = clampf(value, 0.5, 32.0)
 		if is_node_ready():

@@ -45,16 +45,16 @@ func _ready() -> void:
 	stack.add_child(row)
 	health_label = Label.new()
 	health_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	health_label.add_theme_font_size_override("font_size",16)
+	health_label.add_theme_font_size_override("font_size",18)
 	row.add_child(health_label)
 	timer_label = Label.new()
-	timer_label.add_theme_font_size_override("font_size",18)
+	timer_label.add_theme_font_size_override("font_size",22)
 	row.add_child(timer_label)
 	var phase_row := HBoxContainer.new()
 	stack.add_child(phase_row)
 	current_phase_label = Label.new()
 	current_phase_label.name = "CurrentPhase"
-	current_phase_label.add_theme_font_size_override("font_size",10)
+	current_phase_label.add_theme_font_size_override("font_size",12)
 	current_phase_label.add_theme_color_override("font_color",HUDStyle.BLUE)
 	current_phase_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	phase_row.add_child(current_phase_label)
@@ -65,7 +65,7 @@ func _ready() -> void:
 	phase_row.add_child(caption)
 	song_progress = ProgressBar.new()
 	song_progress.name = "SongProgress"
-	song_progress.custom_minimum_size.y = 5
+	song_progress.custom_minimum_size.y = 6
 	song_progress.max_value = 140.80
 	song_progress.step = 0.001
 	HUDStyle.progress(song_progress)
@@ -151,7 +151,9 @@ func show_phase(title: String) -> void:
 	phase_transition.flash_strength = phase_flash_strength
 	phase_transition.border_strength = phase_border_strength
 	var tint := Color("#B6EAF2") if title in ["Intermission()","Finale()"] else HUDStyle.BLUE
-	phase_transition.present(title,tint,battle.timeline.clock,title == "Convergence()")
+	if title == "Convergence()":
+		tint = Color("#FF4766")
+	phase_transition.present("NOW DIE!" if title == "Convergence()" else title,tint,battle.timeline.clock,title == "Convergence()")
 	if title != "Introduction()":
 		battle.shake_time = maxf(battle.shake_time,0.16)
 		battle.shake_strength = maxf(battle.shake_strength,1.5)
