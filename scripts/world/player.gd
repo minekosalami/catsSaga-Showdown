@@ -9,6 +9,13 @@ var facing_left: bool = true
 var facing_direction := Vector2.LEFT
 var sprite: Sprite2D
 
+func face_direction(direction: Vector2) -> void:
+	if direction == Vector2.ZERO: return
+	facing_direction = direction.normalized()
+	if direction.x != 0:
+		facing_left = direction.x < 0
+		sprite.flip_h = facing_left != artwork_faces_left
+
 @export var acceleration: float = 1800.0
 @export var deceleration: float = 2200.0
 var movement_locked: bool = false

@@ -22,6 +22,12 @@ func _draw() -> void:
 			if Rect2(Vector2.ZERO,size).intersects(rect):
 				draw_style_box(label_style,rect)
 				draw_string(FONT,label_position+Vector2(-width/2,6),text,HORIZONTAL_ALIGNMENT_LEFT,-1,18,Color(0.94,0.95,0.90))
+	for marker in canvas.boss_markers:
+		var position: Vector2 = canvas.screen_point(marker.point)
+		if not Rect2(Vector2.ZERO,size).grow(-6).has_point(position): continue
+		if canvas.circular and position.distance_to(size/2) > size.x/2-8: continue
+		draw_circle(position,5.5,Color("#101410"))
+		draw_circle(position,3.5,Color("#5DEA87") if marker.defeated else Color("#FF5166"))
 	var point: Vector2 = canvas.screen_point(canvas.player_world)
 	if not Rect2(Vector2.ZERO,size).grow(-10).has_point(point): return
 	var angle: float = canvas.facing.angle()+PI/2

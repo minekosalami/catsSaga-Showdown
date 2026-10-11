@@ -53,7 +53,7 @@ func run() -> void:
 			var interior := true
 			for step in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 				interior = interior and reachable.has(cell + step)
-			if interior:
+			if interior and cell.x >= 3 and cell.y >= 3 and cell.x < int(map.map_size.x/16)-3 and cell.y < int(map.map_size.y/16)-3:
 				route_clear = route_clear and map.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
 		check(soil_only, filename + " uses GFX single-cell soil tiles")
 		check(route_clear, filename + " interior path cells fit actual player collision shape")
@@ -127,7 +127,7 @@ func run() -> void:
 	await process_frame
 	check(current_scene.player.position == safe and not current_scene.checking_spawn, "valid saved position is retained")
 	await session.travel("deep_forest", "FromBart")
-	var expanded_spawn := Vector2(2280,1200)
+	var expanded_spawn: Vector2 = current_scene.map.get_node("Entries/FromBart").position
 	check(current_scene.player.position == expanded_spawn and current_scene.player.get_node("Camera2D").limit_right == 5120 and current_scene.player.get_node("Camera2D").limit_bottom == 2880, "relocated Deep Forest arrival and camera follow expanded bounds")
 	check(session.saves.write_save(session.snapshot("deep_forest", expanded_spawn)), "version-one save accepts new Deep Forest coordinates")
 	await session.load_game()

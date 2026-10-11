@@ -45,10 +45,11 @@ func run() -> void:
 	session.grant_flooded_key()
 	session.grant_flooded_key()
 	check(session.story_flags.flooded_forest_key_obtained and session.key_notification_pending,"key award is idempotent with one pending notification")
-	gate.handle_interaction(world)
+	world.player.position = world.map.get_node("Portals/ToFlooded").position
+	for i in 4: await physics_frame
 	await wait_transition()
 	world = current_scene
-	check(session.area_id == "flooded_forest" and session.story_flags.flooded_forest_unlocked,"Z gate action unlocks and travels with key")
+	check(session.area_id == "flooded_forest" and session.story_flags.flooded_forest_unlocked,"automatic boundary uses existing key and records gate traversal")
 	check(session.story_flags.flooded_forest_key_obtained,"gate never consumes key")
 	check(world.map.map_size == Vector2(4096,3072) and world.player.get_node("Camera2D").limit_right == 4096,"new map and camera retain widescreen architecture")
 	var water: TileMapLayer = world.map.get_node("PlaceholderWater")
@@ -86,22 +87,23 @@ func run() -> void:
 	check(session.save_current(),"Flooded Forest position and flags save through existing storage")
 	var saved: Dictionary = session.saves.read_save()
 	check(saved.area == "flooded_forest" and saved.story_flags.flooded_forest_key_obtained,"new area and persistent key reload as valid version-one data")
-	world.player.position = Vector2(110,768)
+	world.player.position = world.map.get_node("Portals/ToDeep").position
 	await physics_frame
 	await physics_frame
 	await physics_frame
 	await wait_transition()
-	check(current_scene.player.position.distance_to(Vector2(1750,1010)) < 1,"actual return portal reaches safe Deep Forest marker")
+	check(current_scene.player.position.distance_to(current_scene.map.get_node("Entries/FromFlooded").position) < 1,"actual return portal reaches safe Deep Forest marker")
 	await session.load_game()
 	check(session.area_id == "deep_forest" and session.story_flags.flooded_forest_key_obtained,"save-load preserves key across travel")
 	await session.travel("flooded_forest","FromDeep")
 	world = current_scene
 	npc = world.map.get_node("Characters/Boss2NPC")
 	npc.handle_interaction(world)
-	check(world.dialogue.active and world.pending_encounter == "boss2" and world.dialogue.graph.nodes.intro.end == "battle","new NPC uses existing introduction and distinct battle routing")
+	check(world.dialogue.active and world.pending_encounter == "boss2" and world.dialogue.graph.nodes.intro.choices[1].end == "battle","new NPC uses existing introduction and distinct battle routing")
 	world.player.position = Vector2(1840,450)
 	world.dialogue.advance()
 	world.dialogue.advance()
+	world.dialogue._choose(1)
 	await wait_transition()
 	var host: Node = current_scene
 	var battle: Node = host.battle
@@ -208,8 +210,8 @@ func run() -> void:
 	await host.return_to_forest()
 	await wait_transition()
 	check(session.area_id == "flooded_forest" and current_scene.player.position.distance_to(Vector2(1840,450)) < 1,"victory returns to saved Flooded Forest point")
-	check(not current_scene.dialogue.active,"new victory invents no post-battle story dialogue")
-	check(not current_scene.map.get_node("Characters/Boss2NPC").can_interact(),"completed new encounter does not restart through NPC")
+	check(current_scene.dialogue.active and current_scene.dialogue.lines[0].text == "What the hell?? I underestimated you…! Get out of here, me!","survival return presents exact requested victory line")
+	check(current_scene.map.get_node("Characters/Boss2NPC").can_interact(),"completed NPC remains available for repeat dialogue")
 	await session.new_game()
 	session.evil_bart_defeated = true
 	session.grant_flooded_key()

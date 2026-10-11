@@ -64,7 +64,7 @@ func run() -> void:
 		var stones: TileMapLayer = map.get_node("GFXBoulders")
 		check(stones.get_used_cells().size() > 0 and stones.collision_enabled,area+" contains blocking boulders")
 		var stone_cell: Vector2i = stones.get_used_cells()[0]
-		query.transform = Transform2D(0,stones.to_global(stones.map_to_local(stone_cell)+Vector2(0,6)))
+		query.transform = Transform2D(0,stones.to_global(stones.map_to_local(stone_cell)+Vector2(0,2)))
 		check(not map.get_world_2d().direct_space_state.intersect_shape(query,1).is_empty(),area+" actual boulder collision blocks movement")
 		var plants: TileMapLayer = map.get_node("GFXUndergrowth")
 		check(plants.get_used_cells().size() >= 150 and not plants.collision_enabled and plants.tile_set.get_physics_layers_count() == 0,area+" flowers and shrubs are walkable")

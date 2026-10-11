@@ -75,7 +75,7 @@ func run() -> void:
 		if battle.game_over: break
 	for code in [KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN,KEY_SHIFT]: key(code,false)
 	check(not player.invincible and not player.unlimited_saturate,"survival route uses no cheats or health changes")
-	check(minimum == 3 and not battle.game_over,"actual focused eight-direction movement survives the full 50 RPM cross without damage")
+	check(minimum == 3 and not battle.game_over,"actual focused eight-direction movement survives the full 18 RPM cross without damage")
 	check(battle.timeline.phase == 5 and not cross.active,"successful route reaches the 89.60-second shatter and finale")
 	print("CROSS ROUTE MINIMUM HP: ",minimum)
 	await session.main_menu()
