@@ -1,6 +1,7 @@
 extends "res://scripts/systems/combat_host.gd"
 
 func record_victory() -> void:
+	if battle.practice_mode or battle.development_run: return
 	if Session.encounter_active and Session.encounter_id == "blankkitten":
 		Session.story_flags["blankkitten_defeated"] = true
 		Session.save_boss_victory()
@@ -18,3 +19,10 @@ func finish_entry() -> void:
 		return
 	super.finish_entry()
 	battle.state = battle.State.INTRODUCTION
+	battle.apply_launch()
+
+func practice(index: int) -> void:
+	var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})
+	if not seen.has(index): return
+	Session.set_meta("blankkitten_launch",{"time":battle.Cue.STARTS[index],"practice":true})
+	retry()

@@ -2,6 +2,12 @@ extends Node2D
 const Cue = preload("res://scripts/blankkitten/timeline.gd")
 enum State { ENTERING, INTRODUCTION, ACTIVE_MINIGAME, ARENA_TRANSITION, BREAK, FINAL_PHASE, ENDING, VICTORY, DEFEAT }
 @export var cue_sheet: Resource = preload("res://resources/blankkitten/timeline.tres")
+@export var reduced_effects := false
+var practice_mode := false
+var development_run := false
+var practice_stage := 0
+var practice_end := 0.0
+var feedback: Node2D
 var state := State.ENTERING
 var player: Node2D
 var music_player: AudioStreamPlayer
@@ -30,6 +36,11 @@ func _ready() -> void:
 	music_player = $Music
 	music_player.add_to_group("combat_music")
 	ui = $UI
+	reduced_effects = bool(Session.get_meta("blankkitten_reduced_effects",false))
+	feedback = Node2D.new()
+	feedback.name = "SequenceFeedback"
+	feedback.set_script(preload("res://scripts/blankkitten/feedback.gd"))
+	add_child(feedback)
 	player = Node2D.new()
 	player.name = "RainbowStar"
 	player.z_index = 2
@@ -78,6 +89,7 @@ func _physics_process(_delta: float) -> void:
 
 func rebuild_clock(time: float) -> void:
 	# Explicit seek/reload support. No pending attack/spin/fade callbacks exist.
+	feedback.clear()
 	hazards.clear()
 	stage = Cue.stage_at(time)
 	stage_history = [stage]
@@ -94,10 +106,11 @@ func rebuild_clock(time: float) -> void:
 	player.invulnerability = player.hit_grace
 	hazards.configure(stage)
 	hazards.last_clock = time
+	ui.stage_changed(stage,time)
 	advance_clock(time)
 
 func safe_point(rect: Rect2, gravity_mode: bool) -> Vector2:
-	return Vector2(rect.get_center().x,rect.end.y-player.RADIUS) if gravity_mode else rect.get_center()
+	return Vector2(rect.get_center().x,rect.end.y-player.RADIUS-player.INNER_EDGE) if gravity_mode else rect.get_center()
 
 func advance_clock(time: float) -> void:
 	if game_over or victory_started:
@@ -119,6 +132,12 @@ func advance_clock(time: float) -> void:
 		morph_target = -1
 		hazards.configure(stage)
 		ui.stage_changed(stage,elapsed_time)
+		remember_stage(stage)
+		if stage == 6:
+			feedback.cue("glitch",elapsed_time)
+			feedback.burst(Vector2(270,230),Color("#FFBB85"),28,elapsed_time,.8,true)
+			feedback.shake_start = elapsed_time
+			feedback.shake_amount = 1.7
 	var target := Cue.morph_at(elapsed_time)
 	player.transition_safe = target >= 0 or stage in [0,3,7]
 	player.movement_locked = target >= 0
@@ -128,6 +147,7 @@ func advance_clock(time: float) -> void:
 			morph_from = arena_rect
 			star_from = player.position
 			hazards.stop_damage()
+			feedback.cue("morph",elapsed_time)
 		var blend := smoothstep(0,1,(elapsed_time-(Cue.STARTS[target]-Cue.MORPH))/Cue.MORPH)
 		arena_rect = Rect2(morph_from.position.lerp(Cue.BOXES[target].position,blend),morph_from.size.lerp(Cue.BOXES[target].size,blend))
 		player.position = star_from.lerp(safe_point(Cue.BOXES[target],Cue.GRAVITY[target]),blend)
@@ -139,9 +159,16 @@ func advance_clock(time: float) -> void:
 	arena_clip.size = arena_rect.size
 	hazards.position = -arena_rect.position
 	hazards.advance(elapsed_time)
+	# The same inset protects the visible silhouette, including during morphs.
+	player.position = player.position.clamp(arena_rect.position+Vector2.ONE*(player.RADIUS+player.INNER_EDGE),arena_rect.end-Vector2.ONE*(player.RADIUS+player.INNER_EDGE))
+	player.clock = elapsed_time
+	player.queue_redraw()
+	feedback.update_clock(elapsed_time)
 	presentation.update_clock(elapsed_time)
 	ui.update_clock(elapsed_time)
-	if elapsed_time >= Cue.END:
+	if practice_mode and elapsed_time >= practice_end:
+		finish_practice()
+	elif elapsed_time >= Cue.END:
 		finish_survival()
 
 func finish_survival() -> void:
@@ -151,26 +178,89 @@ func finish_survival() -> void:
 	state = State.VICTORY
 	hazards.clear()
 	player.movement_locked = true
-	get_tree().current_scene.record_victory()
+	if not development_run:
+		get_tree().current_scene.record_victory()
 	_fade_music(0.15)
 	ui.show_result(true)
+	if development_run:
+		ui.result_label.text = "PREVIEW COMPLETE()"
+		ui.return_button.hide()
+		ui.retry_button.grab_focus()
 
 func _defeat() -> void:
 	if game_over or victory_started:
 		return
 	game_over = true
 	state = State.DEFEAT
+	ui.update_clock(elapsed_time)
 	hazards.clear()
 	player.movement_locked = true
 	player.velocity = Vector2.ZERO
-	music_player.stop()
-	ui.show_result(false,audio_error)
+	_fade_music(.18)
+	if player.health <= 0:
+		feedback.die(player.position)
+	else:
+		ui.show_result(false,audio_error)
 
 func _audio_failure(reason: String) -> void:
 	if game_over or victory_started:
 		return
 	audio_error = reason
 	_defeat()
+
+func remember_stage(index: int) -> void:
+	if development_run or practice_mode: return
+	var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})
+	if index in [1,2,4,5,6]: seen[index] = true
+	Session.set_meta("blankkitten_seen_stages",seen)
+
+func seek_timestamp(time: float, practice := false) -> bool:
+	if not practice and not OS.is_debug_build(): return false
+	if time < 0 or time >= Cue.END or game_over or victory_started: return false
+	var index := Cue.stage_at(time)
+	if practice:
+		var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})
+		if not seen.has(index) or index not in [1,2,4,5,6]: return false
+	practice_mode = practice
+	development_run = not practice
+	practice_stage = index
+	practice_end = Cue.STARTS[index+1]-Cue.MORPH if practice else Cue.END
+	music_player.volume_db = -12
+	music_player.play(time)
+	rebuild_clock(time)
+	clock_initialized = false
+	return true
+
+func finish_practice() -> void:
+	if game_over or victory_started: return
+	victory_started = true
+	state = State.VICTORY
+	hazards.clear()
+	player.movement_locked = true
+	_fade_music(.3)
+	ui.show_result(true)
+	ui.result_label.text = "PRACTICE COMPLETE()"
+	ui.result_label.add_theme_font_size_override("font_size",24)
+	ui.return_button.hide()
+	ui.retry_button.grab_focus()
+
+func apply_launch() -> void:
+	var launch: Dictionary = Session.get_meta("blankkitten_launch",{})
+	Session.remove_meta("blankkitten_launch")
+	if not launch.is_empty():
+		seek_timestamp(float(launch.time),bool(launch.practice))
+		return
+	if OS.is_debug_build():
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--blankkitten-seek="):
+				var value := arg.trim_prefix("--blankkitten-seek=")
+				if value.is_valid_float(): seek_timestamp(value.to_float())
+
+func _input(event: InputEvent) -> void:
+	if not OS.is_debug_build() or game_over or victory_started: return
+	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.shift_pressed:
+		if event.keycode >= KEY_1 and event.keycode <= KEY_8:
+			seek_timestamp(Cue.STARTS[event.keycode-KEY_1])
 
 func _on_music_finished() -> void:
 	if game_over or victory_started:
