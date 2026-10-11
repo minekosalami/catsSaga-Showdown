@@ -35,22 +35,28 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _draw() -> void:
-	var pulse := 0.85 + 0.15 * sin(animation_time * 5.0)
-	# The filled disk and its bright outline stay at the exact dangerous radius.
-	draw_circle(Vector2.ZERO, body_radius + 2.0, Color(bullet_color, 0.09 * pulse))
+	var shimmer := 0.94 + 0.06 * sin(animation_time * 4.0)
+	# Antialias the silhouette/rim only; interior layers are already inside it.
+	# Radius never pulses: the saturated rim ends at the actual dangerous radius.
+	draw_circle(Vector2.ZERO,body_radius+2.5,Color(bullet_color,0.055*shimmer))
 	if visual_style == Style.FAST:
-		draw_line(-direction * body_radius, -direction * (body_radius + 12), Color(bullet_color, 0.22), 2)
+		for i in range(3):
+			var start := -direction * (body_radius+float(i)*4)
+			draw_line(start,start-direction*4,Color(bullet_color,0.24-float(i)*0.065),2-float(i)*0.4)
 	elif visual_style == Style.DIAMOND:
 		var corners := PackedVector2Array()
 		for i in range(5):
-			corners.append(Vector2.RIGHT.rotated(i * PI / 2 + animation_time * 0.7) * body_radius * 1.42)
-		draw_polyline(corners, Color(bullet_color, 0.5), 1)
-	draw_circle(Vector2.ZERO, body_radius, bullet_color.darkened(0.15))
-	draw_arc(Vector2.ZERO, body_radius, 0, TAU, 24, bullet_color.lightened(0.55), 1.0 if visual_style != Style.HEAVY else 1.5)
-	draw_circle(Vector2.ZERO, body_radius * 0.48, bullet_color.lightened(0.75))
-	draw_circle(Vector2(-1, -1), body_radius * 0.23, Color.WHITE)
+			corners.append(Vector2.RIGHT.rotated(i*PI/2+animation_time*0.55)*body_radius*1.35)
+		draw_polyline(corners,Color(bullet_color,0.3),1,true)
+	draw_circle(Vector2.ZERO,body_radius,bullet_color.darkened(0.28))
+	draw_arc(Vector2.ZERO,body_radius-0.6,0,TAU,32,bullet_color,1.2,true)
+	draw_circle(Vector2.ZERO,body_radius*0.61,bullet_color.lightened(0.4))
+	draw_circle(Vector2.ZERO,body_radius*0.32,Color(1,1,1,shimmer))
+	if visual_style == Style.HEAVY:
+		draw_arc(Vector2.ZERO,body_radius*0.77,0.2,TAU-0.2,28,bullet_color.lightened(0.5),0.8)
 	if animation_time < 0.12:
-		draw_arc(Vector2.ZERO, body_radius + 7 * (1 - animation_time / 0.12), 0, TAU, 20, Color(bullet_color, 0.12 * (1 - animation_time / 0.12)), 1)
+		var birth := 1-animation_time/0.12
+		draw_arc(Vector2.ZERO,body_radius+5*birth,0,TAU,24,Color(bullet_color,0.1*birth),1,true)
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player"):
