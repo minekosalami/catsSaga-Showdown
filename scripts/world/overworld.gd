@@ -13,6 +13,7 @@ var interaction_hint: Label
 var nearest_npc: Node2D
 var interaction_indicator: Label
 var conversation_flag: String = ""
+var awaiting_victory_dialogue: bool = false
 
 func _ready() -> void:
 	map = MAPS[Session.area_id].instantiate()
@@ -36,13 +37,20 @@ func _ready() -> void:
 	_build_hud()
 	interaction_indicator = Label.new()
 	interaction_indicator.name = "InteractionIndicator"
-	interaction_indicator.text = "[E]"
+	interaction_indicator.text = "[Z]"
 	interaction_indicator.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono.ttf"))
 	interaction_indicator.add_theme_font_size_override("font_size", 18)
 	interaction_indicator.add_theme_color_override("font_outline_color", Color.BLACK)
 	interaction_indicator.add_theme_constant_override("outline_size", 6)
 	add_child(interaction_indicator)
 	interaction_indicator.hide()
+	awaiting_victory_dialogue = Session.area_id == "bart_area" and Session.evil_bart_defeated and Session.story_flags.get("bart_victory_dialogue_pending", false) and not Session.story_flags.get("bart_victory_dialogue_seen", false)
+	if awaiting_victory_dialogue:
+		player.movement_locked = true
+		if Session.busy:
+			Session.transition_finished.connect(_show_victory_dialogue, CONNECT_ONE_SHOT)
+		else:
+			call_deferred("_show_victory_dialogue")
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
@@ -65,6 +73,7 @@ func _build_hud() -> void:
 	row.add_child(title)
 	var back := Button.new()
 	back.text = "MAIN MENU"
+	back.focus_mode = Control.FOCUS_NONE
 	back.pressed.connect(Session.request_main_menu)
 	row.add_child(back)
 	interaction_hint = Label.new()
@@ -73,10 +82,10 @@ func _build_hud() -> void:
 	interaction_hint.offset_top = -56
 	interaction_hint.offset_bottom = -24
 	interaction_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   E  Interact   |   ESC  Pause"
+	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
 
 func _process(_delta: float) -> void:
-	player.movement_locked = dialogue.active or Session.busy
+	player.movement_locked = dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):
@@ -86,15 +95,15 @@ func _process(_delta: float) -> void:
 		if distance <= npc.interaction_radius and distance < closest:
 			closest = distance
 			nearest_npc = npc
-	interaction_hint.visible = not dialogue.active and not Session.busy and not get_tree().paused
+	interaction_hint.visible = not Session.world_menu_open() and not dialogue.active and not awaiting_victory_dialogue and not Session.busy and not get_tree().paused
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
 		interaction_indicator.position = nearest_npc.position + Vector2(-16, -62)
-	interaction_hint.text = "E  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   E  Interact   |   ESC  Pause"
+	interaction_hint.text = "Z  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not get_tree().paused and not Session.busy and not dialogue.active and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E:
-		pending_battle = nearest_npc.starts_battle and not Session.evil_bart_defeated
+func _input(event: InputEvent) -> void:
+	if not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
+		pending_battle = false
 		conversation_flag = nearest_npc.completion_flag
 		var custom: Array = nearest_npc.custom_lines()
 		if custom.is_empty():
@@ -106,16 +115,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_dialogue_finished() -> void:
+	var completed_victory := conversation_flag == "bart_victory_dialogue_seen"
 	if not conversation_flag.is_empty():
 		Session.story_flags[conversation_flag] = true
 	conversation_flag = ""
 	player.movement_locked = false
-	if pending_battle:
-		pending_battle = false
+	if dialogue.outcome == "battle":
+		pending_battle = true
+		player.movement_locked = true
 		Session.begin_battle(player.position)
+	elif completed_victory:
+		Session.story_flags.erase("bart_victory_dialogue_pending")
+		Session.save_current()
 
 func _travel(destination: String, entry: String) -> void:
-	if dialogue.active or Session.busy:
+	if dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open():
 		return
 	player.movement_locked = true
 	Session.travel(destination, entry)
@@ -123,3 +137,12 @@ func _travel(destination: String, entry: String) -> void:
 func hide_interaction() -> void:
 	interaction_indicator.hide()
 	interaction_hint.hide()
+
+func _show_victory_dialogue() -> void:
+	if not awaiting_victory_dialogue or Session.busy:
+		return
+	awaiting_victory_dialogue = false
+	conversation_flag = "bart_victory_dialogue_seen"
+	dialogue.start("bart_victory")
+	player.movement_locked = true
+	hide_interaction()

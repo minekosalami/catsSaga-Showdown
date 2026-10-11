@@ -16,6 +16,13 @@ func _ready() -> void:
 	battle = battle_scene.instantiate()
 	battle.process_mode = Node.PROCESS_MODE_PAUSABLE
 	arena.add_child(battle)
+	if Session.battle_entry_pending:
+		# Initialize behind the white wipe without advancing music or gameplay.
+		battle.music_player.stop()
+		battle.set_process_input(false)
+		battle.player.set_process_input(false)
+		Session._suspend_always(battle)
+		battle.process_mode = Node.PROCESS_MODE_DISABLED
 
 func _layout_arena() -> void:
 	# Transform the container only; its viewport never stretches or resizes.
@@ -26,6 +33,8 @@ func _layout_arena() -> void:
 func record_victory() -> void:
 	if Session.encounter_active:
 		Session.evil_bart_defeated = true
+		if not Session.story_flags.get("bart_victory_dialogue_seen", false):
+			Session.story_flags["bart_victory_dialogue_pending"] = true
 		Session.save_boss_victory()
 
 func return_to_forest() -> void:
@@ -36,3 +45,10 @@ func retry() -> void:
 
 func main_menu() -> void:
 	Session.main_menu()
+
+func finish_entry() -> void:
+	battle.process_mode = Node.PROCESS_MODE_PAUSABLE
+	battle.set_process_input(true)
+	battle.player.set_process_input(true)
+	Session.restore_suspended_modes()
+	battle.music_player.play(0.0)

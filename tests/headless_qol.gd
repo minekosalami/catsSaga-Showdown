@@ -31,7 +31,7 @@ func _initialize() -> void:
 
 func finish(dialogue: Node) -> void:
 	while dialogue.active:
-		await press(KEY_ENTER)
+		await press(KEY_Z)
 
 func write_text(path: String, content: String) -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
@@ -56,7 +56,8 @@ func run() -> void:
 	check(session.saves.read_save().area == "entrance", "area-entry autosave records entrance")
 	check(not session.has_unsaved_progress(), "autosaved entry has no unsaved progress")
 	var player: CharacterBody2D = world.player
-	check(player.sprite_texture == null and player.get_node("VisualPlaceholder").visible, "inaccessible custom sprite is not replaced by another artwork")
+	check(player.sprite_texture.resource_path == "res://assets/player/player.png.png" and not player.get_node("VisualPlaceholder").visible, "original supplied cat sprite replaces placeholder")
+	check(player.sprite.scale.x == player.sprite.scale.y and is_equal_approx(player.sprite.scale.y * player.sprite_texture.get_height(), player.sprite_height), "sprite retains original proportions at configured display height")
 	key(KEY_D, true)
 	await create_timer(0.3).timeout
 	check(is_equal_approx(player.velocity.length(), player.speed), "normal overworld speed preserved")
@@ -85,9 +86,9 @@ func run() -> void:
 	player.velocity = Vector2.ZERO
 	await process_frame
 	await process_frame
-	check(world.nearest_npc.name == "InspectableTree" and world.interaction_indicator.visible, "shared interaction selects inspectable and shows [E]")
-	check(world.interaction_indicator.text == "[E]", "indicator uses requested minimal label")
-	await press(KEY_E)
+	check(world.nearest_npc.name == "InspectableTree" and world.interaction_indicator.visible, "shared interaction selects inspectable and shows [Z]")
+	check(world.interaction_indicator.text == "[Z]", "indicator uses requested minimal label")
+	await press(KEY_Z)
 	check(world.dialogue.active and world.dialogue.speaker_label.text == "> TREE", "inspectable uses terminal dialogue and object name")
 	check(world.dialogue.lines.size() == 2 and world.dialogue.lines[1].text == "Probably.", "Inspector descriptions support multiple lines")
 	check(not world.interaction_indicator.visible, "indicator hides during inspection")
@@ -168,7 +169,7 @@ func run() -> void:
 	check(current_scene.name == "Overworld" and session.story_flags.inspected_tree, "Continue restores saved game instead of resetting flags")
 	check(not await session.transition_to("res://scenes/missing-qol-test.tscn"), "missing destination fails gracefully")
 	check(not session.busy and not session.curtain.visible and not paused, "transition failure restores screen and controls")
-	# One temporary overlapping target with an unmet condition must not steal E.
+	# One temporary overlapping target with an unmet condition must not steal Z.
 	world = current_scene
 	player = world.player
 	var tree: Node = world.map.get_node("Characters/InspectableTree")
@@ -187,8 +188,8 @@ func run() -> void:
 	check(world.nearest_npc == other, "closest eligible object wins one shared interaction target")
 	other.queue_free()
 	await process_frame
-	await press(KEY_E)
-	check(world.dialogue.active and world.dialogue.speaker_label.text == "> TREE", "single E triggers only selected object")
+	await press(KEY_Z)
+	check(world.dialogue.active and world.dialogue.speaker_label.text == "> TREE", "single Z triggers only selected object")
 	await finish(world.dialogue)
 	# Save storage validation and recovery.
 	var data: Dictionary = session.snapshot("entrance", Vector2(300, 450))
@@ -216,7 +217,7 @@ func run() -> void:
 	check(session.saves.read_save().area == "bart_area", "area transitions autosave destination")
 	session.begin_battle(Vector2(1000, 520))
 	check(not session.save_current(), "manual save prevented during transition")
-	await create_timer(0.45).timeout
+	await create_timer(0.95).timeout
 	var host: Node = current_scene
 	var game: Node = host.battle
 	check(host.arena.size == Vector2i(540, 900), "combat viewport remains 540x900")
@@ -255,6 +256,8 @@ func run() -> void:
 	await create_timer(0.45).timeout
 	check(current_scene.player.position == Vector2(1000, 520), "victory return position remains exact")
 	check(session.saves.read_save().area == "bart_area", "victory autosave preserves return area")
+	await finish(current_scene.dialogue)
+	check(session.saves.read_save().story_flags.bart_victory_dialogue_seen, "completed victory dialogue persists")
 	# A separate manager reads actual disk state rather than Session memory.
 	var fresh := preload("res://scripts/systems/save_manager.gd").new()
 	fresh.save_path = session.saves.save_path

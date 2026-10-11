@@ -112,7 +112,47 @@ func run() -> void:
 	current_scene.player.position = Vector2(1000, 520)
 	await create_timer(0.5).timeout
 	await snapshot("rpg-bart-area")
-	await session.begin_battle(current_scene.player.position)
+	var d: Node = current_scene.dialogue
+	d.start("bart_encounter")
+	d.advance()
+	d.advance()
+	await process_frame
+	await snapshot("bart-opening-choice")
+	await mouse_click(d.choice_buttons[0].get_global_rect().get_center())
+	check(d.node_id == "BART_002" and d.line_index == 0, "mouse selects mandatory What? without skipping next line")
+	d.advance()
+	d.advance()
+	await process_frame
+	await mouse_click(d.choice_buttons[1].get_global_rect().get_center())
+	check(not d.active and not session.busy, "mouse selects No without starting battle")
+	d.start("bart_encounter")
+	d.advance()
+	d.advance()
+	d._choose(0)
+	d.advance()
+	d.advance()
+	d._choose(0)
+	d.advance()
+	await snapshot("bart-refraction")
+	d.advance()
+	d.advance()
+	d.advance()
+	d.advance()
+	d.advance()
+	await process_frame
+	await snapshot("bart-rainbow-choices")
+	check(d.text_label.get_content_height() <= d.text_label.size.y, "long dialogue fits body above choices")
+	await mouse_click(d.choice_buttons[1].get_global_rect().get_center())
+	check(d.node_id == "BART_004B", "mouse selects rainbow explanation choice")
+	d.advance()
+	await snapshot("bart-saturate-parentheses")
+	d._finish("declined")
+	session.begin_battle(current_scene.player.position)
+	await create_timer(0.25).timeout
+	await snapshot("bart-white-wipe")
+	await scene_changed
+	await snapshot("bart-white-reveal")
+	await create_timer(0.4).timeout
 	var host: Node = current_scene
 	var game: Node = host.battle
 	game.player.invincible = true
@@ -161,7 +201,9 @@ func run() -> void:
 	await mouse_click(root_point)
 	await create_timer(0.5).timeout
 	check(current_scene.name == "Overworld", "mouse return-to-forest reaches overworld")
+	await create_timer(1.8).timeout
 	await snapshot("rpg-returned-forest")
+	check(current_scene.dialogue.active and current_scene.dialogue.lines[0].text.begins_with("You were more powerful"), "victory return shows one-time dialogue")
 	current_scene.queue_free()
 	await create_timer(0.3).timeout
 	print("GRAPHICAL VALIDATION: ", failures, " failures")

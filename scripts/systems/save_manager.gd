@@ -26,6 +26,9 @@ func validate(value: Variant) -> Dictionary:
 	for flag in flags:
 		if not flag is String or not flags[flag] is bool:
 			return {}
+	flags = flags.duplicate()
+	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
+		flags["bart_victory_dialogue_seen"] = true
 	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate()}
 
 func read_file(path: String) -> Dictionary:

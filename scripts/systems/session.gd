@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal transition_finished
+
 # Progression remains in one Session; save storage is a reusable helper.
 var area_id: String = "entrance"
 var entry_marker: String = "Start"
@@ -8,6 +10,9 @@ var restore_position: bool = false
 var evil_bart_defeated: bool = false
 var encounter_active: bool = false
 var busy: bool = false
+var battle_entry_pending: bool = false
+@export var battle_wipe_duration: float = 0.5
+@export var battle_reveal_duration: float = 0.3
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 var story_flags: Dictionary = {}
 var saves := preload("res://scripts/systems/save_manager.gd").new()
@@ -73,7 +78,7 @@ func begin_battle(position_before_battle: Vector2) -> void:
 		return
 	return_position = position_before_battle
 	encounter_active = true
-	await transition_to("res://scenes/combat_host.tscn")
+	await transition_to("res://scenes/combat_host.tscn", true)
 
 func return_to_forest() -> void:
 	if busy or not evil_bart_defeated:
@@ -89,16 +94,22 @@ func main_menu() -> void:
 	encounter_active = false
 	await transition_to("res://scenes/main_menu.tscn")
 
-func transition_to(scene_path: String) -> bool:
+func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 	if busy:
 		return false
 	busy = true
 	close_pause()
 	get_tree().paused = false
+	battle_entry_pending = white_wipe
+	curtain.color = Color.WHITE if white_wipe else Color.BLACK
 	curtain.show()
-	curtain.modulate.a = 0.0
+	curtain.modulate.a = 1.0 if white_wipe else 0.0
+	curtain.position.y = -get_viewport().get_visible_rect().size.y if white_wipe else 0.0
 	var fade := create_tween()
-	fade.tween_property(curtain, "modulate:a", 1.0, transition_duration * 0.5)
+	if white_wipe:
+		fade.tween_property(curtain, "position:y", 0.0, battle_wipe_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	else:
+		fade.tween_property(curtain, "modulate:a", 1.0, transition_duration * 0.5)
 	await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
@@ -111,10 +122,16 @@ func transition_to(scene_path: String) -> bool:
 	else:
 		await get_tree().scene_changed
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 0.0, transition_duration * 0.5)
+	fade.tween_property(curtain, "modulate:a", 0.0, battle_reveal_duration if white_wipe else transition_duration * 0.5)
 	await fade.finished
 	curtain.hide()
+	curtain.position.y = 0.0
+	curtain.color = Color.BLACK
+	if white_wipe and error == OK:
+		get_tree().current_scene.finish_entry()
+	battle_entry_pending = false
 	busy = false
+	transition_finished.emit.call_deferred()
 	return error == OK
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
@@ -161,6 +178,9 @@ func load_game() -> bool:
 	encounter_active = false
 	return await transition_to("res://scenes/world/overworld.tscn")
 
+func world_menu_open() -> bool:
+	return (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
+
 func can_pause() -> bool:
 	var scene := get_tree().current_scene
 	if busy or scene == null or get_tree().paused:
@@ -193,11 +213,14 @@ func _suspend_always(node: Node) -> void:
 func close_pause() -> void:
 	if pause_menu != null:
 		pause_menu.hide_menu()
+	restore_suspended_modes()
+	get_tree().paused = false
+
+func restore_suspended_modes() -> void:
 	for node in suspended_modes:
 		if is_instance_valid(node):
 			node.process_mode = suspended_modes[node]
 	suspended_modes.clear()
-	get_tree().paused = false
 
 func open_options() -> void:
 	if not is_instance_valid(options_dialog):
