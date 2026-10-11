@@ -23,3 +23,10 @@ Session="*res://scripts/systems/session.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+
+[input]
+
+ui_accept={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":90)]
+}

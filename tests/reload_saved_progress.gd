@@ -28,12 +28,12 @@ func run() -> void:
 	check(current_scene.player.position == Vector2(1000, 520), "saved position persists across processes")
 	await process_frame
 	var event := InputEventKey.new()
-	event.keycode = KEY_E
+	event.keycode = KEY_Z
 	event.pressed = true
 	Input.parse_input_event(event)
 	await process_frame
 	event = InputEventKey.new()
-	event.keycode = KEY_E
+	event.keycode = KEY_Z
 	event.pressed = false
 	Input.parse_input_event(event)
 	check(current_scene.dialogue.active and not current_scene.pending_battle, "saved victory prevents restarting Bart encounter")

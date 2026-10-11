@@ -1,14 +1,24 @@
 {
   "forest_npc": [
-    {"speaker": "NPC [TEMP]", "text": "The path continues east."},
-    {"speaker": "NPC [TEMP]", "text": "I am waiting here. Very professionally."}
-  ],
-  "bart_encounter": [
-    {"speaker": "Evil Bart", "text": "You found the clearing."},
-    {"speaker": "Evil Bart", "text": "Ready? Showdown()."}
+    {
+      "speaker": "NPC [TEMP]",
+      "text": "The path continues east."
+    },
+    {
+      "speaker": "NPC [TEMP]",
+      "text": "I am waiting here. Very professionally."
+    }
   ],
   "bart_defeated": [
-    {"speaker": "Evil Bart", "text": "Execution complete. You won."},
-    {"speaker": "Evil Bart", "text": "For now, the forest is quiet."}
+    {
+      "speaker": "EVIL BART",
+      "text": "See you soon... Maybe one day I'll be able to beat you."
+    }
+  ],
+  "bart_victory": [
+    {
+      "speaker": "EVIL BART",
+      "text": "You were more powerful than I thought... You'll do great out there!"
+    }
   ]
 }

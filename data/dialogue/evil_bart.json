@@ -1,0 +1,74 @@
+{
+  "start": "BART_001",
+  "nodes": {
+    "BART_001": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "Hello... I didn't see you there! Wait... are you who I think you are..."
+      ],
+      "choices": [
+        {
+          "text": "What?",
+          "next": "BART_002"
+        }
+      ]
+    },
+    "BART_002": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "I heard you would be coming. Do you have a minute to listen?"
+      ],
+      "choices": [
+        {
+          "text": "Yes.",
+          "next": "BART_003"
+        },
+        {
+          "text": "No.",
+          "end": "declined"
+        }
+      ]
+    },
+    "BART_003": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "Are you familar with The Refraction? Well, probably not.",
+        "The Refraction was an event that gave various cats the ability to SATURATE.",
+        "Nobody is sure why it happened, and I've heard that it causes memory loss to the recipient. You can SATURATE, correct?"
+      ],
+      "choices": [
+        {
+          "text": "Uhh... Maybe?",
+          "next": "BART_004A"
+        },
+        {
+          "text": "What is Saturate?",
+          "next": "BART_004B"
+        }
+      ]
+    },
+    "BART_004A": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "Okay, great. But I just need to do one thing..."
+      ],
+      "next": "BART_005"
+    },
+    "BART_004B": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "SATURATE() is a strength not many have...",
+        "It lets you shoot a Rainbow Death Beam once per battle by pressing X!",
+        "So one more thing..."
+      ],
+      "next": "BART_005"
+    },
+    "BART_005": {
+      "speaker": "EVIL BART",
+      "lines": [
+        "I need to test your power. Get ready to SATURATE()"
+      ],
+      "end": "battle"
+    }
+  }
+}

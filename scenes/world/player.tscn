@@ -1,12 +1,14 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 [ext_resource type="Script" path="res://scripts/world/player.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/placeholder.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/player/player.png.png" id="player_texture"]
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(28, 28)
 [node name="Explorer" type="CharacterBody2D" groups=["overworld_player"]]
 collision_layer = 2
 collision_mask = 1
 script = ExtResource("1")
+sprite_texture = ExtResource("player_texture")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("body")
 [node name="VisualPlaceholder" type="Node2D" parent="."]

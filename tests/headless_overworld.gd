@@ -29,10 +29,8 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func finish_dialogue(dialogue: Node) -> void:
-	for line in range(dialogue.lines.size()):
-		if not dialogue.is_revealed():
-			await press(KEY_ENTER)
-		await press(KEY_ENTER)
+	while dialogue.active:
+		await press(KEY_Z)
 
 func run() -> void:
 	var save_manager = root.get_node("Session").saves
@@ -43,7 +41,7 @@ func run() -> void:
 	root.size = Vector2i(1280, 720)
 	session = root.get_node("Session")
 	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 1280 and ProjectSettings.get_setting("display/window/size/viewport_height") == 720, "project base resolution is 1280x720")
-	check(ProjectSettings.get_setting("display/window/stretch/mode") == "canvas_items" and ProjectSettings.get_setting("display/window/stretch/aspect") == "keep", "window stretching preserves aspect ratio")
+	check(ProjectSettings.get_setting("display/window/stretch/mode") == "canvas_items" and ProjectSettings.get_setting("display/window/stretch/aspect", "keep") == "keep", "window stretching preserves aspect ratio")
 	for filename in ["forest_entrance", "deep_forest", "bart_area", "player", "dialogue", "overworld"]:
 		var packed := load("res://scenes/world/" + filename + ".tscn") as PackedScene
 		check(packed != null and packed.can_instantiate(), filename + " scene loads")
@@ -93,8 +91,8 @@ func run() -> void:
 	world.player.position = npc.position + Vector2(0, 60)
 	await process_frame
 	await process_frame
-	await press(KEY_E)
-	check(world.dialogue.active and world.player.movement_locked, "E starts nearby NPC dialogue and locks movement")
+	await press(KEY_Z)
+	check(world.dialogue.active and world.player.movement_locked, "Z starts nearby NPC dialogue and locks movement")
 	check(world.dialogue.speaker_label.text.contains("NPC"), "dialogue shows speaker")
 	check(world.dialogue.text_label.visible_characters < world.dialogue.text_label.get_total_character_count(), "dialogue begins with typewriter reveal")
 	var conversation_position: Vector2 = world.player.position
@@ -102,10 +100,10 @@ func run() -> void:
 	await create_timer(0.1).timeout
 	key(KEY_D, false)
 	check(world.player.position == conversation_position, "movement stays disabled during conversation")
-	await press(KEY_E)
-	check(world.dialogue.is_revealed(), "E instantly reveals current dialogue line")
-	await press(KEY_ENTER)
-	check(world.dialogue.line_index == 1 and world.dialogue.active, "Enter advances to next line")
+	await press(KEY_Z)
+	check(world.dialogue.is_revealed(), "Z instantly reveals current dialogue line")
+	await press(KEY_Z)
+	check(world.dialogue.line_index == 1 and world.dialogue.active, "Z advances to next line")
 	await finish_dialogue(world.dialogue)
 	check(not world.dialogue.active and not world.player.movement_locked, "conversation finishes and restores movement")
 	world.player.position = Vector2(120, 540)
@@ -123,11 +121,11 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	var before_battle: Vector2 = world.player.position
-	await press(KEY_E)
-	check(world.dialogue.active and world.pending_battle, "Bart interaction starts dialogue before battle")
+	await press(KEY_Z)
+	check(world.dialogue.active and not world.pending_battle, "Bart interaction starts dialogue before battle")
 	check(current_scene.name == "Overworld", "battle does not start before dialogue finishes")
 	await finish_dialogue(world.dialogue)
-	await create_timer(0.45).timeout
+	await create_timer(0.95).timeout
 	var host: Node = current_scene
 	check(host.name == "CombatHost" and session.encounter_active, "completed Bart conversation loads combat host")
 	check(host.arena.size == Vector2i(540, 900) and host.arena_container.scale == Vector2(0.8, 0.8), "battle retains portrait coordinates and uniform scale")
@@ -157,9 +155,11 @@ func run() -> void:
 	check(not session.encounter_active and session.evil_bart_defeated, "defeat record persists after leaving combat")
 	check(get_nodes_in_group("combat_music").is_empty(), "combat soundtrack is removed from quiet forest")
 	await process_frame
-	await press(KEY_E)
+	check(world.dialogue.active and world.dialogue.lines[0].text.begins_with("You were more powerful"), "return shows one-time victory dialogue")
+	await finish_dialogue(world.dialogue)
+	await press(KEY_Z)
 	check(world.dialogue.active and not world.pending_battle, "defeated Bart uses alternate dialogue without re-triggering battle")
-	check(world.dialogue.lines[0]["text"].contains("You won"), "post-victory conversation is different")
+	check(world.dialogue.lines[0]["text"] == "See you soon... Maybe one day I'll be able to beat you.", "post-victory conversation is different")
 	await finish_dialogue(world.dialogue)
 	await create_timer(0.4).timeout
 	check(current_scene.name == "Overworld", "post-victory dialogue stays in forest")
