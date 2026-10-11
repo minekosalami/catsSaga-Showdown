@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/enemybullet.gd" id="1_fw86s"]
+[ext_resource type="Script" path="res://scripts/boss2/projectile.gd" id="1_fw86s"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_sfeay"]
 radius = 6.5

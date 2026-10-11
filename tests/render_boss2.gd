@@ -41,7 +41,7 @@ func run() -> void:
 	battle.player.invincible = true
 	battle.set_physics_process(false)
 	await snapshot("survival-introduction")
-	for cue in [[18.0,"opening"],[38.4,"laser-warning"],[43.0,"laser-assault"],[64.0,"intermission"],[70.4,"convergence-warning"],[85.0,"convergence-stopped"],[90.0,"finale"]]:
+	for cue in [[18.0,"opening"],[38.4,"laser-warning"],[43.0,"laser-assault"],[64.0,"ricochet"],[70.4,"cross-warning"],[85.0,"cross-max-speed"],[90.0,"finale"]]:
 		battle.timeline.clear_hostiles()
 		await physics_frame
 		battle.music_player.seek(cue[0])

@@ -11,17 +11,20 @@ var top_margin: MarginContainer
 var last_health := -1
 var health_tween: Tween
 
+var stamina_bar: ProgressBar
+var stamina_caption: Label
+var arena_overlay: Control
 var health_label: Label
 var timer_label: Label
 var phase_label: Label
 var dialogue_label: Label
-var saturate_label: Label
 var end_screen: Control
 var result_label: Label
 var return_button: Button
 var battle: Node
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	battle = get_parent()
 	var root := Control.new()
 	add_child(root)
@@ -45,10 +48,10 @@ func _ready() -> void:
 	stack.add_child(row)
 	health_label = Label.new()
 	health_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	health_label.add_theme_font_size_override("font_size",18)
+	health_label.add_theme_font_size_override("font_size",16)
 	row.add_child(health_label)
 	timer_label = Label.new()
-	timer_label.add_theme_font_size_override("font_size",22)
+	timer_label.add_theme_font_size_override("font_size",18)
 	row.add_child(timer_label)
 	var phase_row := HBoxContainer.new()
 	stack.add_child(phase_row)
@@ -59,42 +62,49 @@ func _ready() -> void:
 	current_phase_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	phase_row.add_child(current_phase_label)
 	var caption := Label.new()
-	caption.text = "SONG / SURVIVAL"
+	caption.text = "SURVIVAL()"
 	caption.add_theme_font_size_override("font_size",10)
 	caption.add_theme_color_override("font_color",Color("#999890"))
 	phase_row.add_child(caption)
 	song_progress = ProgressBar.new()
 	song_progress.name = "SongProgress"
-	song_progress.custom_minimum_size.y = 6
+	song_progress.custom_minimum_size.y = 3
 	song_progress.max_value = 140.80
 	song_progress.step = 0.001
 	HUDStyle.progress(song_progress)
 	stack.add_child(song_progress)
-	_ignore_pointer(root)
+	var sprint_row := HBoxContainer.new()
+	stack.add_child(sprint_row)
+	stamina_caption = Label.new()
+	stamina_caption.text = "SPRINT() / X"
+	stamina_caption.add_theme_font_size_override("font_size",10)
+	stamina_caption.custom_minimum_size.x = 120
+	sprint_row.add_child(stamina_caption)
+	stamina_bar = ProgressBar.new()
+	stamina_bar.name = "SprintStamina"
+	stamina_bar.max_value = 1.0
+	stamina_bar.step = 0.001
+	stamina_bar.value = 1.0
+	stamina_bar.custom_minimum_size.y = 6
+	stamina_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stamina_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	HUDStyle.progress(stamina_bar,Color.WHITE)
+	sprint_row.add_child(stamina_bar)
+	dialogue_label = Label.new()
+	dialogue_label.custom_minimum_size = Vector2(460,0)
+	stack.add_child(dialogue_label)
+	dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dialogue_label.add_theme_font_size_override("font_size",11)
+	dialogue_label.add_theme_color_override("font_color",Color("#CBE7EB"))
 	phase_transition = Control.new()
 	phase_transition.set_script(Transition)
 	root.add_child(phase_transition)
 	phase_label = phase_transition.label
-	dialogue_label = Label.new()
-	root.add_child(dialogue_label)
-	dialogue_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	dialogue_label.offset_left = 42
-	dialogue_label.offset_right = -42
-	dialogue_label.offset_top = 275
-	dialogue_label.offset_bottom = 365
-	dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	dialogue_label.add_theme_font_size_override("font_size",20)
-	dialogue_label.add_theme_color_override("font_outline_color",Color.BLACK)
-	dialogue_label.add_theme_constant_override("outline_size",5)
-	saturate_label = Label.new()
-	root.add_child(saturate_label)
-	saturate_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	saturate_label.offset_top = -42
-	saturate_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	saturate_label.add_theme_font_size_override("font_size",18)
-	saturate_label.add_theme_color_override("font_outline_color",Color.BLACK)
-	saturate_label.add_theme_constant_override("outline_size",5)
+	arena_overlay = Control.new()
+	arena_overlay.set_script(preload("res://scripts/boss2/arena_overlay.gd"))
+	root.add_child(arena_overlay)
+	arena_overlay.battle = battle
+	_ignore_pointer(root)
 	end_screen = ColorRect.new()
 	root.add_child(end_screen)
 	end_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -142,21 +152,26 @@ func update(clock: float) -> void:
 	song_progress.max_value = battle.end_time
 	song_progress.value = clampf(clock,0,battle.end_time)
 	phase_transition.update_clock(clock)
-	dialogue_label.visible = clock < 12.80 or (clock >= 64.00 and clock < 70.00)
-	dialogue_label.text = battle.introductory_dialogue if clock < 12.80 else "You're stronger than you look. But how long can you survive?"
-	saturate_label.text = "SURVIVAL() / OFFENSE DISABLED"
+	# Persistent phase caption provides the cue without blocking the arena.
+	phase_label.hide()
+	arena_overlay.update_clock(clock)
+	stamina_bar.value = battle.player.stamina
+	stamina_bar.modulate = Color("#F48BB6") if battle.player.stamina < 0.2 else Color.WHITE
+	stamina_caption.text = "SPRINT() / RELEASE X" if battle.player.exhausted_until_release else ("SPRINT() / EMPTY" if battle.player.stamina <= 0.001 else "SPRINT() / X")
+	dialogue_label.visible = clock < 12.80 or (clock >= 64.00 and clock < 70.00) or (clock >= 70.40 and clock < 71.20)
+	dialogue_label.text = battle.introductory_dialogue if clock < 12.80 else ("NOW DIE!" if clock >= 70.40 else "You're stronger than you look. But how long can you survive?")
 
 func show_phase(title: String) -> void:
 	current_phase_label.text = title
 	phase_transition.flash_strength = phase_flash_strength
 	phase_transition.border_strength = phase_border_strength
-	var tint := Color("#B6EAF2") if title in ["Intermission()","Finale()"] else HUDStyle.BLUE
-	if title == "Convergence()":
+	var tint := Color("#B6EAF2") if title in ["RICOCHET()","Finale()"] else HUDStyle.BLUE
+	if title == "CrossLaser()":
 		tint = Color("#FF4766")
-	phase_transition.present("NOW DIE!" if title == "Convergence()" else title,tint,battle.timeline.clock,title == "Convergence()")
+	phase_transition.present("NOW DIE!" if title == "CrossLaser()" else title,tint,battle.timeline.clock,title == "CrossLaser()")
 	if title != "Introduction()":
 		battle.shake_time = maxf(battle.shake_time,0.16)
-		battle.shake_strength = maxf(battle.shake_strength,1.5)
+		battle.shake_strength = maxf(battle.shake_strength,4.0 if title == "CrossLaser()" else 1.5)
 
 func _ignore_pointer(node: Node) -> void:
 	if node is Control:
@@ -168,7 +183,7 @@ func show_result(victory: bool) -> void:
 	phase_transition.hide()
 	create_tween().tween_property(top_margin,"modulate:a",0.0,0.2)
 	dialogue_label.hide()
-	saturate_label.hide()
+	arena_overlay.hide()
 	result_label.text = "VICTORY()" if victory else "GAME OVER()"
 	return_button.visible = victory
 	end_screen.show()

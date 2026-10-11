@@ -152,11 +152,11 @@ func run() -> void:
 	battle.elapsed_time = 64.0
 	timeline.advance(64.0)
 	await physics_frame
-	check(get_nodes_in_group("boss2_projectiles").is_empty() and not timeline.lasers[0].active,"intermission removes hostile projectiles and lasers")
+	check(get_nodes_in_group("boss2_ricochets").size() == 7 and not timeline.lasers[0].active,"ricochet replaces former intermission and removes blue lasers")
 	battle.ui.update(64.0)
-	check(battle.ui.dialogue_label.text == "You're stronger than you look. But how long can you survive?" and battle.music_player.playing,"exact intermission line is presentation without music pause")
+	check(battle.ui.dialogue_label.text == "You're stronger than you look. But how long can you survive?" and battle.music_player.playing,"exact ricochet line is presentation without music pause")
 	battle.ui.update(70.0)
-	check(not battle.ui.dialogue_label.visible,"automatic intermission line disappears before 70.40")
+	check(not battle.ui.dialogue_label.visible,"automatic ricochet line disappears before 70.40")
 	battle.set_physics_process(false)
 	timeline.advance(38.40)
 	check(timeline.lasers[0].warning and not timeline.lasers[0].active,"laser assault begins with warning-only window")
@@ -166,11 +166,11 @@ func run() -> void:
 	check(not timeline.lasers[0].active and timeline.boss.position.x == 270,"convergence starts with warning and centered stationary boss")
 	timeline.advance(83.0)
 	var stopped_x: float = timeline.lasers[0].position.x
-	var actual_gap: float = timeline.lasers[1].position.x - stopped_x - timeline.laser_width
-	check(absf(actual_gap-timeline.resolved_gap) < 0.1 and timeline.boss.position.x == 270,"converged solid beam edges leave two player sprite widths")
+	check(timeline.cross.active and timeline.cross.position == timeline.cross.pivot_center and timeline.boss.position.x == 270,"red cross has fixed pivot and stationary boss")
 	timeline.advance(89.59)
-	check(is_equal_approx(timeline.lasers[0].position.x,stopped_x),"laser movement stops at predefined limits")
-	check(timeline.lasers[0].beam_top > timeline.boss.position.y + timeline.boss.texture.get_height()*timeline.boss.scale.y/2,"vertical beams never intersect protected boss sprite")
+	check(not timeline.lasers[0].active and timeline.cross.angular_speed < 0.001,"blue lasers stay off while red cross eases to rest")
+	check(absf(timeline.boss.position.x-timeline.lasers[0].position.x) > timeline.boss.texture.get_width()*timeline.boss.scale.x/2+timeline.laser_width/2,"vertical blue beams remain clear of the protected boss sprite")
+	timeline.cross.sample(-1)
 	battle.player.invincible = false
 	battle.player.invulnerability_timer = 0
 	battle.player.position = Vector2(stopped_x+13,700-17)
@@ -182,7 +182,7 @@ func run() -> void:
 	await create_timer(0.12).timeout
 	check(battle.player.health == 2,"active laser contact damages through actual player collision")
 	await create_timer(0.12).timeout
-	check(battle.player.health == 2,"continuous laser contact respects existing one-second i-frames")
+	check(battle.player.health == 2,"continuous laser contact respects Boss2 1.5-second i-frames")
 	timeline.advance(89.60)
 	await physics_frame
 	check(not timeline.lasers[0].active and timeline.phase == 5 and not battle.victory_started,"finale deactivates lasers without ending encounter")

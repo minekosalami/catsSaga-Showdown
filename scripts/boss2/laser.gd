@@ -37,6 +37,8 @@ func present(x: float, dangerous: bool, show_warning: bool, span: Rect2, clock: 
 		activation_clock = clock
 	if active and not dangerous:
 		deactivation_clock = clock
+	collision_layer = 4 if dangerous else 0
+	collision_mask = 2 if dangerous else 0
 	active = dangerous
 	warning = show_warning
 	warning_span = span
@@ -58,19 +60,20 @@ func _physics_process(_delta: float) -> void:
 	query.collide_with_bodies = false
 	for hit in get_world_2d().direct_space_state.intersect_shape(query, 4):
 		if hit.collider.is_in_group("player"):
+			hit.collider.notify_laser_contact(hit.collider.hit_center())
 			hit.collider.take_damage(1)
 
 func _draw() -> void:
 	if warning:
 		var local := Rect2(warning_span.position-position,warning_span.size)
 		var breathe := 0.16+0.03*sin(energy_time*3.0)
-		draw_rect(local,Color(1,0.12,0.22,breathe))
-		draw_rect(local,Color(1,0.32,0.38,0.8),false,1.5)
+		draw_rect(local,Color(0.1,0.65,1,breathe))
+		draw_rect(local,Color(0.4,0.85,1,0.8),false,1.5)
 		for y in range(int(beam_top),int(beam_bottom),48):
-			draw_line(Vector2(local.position.x,y),Vector2(local.end.x,y+16),Color(1,0.25,0.32,0.32),1,true)
-		# A red dashed locator contrasts with the later continuous blue core.
+			draw_line(Vector2(local.position.x,y),Vector2(local.end.x,y+16),Color(0.1,0.75,1,0.32),1,true)
+		# A narrow dashed locator matches the actual beam footprint.
 		for y in range(int(beam_top),int(beam_bottom),32):
-			draw_line(Vector2(0,y),Vector2(0,y+13),Color(1,0.55,0.58,0.85),2,true)
+			draw_line(Vector2(0,y),Vector2(0,y+13),Color(0.7,0.95,1,0.85),2,true)
 		var charge := smoothstep(0,maxf(0.1,charge_duration),energy_time-warning_clock)
 		draw_line(Vector2(0,beam_top),Vector2(0,beam_bottom),Color(0.5,0.85,1,charge*0.4),3,true)
 	var tail := 1-smoothstep(0.0,0.18,energy_time-deactivation_clock)

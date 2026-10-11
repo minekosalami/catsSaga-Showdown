@@ -24,7 +24,7 @@ func run() -> void:
 			last_phase = battle.timeline.phase
 			seen.append(last_phase)
 			print("FULL SONG: phase ",last_phase," at ",battle.elapsed_time)
-		if battle.timeline.phase == 3 and (get_nodes_in_group("boss2_projectiles").size() > 0 or battle.timeline.lasers[0].active):
+		if (battle.timeline.phase == 3 and (get_nodes_in_group("boss2_ricochets").size() > 30 or battle.timeline.lasers[0].active)) or (battle.timeline.phase == 4 and not get_nodes_in_group("boss2_projectiles").is_empty()):
 			failures += 1
 		if battle.game_over or peak > 240:
 			failures += 1
@@ -35,7 +35,7 @@ func run() -> void:
 	print("PASS: survival victory at 140.80" if battle.victory_started and battle.elapsed_time >= 140.80 else "FAIL: ending")
 	if not battle.victory_started or battle.elapsed_time < 140.80:
 		failures += 1
-	print("PASS: intermission and projectile cap" if failures == 0 else "FAIL: safety/cap")
+	print("PASS: ricochet/cross separation and projectile cap" if failures == 0 else "FAIL: safety/cap")
 	print("FULL SONG PEAK PROJECTILES: ",peak)
 	await create_timer(0.85).timeout
 	await session.main_menu()
