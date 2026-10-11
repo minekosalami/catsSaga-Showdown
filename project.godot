@@ -1,23 +1,25 @@
 ; Engine configuration file.
-; Widescreen presentation; combat_host keeps the original 540 x 900 arena.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
 
 config/name="catsSaga()"
 run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.7")
+
+[autoload]
+
+Session="*res://scripts/systems/session.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-
-; Gameplay reads keys directly in scenes/player.gd; no custom InputMap actions
-; are required. Keep the engine's built-in UI actions for menu navigation.
-
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
-
-[autoload]
-
-Session="*res://scripts/systems/session.gd"
