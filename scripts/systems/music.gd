@@ -24,7 +24,7 @@ func theme_for(path: String) -> String:
 	if path == "res://scenes/main_menu.tscn":
 		return "menu"
 	if path == "res://scenes/world/overworld.tscn":
-		return "overworld"
+		return "" if Session.area_id == "underground_cave" else "overworld"
 	return ""
 
 func prepare_transition(path: String, duration: float) -> void:

@@ -110,13 +110,13 @@ func new_game() -> void:
 	if await transition_to("res://scenes/world/overworld.tscn"):
 		save_current()
 
-func travel(destination: String, marker: String) -> void:
+func travel(destination: String, marker: String, cave_motion: bool = false) -> void:
 	if busy:
 		return
 	area_id = destination
 	entry_marker = marker
 	restore_position = false
-	if await transition_to("res://scenes/world/overworld.tscn", false, true):
+	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
 		save_current()
 
 func begin_battle(position_before_battle: Vector2) -> void:
@@ -188,7 +188,7 @@ func main_menu() -> void:
 	encounter_active = false
 	await transition_to("res://scenes/main_menu.tscn")
 
-func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false) -> bool:
+func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false) -> bool:
 	if busy:
 		return false
 	busy = true
@@ -202,6 +202,19 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	curtain.color = Color.BLACK
 	curtain.position = Vector2.ZERO
 	var fade: Tween
+	if cave_motion:
+		var world := get_tree().current_scene
+		world.player.movement_locked = true
+		world.player.velocity = Vector2.ZERO
+		var sprite: Sprite2D = world.player.sprite
+		var motion := create_tween().set_parallel(true)
+		var descending := area_id == "underground_cave"
+		if world.nearest_npc != null:
+			motion.tween_property(world.player,"position",world.nearest_npc.position,.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		motion.tween_property(sprite,"position:y",32.0 if descending else -44.0,.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		motion.tween_property(sprite,"scale",sprite.scale*.55,.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		motion.tween_property(sprite,"modulate:a",0.0,.28)
+		await motion.finished
 	if white_wipe:
 		battle_walls.duration = battle_wipe_duration
 		await battle_walls.close_walls()

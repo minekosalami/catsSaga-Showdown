@@ -9,12 +9,12 @@ func _init() -> void:
 	reset()
 
 func grid_size(area: String) -> Vector2i:
-	var size: Vector2i = Layout.REGIONS[area].size
+	var size: Vector2i = Layout.region(area).size
 	return Vector2i(ceili(float(size.x)/CELL_TILES),ceili(float(size.y)/CELL_TILES))
 
 func reset() -> void:
 	regions.clear()
-	for area in Layout.REGIONS:
+	for area in Layout.all_regions():
 		var grid := grid_size(area)
 		var bits := PackedByteArray()
 		bits.resize(ceili(grid.x*grid.y/8.0))
@@ -29,7 +29,7 @@ func visited(area: String, cell: Vector2i) -> bool:
 
 func reveal(area: String, position: Vector2) -> Array[Rect2i]:
 	var changed: Array[Rect2i] = []
-	if not Layout.REGIONS.has(area): return changed
+	if not Layout.all_regions().has(area): return changed
 	var point := position/Layout.TILE_PIXELS
 	var grid := grid_size(area)
 	var center := Vector2i(point/CELL_TILES)
@@ -42,8 +42,8 @@ func reveal(area: String, position: Vector2) -> Array[Rect2i]:
 			var index := y*grid.x+x
 			if (bits[index/8] & (1 << (index%8))) != 0: continue
 			bits[index/8] |= 1 << (index%8)
-			var offset: Vector2i = Layout.REGIONS[area].offset
-			var size: Vector2i = Layout.REGIONS[area].size
+			var offset: Vector2i = Layout.region(area).offset
+			var size: Vector2i = Layout.region(area).size
 			var extent := Vector2i(mini(CELL_TILES,size.x-x*CELL_TILES),mini(CELL_TILES,size.y-y*CELL_TILES))
 			changed.append(Rect2i(offset+cell*CELL_TILES,extent))
 	regions[area] = bits
@@ -51,7 +51,7 @@ func reveal(area: String, position: Vector2) -> Array[Rect2i]:
 
 func snapshot() -> Dictionary:
 	var result: Dictionary = {}
-	for area in Layout.REGIONS: result[area] = Marshalls.raw_to_base64(regions[area])
+	for area in Layout.all_regions(): result[area] = Marshalls.raw_to_base64(regions[area])
 	return result
 
 func restore(value: Variant) -> bool:
@@ -60,7 +60,7 @@ func restore(value: Variant) -> bool:
 	var valid_encoding := RegEx.new()
 	valid_encoding.compile("^[A-Za-z0-9+/]*={0,2}$")
 	for area in value:
-		if not Layout.REGIONS.has(area) or not value[area] is String: return false
+		if not Layout.all_regions().has(area) or not value[area] is String: return false
 		var encoded: String = value[area]
 		var grid := grid_size(area)
 		var bytes := ceili(grid.x*grid.y/8.0)
@@ -72,13 +72,15 @@ func restore(value: Variant) -> bool:
 	for area in candidate: regions[area] = candidate[area]
 	return true
 
-func visibility_image() -> Image:
-	var result := Image.create(Layout.SIZE.x,Layout.SIZE.y,false,Image.FORMAT_R8)
+func visibility_image(area_id: String = "entrance") -> Image:
+	var dimensions := Layout.atlas_size(area_id)
+	var result := Image.create(dimensions.x,dimensions.y,false,Image.FORMAT_R8)
 	result.fill(Color.BLACK)
-	for area in Layout.REGIONS:
+	for area in Layout.all_regions():
+		if not Layout.same_map(area_id,area): continue
 		var grid := grid_size(area)
-		var offset: Vector2i = Layout.REGIONS[area].offset
-		var size: Vector2i = Layout.REGIONS[area].size
+		var offset: Vector2i = Layout.region(area).offset
+		var size: Vector2i = Layout.region(area).size
 		for y in grid.y:
 			for x in grid.x:
 				if not visited(area,Vector2i(x,y)): continue

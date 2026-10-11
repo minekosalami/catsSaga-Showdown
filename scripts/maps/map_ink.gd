@@ -13,8 +13,8 @@ func _draw() -> void:
 		draw_arc(size/2,size.x/2-2,0,TAU,96,Color(0.90,0.92,0.87),2.0,true)
 		draw_string(FONT,Vector2(size.x/2-4,18),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)
 	else:
-		for area in Layout.REGIONS:
-			var region: Dictionary = Layout.REGIONS[area]
+		for area in Layout.visible_regions(canvas.map_area):
+			var region: Dictionary = Layout.region(area)
 			var label_position: Vector2 = canvas.screen_point(Vector2(region.offset)+Vector2(region.size)/2)
 			var text: String = region.name
 			var width := FONT.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x

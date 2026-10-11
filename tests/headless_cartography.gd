@@ -62,7 +62,7 @@ func run() -> void:
 	check(not legacy.is_empty() and legacy.story_flags.unrelated_flag and legacy.exploration == Exploration.new().snapshot(),"old V1 saves gain empty fog without losing flags")
 	check(session.saves.validate({"version":1,"area":"entrance","position":[280,450],"exploration":{"entrance":"bad"}}).is_empty(),"malformed saved fog rejected safely")
 	var encoded_size := 0
-	for value in fresh.snapshot().values(): encoded_size += value.length()
+	for area in Layout.REGIONS: encoded_size += fresh.snapshot()[area].length()
 	check(encoded_size <= 1700,"four-region fog bitsets occupy under 1700 base64 characters")
 	check(Layout.world_point("entrance",Vector2(160,320)) == Vector2(10,20),"Entrance uses uniform 16px-to-map transform")
 	check(Layout.world_point("deep_forest",Vector2(160,320)) == Vector2(210,20),"Deep Forest occupies northeast")

@@ -2,6 +2,7 @@ extends Control
 
 const Layout = preload("res://scripts/maps/world_layout.gd")
 const FONT = preload("res://assets/ui/fonts/DejaVuSansMono.ttf")
+var map_area := "entrance"
 var center_world := Vector2.ZERO
 var player_world := Vector2.ZERO
 var facing := Vector2.LEFT
@@ -11,11 +12,13 @@ var shader: ShaderMaterial
 var last_state: Array = []
 var boss_markers: Array = []
 
-func configure(terrain: Texture2D, fog: Texture2D, circle: bool) -> void:
+func configure(terrain: Texture2D, fog: Texture2D, circle: bool, area: String = "entrance") -> void:
+	map_area = area
 	circular = circle
 	shader = ShaderMaterial.new()
 	shader.shader = preload("res://resources/maps/cartography.gdshader")
 	shader.set_shader_parameter("terrain",terrain)
+	shader.set_shader_parameter("atlas_size",terrain.get_size())
 	shader.set_shader_parameter("explored",fog)
 	shader.set_shader_parameter("circular",circle)
 	material = shader
