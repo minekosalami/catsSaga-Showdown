@@ -164,8 +164,9 @@ func run() -> void:
 	key(KEY_SHIFT, false)
 	await create_timer(0.85).timeout
 	check(hud.victory_screen.visible, "300 HP boss completes existing defeat and victory screen")
+	var retry_scene_id := current_scene.get_instance_id()
 	hud.victory_retry.pressed.emit()
-	await create_timer(0.5).timeout
+	while current_scene == null or current_scene.get_instance_id() == retry_scene_id or root.get_node("Session").busy: await process_frame
 	game = current_scene.battle
 	game.music_player.seek(7)
 	await create_timer(0.1).timeout

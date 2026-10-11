@@ -352,10 +352,11 @@ func run() -> void:
 	check(not game.music_player.playing, "soundtrack stops only after graceful fade")
 	check(hud.victory_retry.has_focus(), "victory Retry receives keyboard focus")
 	check(Rect2(Vector2.ZERO, Vector2(540, 900)).encloses(hud.victory_retry.get_global_rect()), "victory navigation fits viewport")
+	var retry_scene_id := current_scene.get_instance_id()
 	hud.victory_retry.pressed.emit()
 	hud.victory_retry.pressed.emit()
 	check(game.victory_navigation, "victory navigation guards repeated activation")
-	await create_timer(0.65).timeout
+	while current_scene == null or current_scene.get_instance_id() == retry_scene_id or root.get_node("Session").busy: await process_frame
 	game = current_scene.battle
 	hud = game.get_node("UI")
 	player = game.player
@@ -371,7 +372,7 @@ func run() -> void:
 	check(retry.visible and retry.has_focus(), "existing Retry button remains accessible while paused")
 	game.music_player.stop()
 	retry.pressed.emit()
-	await create_timer(0.45).timeout
+	while root.get_node("Session").busy: await process_frame
 	game = current_scene.battle
 	hud = game.get_node("UI")
 	await process_frame

@@ -190,9 +190,9 @@ func run() -> void:
 	d._finish("declined")
 	session.begin_battle(current_scene.player.position)
 	await create_timer(0.25).timeout
-	await snapshot("bart-white-wipe")
+	await snapshot("bart-black-walls")
 	await scene_changed
-	await snapshot("bart-white-reveal")
+	await snapshot("bart-black-reveal")
 	await create_timer(0.4).timeout
 	var host: Node = current_scene
 	var game: Node = host.battle
@@ -229,8 +229,9 @@ func run() -> void:
 	# This click begins in the root viewport and must be transformed into arena UI.
 	var button_center: Vector2 = game.ui.victory_retry.get_global_rect().get_center()
 	var root_point: Vector2 = host.arena_container.position + button_center * host.arena_container.scale
+	var retry_scene_id := current_scene.get_instance_id()
 	await mouse_click(root_point)
-	await create_timer(0.65).timeout
+	while current_scene == null or current_scene.get_instance_id() == retry_scene_id or session.busy: await process_frame
 	check(current_scene != host and current_scene.name == "CombatHost", "mouse click reaches Retry inside scaled viewport")
 	host = current_scene
 	game = host.battle

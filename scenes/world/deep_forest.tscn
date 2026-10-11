@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" path="res://scenes/world/tree.tscn" id="tree"]
 [ext_resource type="Script" path="res://scripts/world/placeholder.gd" id="visual"]
 
+[ext_resource type="PackedScene" path="res://scenes/blankkitten/npc.tscn" id="blankkitten"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_t3bbw"]
 size = Vector2(5120, 30)
 
@@ -1658,3 +1660,6 @@ tile_map_data = PackedByteArray("AAAqAEsAAAAAAAgAAACEAEoAAAADAAwAAACPABMAAAAAAAg
 tile_set = ExtResource("13_17myb")
 collision_enabled = false
 navigation_enabled = false
+
+[node name="BlankKitten" parent="Characters" instance=ExtResource("blankkitten")]
+position = Vector2(824, 800)

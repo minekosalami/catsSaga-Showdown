@@ -17,7 +17,7 @@ func _ready() -> void:
 	battle.process_mode = Node.PROCESS_MODE_PAUSABLE
 	arena.add_child(battle)
 	if Session.battle_entry_pending:
-		# Initialize behind the white wipe without advancing music or gameplay.
+		# Initialize behind the black walls without advancing music or gameplay.
 		battle.music_player.stop()
 		battle.set_process_input(false)
 		battle.player.set_process_input(false)
@@ -42,7 +42,7 @@ func return_to_forest() -> void:
 	Session.return_to_forest()
 
 func retry() -> void:
-	Session.transition_to("res://scenes/combat_host.tscn")
+	Session.transition_to("res://scenes/combat_host.tscn", true)
 
 func main_menu() -> void:
 	Session.main_menu()

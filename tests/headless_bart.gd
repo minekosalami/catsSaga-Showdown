@@ -133,8 +133,8 @@ func run() -> void:
 	await reveal_advance(d)
 	check(d.node_id == "BART_005", "Maybe converges on same final warning")
 	await reveal_advance(d)
-	check(session.busy and session.curtain.color == Color.WHITE and session.curtain.position.y < 0, "final warning starts descending solid white wipe")
-	check(session.curtain.size.is_equal_approx(Vector2(1280, 720)), "white rectangle covers full window and side areas")
+	check(session.busy and session.battle_walls.visible and session.curtain.color == Color.BLACK, "final warning starts universal black walls")
+	check(session.battle_walls.size.is_equal_approx(Vector2(1280, 720)), "black walls cover full window and side areas")
 	check(world.player.movement_locked, "movement locked during wipe")
 	await press(KEY_Z)
 	await press(KEY_X)
@@ -142,7 +142,7 @@ func run() -> void:
 	var host: Node = current_scene
 	var game: Node = host.battle
 	check(host.name == "CombatHost" and host.arena.size == Vector2i(540, 900), "wipe initializes original portrait battle")
-	check(session.curtain.position.y == 0 and session.curtain.modulate.a > 0.95, "scene changes while entire window is white")
+	check(session.curtain.position.y == 0 and session.curtain.modulate.a > 0.95, "scene changes while entire window is black")
 	check(game.process_mode == Node.PROCESS_MODE_DISABLED and not game.music_player.playing, "combat timing and music disabled during reveal")
 	await press(KEY_Z)
 	await press(KEY_X)

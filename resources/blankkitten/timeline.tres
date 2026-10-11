@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/blankkitten/timeline.gd" id="timeline"]
+[resource]
+script = ExtResource("timeline")
+musical_phase_offset = 0.0
+pattern_seed = 73129
+ending_lines = Array[String]([])
