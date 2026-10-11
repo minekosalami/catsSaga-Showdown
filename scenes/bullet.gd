@@ -15,10 +15,8 @@ func _ready() -> void:
 	orb_visual.name = "OrbVisual"
 	add_child(orb_visual)
 
-	_add_circle(orb_visual, 8.0, Color(1.0, 0.1, 0.7, 0.15))
-	_add_circle(orb_visual, 5.0, Color("#FF38D4"))
-	_add_circle(orb_visual, 3.0, Color("#FFB5F4"))
-	_add_circle(orb_visual, 1.5, Color.WHITE)
+	orb_visual.set_script(preload("res://scripts/ui/shot_visual.gd"))
+
 
 
 func _add_circle(

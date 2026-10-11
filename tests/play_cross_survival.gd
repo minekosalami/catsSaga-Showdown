@@ -81,5 +81,9 @@ func run() -> void:
 	await session.main_menu()
 	root.get_node("Music").play_theme("")
 	await create_timer(0.2).timeout
+	# Fixed-FPS simulation can finish before the real audio mixer releases its
+	# stopped menu sample. Give that background thread one bounded cleanup gap.
+	OS.delay_msec(100)
+	await process_frame
 	print("CROSS PLAY VALIDATION: ",checks," checks, ",failures," failures")
 	quit(0 if failures == 0 else 1)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 [ext_resource type="Script" path="res://scripts/boss2/battle.gd" id="battle"]
 [ext_resource type="Texture2D" path="res://assets/enironment/bosses/bosstwo.png" id="boss"]
 [ext_resource type="Texture2D" path="res://assets/levelbg.png" id="background"]
@@ -7,6 +7,9 @@
 [ext_resource type="Script" path="res://scripts/boss2/hud.gd" id="hud"]
 [ext_resource type="Script" path="res://scripts/boss2/boss_visual.gd" id="visual"]
 [ext_resource type="Script" path="res://scripts/boss2/cross_laser.gd" id="cross"]
+[ext_resource type="Script" path="res://scripts/ui/cinematic_arena.gd" id="cinematic"]
+[ext_resource type="Resource" path="res://resources/battle/doppelcat.tres" id="look"]
+
 [node name="Boss2Battle" type="Node2D"]
 script = ExtResource("battle")
 [node name="Background" type="Sprite2D" parent="."]
@@ -31,3 +34,7 @@ script = ExtResource("hud")
 
 [node name="RotatingCross" type="Node2D" parent="Boss2Timeline"]
 script = ExtResource("cross")
+
+[node name="CinematicArena" type="Node2D" parent="."]
+script = ExtResource("cinematic")
+look = ExtResource("look")

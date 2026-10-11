@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/boss2/combat_host.gd" id="1"]
 
 [ext_resource type="PackedScene" path="res://scenes/boss2/battle.tscn" id="battle"]
+
+[ext_resource type="Script" path="res://scripts/ui/cinematic_surround.gd" id="surround"]
 
 [node name="Boss2CombatHost" type="Control"]
 layout_mode = 3
@@ -20,7 +22,8 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.035, 0.035, 0.04, 1)
+color = Color(0.018, 0.022, 0.035, 1)
+script = ExtResource("surround")
 
 [node name="ArenaContainer" type="SubViewportContainer" parent="."]
 layout_mode = 0

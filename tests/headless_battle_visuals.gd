@@ -104,8 +104,8 @@ func run() -> void:
 	check(hud.timer_label.text == "00:00.00" and hud.song_progress.value == hud.song_progress.max_value,"survival timer and progress clamp at the ending")
 	check(hud.find_children("*Boss*","ProgressBar",true,false).is_empty(),"survival HUD has no boss HP bar")
 	hud.phase_transition.update_clock(89.7)
-	check(not hud.phase_label.visible,"compact phase caption avoids covering the arena")
-	hud.phase_transition.update_clock(91.0)
+	check(hud.phase_label.visible and hud.phase_label.text == "Showdown()","final-phase typography appears briefly above the active playfield")
+	hud.phase_transition.update_clock(91.3)
 	check(not hud.phase_label.visible,"transient phase title hides without removing persistent current phase")
 	game.player.health = 2
 	hud.update(91)

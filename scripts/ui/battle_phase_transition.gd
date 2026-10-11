@@ -20,9 +20,10 @@ func _ready() -> void:
 	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	label.offset_left = 24
 	label.offset_right = -24
-	label.offset_top = 230
-	label.offset_bottom = 270
+	label.offset_top = 317
+	label.offset_bottom = 357
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font",preload("res://assets/ui/fonts/DejaVuSansMono-Bold.ttf"))
 	label.add_theme_color_override("font_outline_color",Color.BLACK)
 	label.add_theme_constant_override("outline_size",4)
 	label.hide()
@@ -31,9 +32,9 @@ func present(title: String, tint: Color, playback: float, emphasis: bool = false
 	cue_time = playback
 	accent = tint
 	dramatic = emphasis
-	duration = 1.1 if emphasis else 0.85
+	duration = 1.6 if emphasis else 1.15
 	label.text = title
-	label.add_theme_font_size_override("font_size",40 if title == "NOW DIE!" else (32 if emphasis else 24))
+	label.add_theme_font_size_override("font_size",30 if title == "NOW DIE!" else (30 if emphasis else 22))
 	label.add_theme_color_override("font_color",tint.lightened(0.25))
 	label.show()
 	update_clock(playback)
@@ -48,6 +49,8 @@ func update_clock(playback: float) -> void:
 	label.scale = Vector2.ONE * (1 + (0.10 if dramatic else 0.045) * (1-smoothstep(0.0,0.3,age)))
 	if age >= duration:
 		label.hide()
+	elif label.text != "Introduction()":
+		label.show()
 	queue_redraw()
 
 func _draw() -> void:
@@ -56,8 +59,9 @@ func _draw() -> void:
 		return
 	var energy := 1-smoothstep(0.0,duration,age)
 	if label.text != "Introduction()":
+		# Energy stays at the edge; no full-arena white veil over live bullets.
 		var flash := (1-smoothstep(0.0,0.12,age)) * flash_strength
-		draw_rect(Rect2(Vector2.ZERO,size),Color(1,1,1,flash))
+		draw_rect(Rect2(2,2,size.x-4,size.y-4),Color(accent,flash),false,3,true)
 	var tint := Color(accent,energy * border_strength * 0.65)
 	var inset := 4 + 5 * (1-energy)
 	draw_rect(Rect2(Vector2.ONE * inset,size-Vector2.ONE * inset*2),tint,false,1.5)

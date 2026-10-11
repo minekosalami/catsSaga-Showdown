@@ -8,6 +8,7 @@ const SketchButton = preload("res://scripts/ui/sketch_button.gd")
 var health_label: Label
 var timer_label: Label
 var saturate_label: Label
+var music_phase_caption: Label
 var boss_caption: Label
 var boss_value: Label
 var boss_bar: ProgressBar
@@ -16,6 +17,7 @@ var victory_screen: Control
 var victory_retry: Button
 var victory_menu: Button
 var victory_continue: Button
+var defeat_backdrop: Control
 var end_screen: CenterContainer
 var observed_boss: Node
 var bar_tween: Tween
@@ -39,6 +41,7 @@ func _label(parent: Node, text: String, font_size: int, color: Color = SketchThe
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var look: Resource = get_parent().get_node("CinematicArena").look
 	var root := Control.new()
 	root.name = "HUD"
 	root.theme = HUDStyle.theme()
@@ -82,15 +85,16 @@ func _ready() -> void:
 	boss_panel.add_child(boss_stack)
 	var boss_row := HBoxContainer.new()
 	boss_stack.add_child(boss_row)
-	boss_caption = _label(boss_row, "EVIL BART / PHASE 1", 12)
+	boss_caption = _label(boss_row, look.boss_name.to_upper()+" / PHASE 1", 12,look.accent)
 	boss_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	boss_value = _label(boss_row, "", 11, SketchTheme.MUTED)
 	boss_bar = ProgressBar.new()
 	boss_bar.name = "BossHealthBar"
 	boss_bar.custom_minimum_size.y = 12
-	HUDStyle.progress(boss_bar,SketchTheme.PAPER)
+	HUDStyle.progress(boss_bar,look.accent)
 	boss_stack.add_child(boss_bar)
 	boss_panel.hide()
+	music_phase_caption = _label(boss_stack,"Introduction()",10,SketchTheme.MUTED)
 
 	var ability_card := PanelContainer.new()
 	ability_card.name = "AbilityCard"
@@ -118,8 +122,8 @@ func _ready() -> void:
 	var game_over: Label = get_node("GameOverLabel")
 	game_over.reparent(content)
 	game_over.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	game_over.add_theme_font_override("font", SketchTheme.TITLE_FONT)
-	game_over.add_theme_font_size_override("font_size", 34)
+	game_over.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono-Bold.ttf"))
+	game_over.add_theme_font_size_override("font_size", 40)
 	_label(content, "MY PET DEAD.", 12, SketchTheme.MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var retry: Button = get_node("RestartButton")
 	retry.reparent(content)
@@ -130,6 +134,15 @@ func _ready() -> void:
 	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.INK, SketchTheme.MUTED))
 	_ignore_pointer(root)
 	retry.mouse_filter = Control.MOUSE_FILTER_STOP
+	var defeat_background := Control.new()
+	defeat_backdrop = defeat_background
+	defeat_background.name = "DefeatBackdrop"
+	defeat_background.set_script(preload("res://scripts/ui/cinematic_result.gd"))
+	defeat_background.look = look
+	root.add_child(defeat_background)
+	root.move_child(defeat_background,root.get_children().find(end_screen))
+	defeat_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	defeat_background.hide()
 	end_screen.hide()
 	entrance_flash = ColorRect.new()
 	entrance_flash.name = "EntranceFlash"
@@ -170,6 +183,8 @@ func _process(_delta: float) -> void:
 		saturate_label.text = "X  /  SATURATE     " + ability_state
 		saturate_label.modulate = SketchTheme.MUTED if player.saturate_used and not player.unlimited_saturate else SketchTheme.ACCENT
 	phase_transition.update_clock(game.elapsed_time)
+	if phase_label.text == "Introduction()":
+		phase_label.hide()
 	var seconds := int(game.elapsed_time)
 	timer_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
 	if is_instance_valid(game.boss) and game.boss != observed_boss:
@@ -185,6 +200,11 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(game.boss):
 		boss_panel.hide()
 	if game.game_over and not end_screen.visible:
+		end_screen.find_child("GameOverLabel",true,false).text = "GAME OVER()"
+		defeat_backdrop.show()
+		var introduction := get_child(0).get_node_or_null("CinematicIntroduction")
+		if introduction != null:
+			introduction.hide()
 		end_screen.show()
 		end_screen.modulate.a = 0.0
 		create_tween().tween_property(end_screen, "modulate:a", 1.0, 0.25)
@@ -192,7 +212,7 @@ func _process(_delta: float) -> void:
 		retry.grab_focus()
 
 func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
-	boss_caption.text = "EVIL BART / PHASE %d" % phase
+	boss_caption.text = get_parent().get_node("CinematicArena").look.boss_name.to_upper()+" / PHASE %d" % phase
 	boss_value.text = "%d / %d" % [health, maximum]
 	boss_bar.max_value = maximum
 	if is_instance_valid(bar_tween):
@@ -208,7 +228,10 @@ func show_boss_entrance() -> void:
 
 func show_phase(title: String, color: Color, dramatic: bool = false) -> void:
 	phase_transition.flash_strength = minf(phase_flash_strength,0.12)
+	music_phase_caption.text = title
 	phase_transition.present(title,color,get_parent().elapsed_time,dramatic)
+	if title == "Introduction()":
+		phase_transition.label.hide()
 
 func show_impact_flash() -> void:
 	if is_instance_valid(entrance_tween):
@@ -223,7 +246,8 @@ func _build_victory(root: Control) -> void:
 	root.add_child(victory_screen)
 	victory_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background := Control.new()
-	background.set_script(preload("res://scripts/ui/sketch_background.gd"))
+	background.set_script(preload("res://scripts/ui/cinematic_result.gd"))
+	background.look = get_parent().get_node("CinematicArena").look
 	victory_screen.add_child(background)
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -236,6 +260,7 @@ func _build_victory(root: Control) -> void:
 	center.add_child(content)
 	_label(content, "// EXECUTION COMPLETE", 12, SketchTheme.MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var title := _label(content, "VICTORY()", 48)
+	title.add_theme_font_override("font",preload("res://assets/ui/fonts/DejaVuSansMono-Bold.ttf"))
 	title.name = "VictoryTitle"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label(content, "Evil Bart defeated.", 18).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

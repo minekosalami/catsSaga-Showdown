@@ -22,12 +22,15 @@ static func gradient(tint: Color, glow: bool = false) -> GradientTexture2D:
 	textures[key] = texture
 	return texture
 
-static func draw_beam(canvas: CanvasItem, length: float, width: float, tint: Color, clock: float, energy: float, glow: float, opacity: float = 1.0) -> void:
+static func draw_beam(canvas: CanvasItem, length: float, width: float, tint: Color, clock: float, energy: float, glow: float, opacity: float = 1.0, core_width: float = -1.0) -> void:
 	canvas.draw_texture_rect(gradient(tint,true),Rect2(-length/2,-width/2-14,length,width+28),false,Color(1,1,1,glow*opacity))
 	# The opaque dangerous body always reaches both collider edges immediately.
-	canvas.draw_texture_rect(gradient(tint),Rect2(-length/2,-width/2,length,width),false,Color(1,1,1,opacity))
+	# The cross has a thin collider inside a wider, translucent energy envelope.
+	canvas.draw_texture_rect(gradient(tint),Rect2(-length/2,-width/2,length,width),false,Color(1,1,1,opacity*(0.30 if core_width > 0 else 1.0)))
+	if core_width > 0:
+		canvas.draw_rect(Rect2(-length/2,-core_width/2,length,core_width),Color(1,1,1,opacity))
 	for side in [-1,1]:
-		canvas.draw_line(Vector2(-length/2,side*width/2),Vector2(length/2,side*width/2),Color(tint.lightened(0.3),opacity),1,true)
+		canvas.draw_line(Vector2(-length/2,side*width/2),Vector2(length/2,side*width/2),Color(tint.lightened(0.3),opacity*(0.25 if core_width > 0 else 1.0)),1,true)
 	var flow := PackedVector2Array()
 	for i in range(25):
 		var x := -length/2+length*float(i)/24
