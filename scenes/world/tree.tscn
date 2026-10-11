@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/enironment/tree.png" id="texture"]
+
+[ext_resource type="Script" path="res://scripts/world/forest_tree.gd" id="variation"]
 
 [sub_resource type="CapsuleShape2D" id="trunk"]
 radius = 8.0
@@ -9,11 +11,12 @@ height = 24.0
 [node name="Tree" type="StaticBody2D" groups=["world_trees"]]
 collision_layer = 1
 collision_mask = 2
+script = ExtResource("variation")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 position = Vector2(-70, -132.22222)
-scale = Vector2(0.3888889, 0.3888889)
+scale = Vector2(0.7777778, 0.7777778)
 texture = ExtResource("texture")
 centered = false
 

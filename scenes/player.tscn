@@ -3,14 +3,20 @@
 [ext_resource type="Script" uid="uid://bqqjc6wjfjtde" path="res://scenes/player.gd" id="1_g2els"]
 [ext_resource type="Texture2D" uid="uid://dmuvb2synat1l" path="res://assets/bartplayer.png" id="2_g2els"]
 
+[ext_resource type="Script" path="res://scripts/ui/battle_hitbox_debug.gd" id="hitbox_debug"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_tefeu"]
-radius = 5.0
+radius = 7.0
 
 [node name="Player" type="Area2D" unique_id=860092324]
 position = Vector2(281, 779)
+collision_layer = 2
+collision_mask = 0
+monitoring = false
 script = ExtResource("1_g2els")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1837506180]
+position = Vector2(-13, 17)
 shape = SubResource("CircleShape2D_tefeu")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1034376047]
@@ -19,3 +25,8 @@ scale = Vector2(0.19719388, 0.1398545)
 texture = ExtResource("2_g2els")
 
 [node name="Node2D" type="Node2D" parent="." unique_id=802928563]
+
+[node name="HitboxDebug" type="Node2D" parent="."]
+visible = false
+z_index = 30
+script = ExtResource("hitbox_debug")

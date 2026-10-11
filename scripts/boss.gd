@@ -351,7 +351,7 @@ func fire_fan(
 		return
 
 	var aim_direction = (
-		player_node.global_position - global_position
+		player_node.get_node("CollisionShape2D").global_position - global_position
 	).normalized()
 
 	var center_angle = aim_direction.angle() + extra_angle

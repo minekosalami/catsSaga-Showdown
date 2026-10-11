@@ -39,7 +39,7 @@ func shoot_at_player() -> void:
 	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
 
 	bullet.global_position = global_position
-	bullet.direction = (player.global_position - global_position).normalized()
+	bullet.direction = (player.get_node("CollisionShape2D").global_position - global_position).normalized()
 
 func take_damage(amount: int) -> void:
 	health -= amount

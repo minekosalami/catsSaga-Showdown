@@ -66,12 +66,12 @@ func run() -> void:
 	key(KEY_D, false)
 	key(KEY_S, false)
 	# Probe a real StaticBody2D obstacle using the player collision shape.
-	player.position = Vector2(490, 240)
+	player.position = Vector2(405, 268)
 	player.velocity = Vector2.ZERO
 	key(KEY_D, true)
 	await create_timer(0.55).timeout
 	key(KEY_D, false)
-	check(player.position.x < 507 and player.is_on_wall(), "environment blocks movement through obstacle")
+	check(player.position.x < 431 and player.get_slide_collision_count() > 0, "tree trunk blocks overworld movement")
 	player.position = Vector2(55, 450)
 	player.velocity = Vector2.ZERO
 	key(KEY_LEFT, true)
@@ -85,7 +85,7 @@ func run() -> void:
 	world = current_scene
 	check(session.area_id == "deep_forest" and world.map.display_name == "Deep Forest", "entrance portal transitions to Deep Forest")
 	check(world.player.position == Vector2(280, 540), "arrival marker avoids immediate portal bounce")
-	check(world.map.map_size == Vector2(1920, 1080), "Deep Forest is larger than entrance")
+	check(world.map.map_size == Vector2(2560, 1440), "Deep Forest is larger than entrance")
 	check(world.map.get_node("Characters").get_child_count() == 1, "Deep Forest has exactly one NPC")
 	var npc: Node2D = world.map.get_node("Characters/ForestNPC")
 	world.player.position = npc.position + Vector2(0, 60)
@@ -108,11 +108,11 @@ func run() -> void:
 	check(not world.dialogue.active and not world.player.movement_locked, "conversation finishes and restores movement")
 	world.player.position = Vector2(120, 540)
 	await create_timer(0.55).timeout
-	check(session.area_id == "entrance" and current_scene.player.position == Vector2(1320, 450), "reverse forest portal restores correct entry marker")
+	check(session.area_id == "entrance" and current_scene.player.position == current_scene.map.get_node("Entries/FromDeep").position, "reverse forest portal restores correct entry marker")
 	current_scene.player.position = Vector2(1480, 450)
 	await create_timer(0.55).timeout
 	world = current_scene
-	world.player.position = Vector2(1800, 540)
+	world.player.position = world.map.get_node("Portals/Exit1").position
 	await create_timer(0.55).timeout
 	world = current_scene
 	check(session.area_id == "bart_area", "Deep Forest connects to Evil Bart area")
@@ -153,7 +153,7 @@ func run() -> void:
 	check(world.name == "Overworld" and session.area_id == "bart_area", "victory returns to Evil Bart area")
 	check(world.player.position.is_equal_approx(before_battle), "return restores exact pre-battle player position")
 	check(not session.encounter_active and session.evil_bart_defeated, "defeat record persists after leaving combat")
-	check(get_nodes_in_group("combat_music").is_empty(), "combat soundtrack is removed from quiet forest")
+	check(get_nodes_in_group("combat_music").is_empty(), "combat soundtrack is removed before restoring overworld theme")
 	await process_frame
 	check(world.dialogue.active and world.dialogue.lines[0].text.begins_with("You were more powerful"), "return shows one-time victory dialogue")
 	await finish_dialogue(world.dialogue)
@@ -180,4 +180,7 @@ func run() -> void:
 	current_scene.queue_free()
 	await create_timer(0.25).timeout
 	print("OVERWORLD VALIDATION: ", checks, " checks, ", failures, " failures")
+	# Allow the audio server to retire looping playback before test shutdown.
+	root.get_node("Music").play_theme("")
+	await create_timer(0.2).timeout
 	quit(0 if failures == 0 else 1)

@@ -4,7 +4,7 @@ signal health_changed(new_health: int)
 signal game_over
 
 # The sole enemy-projectile damage shape uses internal battle pixels.
-@export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 5.0:
+@export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 7.0:
 	set(value):
 		damage_hitbox_radius = clampf(value, 0.5, 32.0)
 		if is_node_ready():
@@ -55,6 +55,7 @@ func _ready() -> void:
 	$CollisionShape2D.shape = $CollisionShape2D.shape.duplicate()
 	($CollisionShape2D.shape as CircleShape2D).radius = damage_hitbox_radius
 	add_to_group("player")
+	$CollisionShape2D.position = $Sprite2D.position
 	_collect_visual_nodes(self)
 
 
@@ -73,6 +74,10 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if not event.pressed or event.echo:
+		return
+
+	if event.keycode == KEY_F3 and OS.is_debug_build():
+		$HitboxDebug.visible = not $HitboxDebug.visible
 		return
 
 	# Press X to activate SATURATE.
@@ -132,11 +137,22 @@ func _process(delta: float) -> void:
 		)
 
 	_update_visual_effects()
-
 	if health <= 0:
 		return
 
-	# Movement.
+	# Normal shooting with Z.
+	shoot_timer -= delta
+
+	if Input.is_key_pressed(KEY_Z) and shoot_timer <= 0.0:
+		shoot()
+		shoot_timer = SHOOT_INTERVAL
+
+
+
+func _physics_process(delta: float) -> void:
+	if health <= 0:
+		return
+	# Movement uses the same fixed step as enemy-projectile collisions.
 	var direction := Vector2.ZERO
 
 	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
@@ -182,12 +198,6 @@ func _process(delta: float) -> void:
 	position.x = clampf(position.x, 16.0, screen_size.x - 16.0)
 	position.y = clampf(position.y, 16.0, screen_size.y - 16.0)
 
-	# Normal shooting with Z.
-	shoot_timer -= delta
-
-	if Input.is_key_pressed(KEY_Z) and shoot_timer <= 0.0:
-		shoot()
-		shoot_timer = SHOOT_INTERVAL
 
 
 func activate_saturate() -> void:

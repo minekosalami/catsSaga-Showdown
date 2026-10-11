@@ -44,14 +44,13 @@ func _add_circle(
 
 
 func _process(delta: float) -> void:
-	# Preserve the original movement and direction.
-	global_position += direction * speed * delta
-
 	# Subtle pulse.
 	animation_time += delta
 	var pulse := 1.0 + sin(animation_time * 7.0) * 0.04
 	orb_visual.scale = Vector2.ONE * pulse
 
+func _physics_process(delta: float) -> void:
+	global_position += direction * speed * delta
 	# Remove bullets that leave the screen.
 	var screen_size := get_viewport_rect().size
 
