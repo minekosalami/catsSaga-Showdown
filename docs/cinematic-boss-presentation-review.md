@@ -1,6 +1,6 @@
 # Cinematic boss presentation
 
-Branch: `feature/cinematic-boss-presentation`  
+Branch: `feature/cinematic-boss-presentation`
 Base: `683591d` (main, including the merged region/dialogue update).
 
 Both existing encounters now share an arena presentation system, bold monospace
