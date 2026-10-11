@@ -1,10 +1,10 @@
 extends SceneTree
 
 const SPECS := {
-	"forest_entrance": [Vector2i(200,114),"Start",{"Start":Vector2(280,450),"FromDeep":Vector2(1360,610)}, {"InspectableTree":Vector2(450,280)}],
-	"deep_forest": [Vector2i(320,180),"FromEntrance",{"FromEntrance":Vector2(280,540),"FromBart":Vector2(2280,1200),"FromFlooded":Vector2(1750,1010)}, {"ForestNPC":Vector2(900,430),"FloodedGate":Vector2(1750,1090)}],
-	"bart_area": [Vector2i(200,114),"FromDeep",{"FromDeep":Vector2(280,450)}, {"EvilBart":Vector2(1000,450)}],
-	"flooded_forest": [Vector2i(256,192),"FromDeep",{"FromDeep":Vector2(260,768)}, {"Boss2NPC":Vector2(1840,360)}],
+	"forest_entrance": [Vector2i(200,114),"Start",{"Start":Vector2(280,450),"FromDeep":Vector2(2992,992)}, {"InspectableTree":Vector2(450,280)}],
+	"deep_forest": [Vector2i(320,180),"FromEntrance",{"FromEntrance":Vector2(208,992),"FromBart":Vector2(208,2816),"FromFlooded":Vector2(1792,2672)}, {"ForestNPC":Vector2(900,430),"FloodedGate":Vector2(1750,1090)}],
+	"bart_area": [Vector2i(200,114),"FromDeep",{"FromDeep":Vector2(2992,992)}, {"EvilBart":Vector2(1000,450)}],
+	"flooded_forest": [Vector2i(256,192),"FromDeep",{"FromDeep":Vector2(1792,208)}, {"Boss2NPC":Vector2(1840,360)}],
 }
 var checks := 0
 var failures := 0
@@ -74,7 +74,7 @@ func run() -> void:
 		shape.size = Vector2(28,28)
 		query.shape = shape
 		query.collision_mask = 1
-		for label in spec[2]: check(map.get_node("Entries/"+label).position == spec[2][label],filename+" preserved arrival "+label)
+		for label in spec[2]: check(map.get_node("Entries/"+label).position == spec[2][label],filename+" aligned safe arrival "+label)
 		for label in spec[3]: check(map.get_node("Characters/"+label).position == spec[3][label],filename+" preserved character "+label)
 		for group in ["Entries","Portals","Discoveries"]:
 			for marker in map.get_node(group).get_children():

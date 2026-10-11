@@ -18,12 +18,14 @@ var sequence := ""
 var sequence_time := 0.0
 var last_reveal_cell := Vector2i(-1000,-1000)
 var last_area := ""
+var boss_locations: Dictionary = {}
 
 func setup(host: Node2D) -> void:
 	world = host
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 30
 	var terrain: Texture2D = load("res://resources/maps/world_terrain.res")
+	boss_locations = terrain.get_meta("boss_locations", {})
 	fog_image = Session.exploration.visibility_image()
 	fog_texture = ImageTexture.create_from_image(fog_image)
 	minimap = Control.new()
@@ -218,6 +220,18 @@ func _refresh() -> void:
 	full_map.player_world = point
 	minimap.facing = world.player.facing_direction
 	full_map.facing = world.player.facing_direction
+	var markers := visible_boss_markers()
+	minimap.boss_markers = markers
+	full_map.boss_markers = markers
 	minimap.visible = normal_exploration() and not modal_open()
 	if minimap.visible: minimap.refresh(Session.map_reveal_cheat)
 	if opened: full_map.refresh(Session.map_reveal_cheat)
+
+func visible_boss_markers() -> Array:
+	var markers := []
+	for id in boss_locations:
+		var boss: Dictionary = boss_locations[id]
+		var cell := Vector2i(boss.local_position / Layout.TILE_PIXELS) / Session.exploration.CELL_TILES
+		if not Session.map_reveal_cheat and not Session.exploration.visited(boss.area, cell): continue
+		markers.append({"id":id, "point":Layout.world_point(boss.area, boss.local_position), "defeated":Session.evil_bart_defeated if id == "bart" else Session.story_flags.get("boss2_defeated", false)})
+	return markers

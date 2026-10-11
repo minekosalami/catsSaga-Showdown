@@ -30,7 +30,7 @@ func run() -> void:
 	battle.set_physics_process(false)
 	await create_timer(0.65).timeout
 	check(battle.ui.top_margin.size.y < 120,"compact HUD fits above boss")
-	for shot in [[0.8,"introduction"],[20.4,"opening"],[38.6,"blue-warning"],[40.4,"blue-active"],[64.1,"ricochet-dialogue"],[70.55,"lasers-slam"],[71.5,"cross-charge"],[80.0,"cross-50rpm"],[89.60,"cross-glass"],[89.80,"shard-fade"],[90.12,"finale"]]:
+	for shot in [[0.8,"introduction"],[20.4,"opening"],[38.6,"blue-warning"],[40.4,"blue-active"],[64.1,"ricochet-dialogue"],[70.55,"lasers-slam"],[71.5,"cross-charge"],[80.0,"cross-18rpm"],[89.60,"cross-glass"],[89.80,"shard-fade"],[90.12,"finale"]]:
 		battle.timeline.advance(shot[0])
 		battle.ui.update(shot[0])
 		battle.timeline.boss.apply_clock(shot[0])

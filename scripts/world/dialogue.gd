@@ -37,6 +37,9 @@ func _ready() -> void:
 	add_child(audio)
 	database = JSON.parse_string(FileAccess.get_file_as_string("res://data/dialogue/test_dialogue.json"))
 	database["bart_encounter"] = JSON.parse_string(FileAccess.get_file_as_string("res://data/dialogue/evil_bart.json"))
+	database["boss2_encounter"] = JSON.parse_string(FileAccess.get_file_as_string("res://data/dialogue/boss2.json"))
+	database["boss2_victory"] = [{"speaker":"Boss 2", "text":"What the hell?? I underestimated you…! Get out of here, me!"}]
+	database["boss2_defeated"] = [{"speaker":"Boss 2", "text":"You're not telling anyone about this"}]
 	var root := Control.new()
 	add_child(root)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -9,6 +9,7 @@ var zoom := 2.5
 var circular := false
 var shader: ShaderMaterial
 var last_state: Array = []
+var boss_markers: Array = []
 
 func configure(terrain: Texture2D, fog: Texture2D, circle: bool) -> void:
 	circular = circle
@@ -27,7 +28,7 @@ func configure(terrain: Texture2D, fog: Texture2D, circle: bool) -> void:
 	ink.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func refresh(reveal: bool) -> void:
-	var state := [center_world,player_world,facing,zoom,size,reveal]
+	var state := [center_world,player_world,facing,zoom,size,reveal,boss_markers.duplicate(true)]
 	if state == last_state: return
 	last_state = state
 	shader.set_shader_parameter("center_world",center_world)

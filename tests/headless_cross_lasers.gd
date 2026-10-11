@@ -47,7 +47,7 @@ func run() -> void:
 		timeline.advance(cue)
 		check(cross.active and cross.position == cross.pivot_center,"fixed pivot remains active at "+str(cue))
 		check(cross.angular_speed >= 0 and not timeline.lasers[0].active and get_nodes_in_group("boss2_projectiles").filter(func(p): return p.dangerous).is_empty(),"single-direction cross never stacks blue beams or normal bullets")
-	check(is_equal_approx(cross.velocity_at(8)*60/TAU,50),"maximum speed is exactly 50 RPM")
+	check(is_equal_approx(cross.velocity_at(8)*60/TAU,18),"maximum speed is exactly 18 RPM")
 	check(cross.velocity_at(0) == 0 and cross.velocity_at(17.6) == 0 and cross.velocity_at(1.6) < cross.velocity_at(3.2),"sine easing accelerates from rest and decelerates to rest")
 	var t := 8.0
 	var derivative: float = (cross.angle_at(t+0.0001)-cross.angle_at(t-0.0001))/0.0002

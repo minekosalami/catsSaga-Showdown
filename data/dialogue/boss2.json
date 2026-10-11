@@ -1,0 +1,18 @@
+{
+  "start": "intro",
+  "nodes": {
+    "intro": {
+      "speaker": "Boss 2",
+      "lines": ["The hell are you looking at? And why do you look just like me?"],
+      "choices": [
+        {"text": "Sorry…", "next": "apology"},
+        {"text": "Bring it on, loser!", "end": "battle"}
+      ]
+    },
+    "apology": {
+      "speaker": "Boss 2",
+      "lines": ["get out of my sight"],
+      "end": "declined"
+    }
+  }
+}

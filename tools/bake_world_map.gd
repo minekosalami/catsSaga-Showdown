@@ -6,6 +6,7 @@ var atlas: Image
 var source_images := {}
 var tile_colors := {}
 var source_hashes := {}
+var boss_locations := {}
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -53,6 +54,9 @@ func run() -> void:
 		var scene_path: String = "res://scenes/world/"+region.scene+".tscn"
 		source_hashes[scene_path] = FileAccess.get_sha256(scene_path)
 		root.add_child(map)
+		var boss := map.get_node_or_null("Characters/" + ("EvilBart" if area == "bart_area" else "Boss2NPC"))
+		if area in ["bart_area", "flooded_forest"] and boss != null:
+			boss_locations["bart" if area == "bart_area" else "boss2"] = {"area":area, "local_position":boss.position}
 		var ground: TileMapLayer = map.get_node("GrassGround")
 		for cell in ground.get_used_cells():
 			var color := average_tile(ground,cell)*ground.modulate*map.modulate
@@ -86,6 +90,7 @@ func run() -> void:
 	for path in ["res://assets/enironment/gfx/Overworld.png","res://assets/enironment/gfx/objects.png","res://assets/enironment/tree.png","res://resources/world/gfx_terrain.tres","res://resources/world/gfx_water.tres","res://resources/world/gfx_trees.tres","res://resources/world/gfx_boulders.tres"]:
 		source_hashes[path] = FileAccess.get_sha256(path)
 	texture.set_meta("source_hashes",source_hashes)
+	texture.set_meta("boss_locations",boss_locations)
 	var error := ResourceSaver.save(texture,"res://resources/maps/world_terrain.res",ResourceSaver.FLAG_COMPRESS)
 	print("WORLD MAP BAKE: ",Layout.SIZE," cached pixels, save=",error)
 	quit(0 if error == OK else 1)

@@ -27,6 +27,8 @@ func _ready() -> void:
 	checking_spawn = Session.restore_position
 	Session.restore_position = false
 	add_child(player)
+	if not checking_spawn:
+		player.face_direction(map.get_node("Entries/" + Session.entry_marker).get_meta("facing_direction", Vector2.LEFT))
 	var camera: Camera2D = player.get_node("Camera2D")
 	camera.limit_left = 0
 	camera.limit_top = 0
@@ -58,6 +60,7 @@ func _ready() -> void:
 		player.movement_locked = true
 		call_deferred("_validate_saved_position")
 	awaiting_victory_dialogue = Session.area_id == "bart_area" and Session.evil_bart_defeated and Session.story_flags.get("bart_victory_dialogue_pending", false) and not Session.story_flags.get("bart_victory_dialogue_seen", false)
+	awaiting_victory_dialogue = awaiting_victory_dialogue or (Session.area_id == "flooded_forest" and Session.story_flags.get("boss2_defeated", false) and Session.story_flags.get("boss2_victory_dialogue_pending", false))
 	if awaiting_victory_dialogue:
 		player.movement_locked = true
 		if Session.busy:
@@ -80,7 +83,8 @@ func _validate_saved_position() -> void:
 			marker = map.get_node("Entries").get_child(0) as Marker2D
 		player.position = marker.position
 		player.velocity = Vector2.ZERO
-		player.get_node("Camera2D").reset_smoothing()
+	player.get_node("Camera2D").reset_smoothing()
+	player.get_node("Camera2D").force_update_scroll()
 	checking_spawn = false
 
 func _build_hud() -> void:
@@ -155,6 +159,7 @@ func _input(event: InputEvent) -> void:
 
 func _on_dialogue_finished() -> void:
 	var completed_victory := conversation_flag == "bart_victory_dialogue_seen"
+	var completed_boss2 := conversation_flag == "boss2_victory_dialogue_seen"
 	if not conversation_flag.is_empty():
 		Session.story_flags[conversation_flag] = true
 	conversation_flag = ""
@@ -169,11 +174,18 @@ func _on_dialogue_finished() -> void:
 	elif completed_victory:
 		Session.story_flags.erase("bart_victory_dialogue_pending")
 		Session.save_current()
+	elif completed_boss2:
+		Session.story_flags.erase("boss2_victory_dialogue_pending")
+		Session.save_current()
 
 func _travel(destination: String, entry: String) -> void:
-	if checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open():
+	if checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or get_tree().paused:
 		return
 	player.movement_locked = true
+	player.velocity = Vector2.ZERO
+	if destination == "flooded_forest" and Session.story_flags.get("flooded_forest_key_obtained", false):
+		Session.story_flags["flooded_forest_unlocked"] = true
+	update_map_exploration()
 	Session.travel(destination, entry)
 
 func hide_interaction() -> void:
@@ -191,7 +203,8 @@ func _show_victory_dialogue() -> void:
 	if not awaiting_victory_dialogue or Session.busy:
 		return
 	awaiting_victory_dialogue = false
-	conversation_flag = "bart_victory_dialogue_seen"
-	dialogue.start("bart_victory")
+	var boss2 := Session.area_id == "flooded_forest"
+	conversation_flag = "boss2_victory_dialogue_seen" if boss2 else "bart_victory_dialogue_seen"
+	dialogue.start("boss2_victory" if boss2 else "bart_victory")
 	player.movement_locked = true
 	hide_interaction()

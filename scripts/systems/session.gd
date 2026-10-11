@@ -16,6 +16,7 @@ var battle_entry_pending: bool = false
 @export var battle_wipe_duration: float = 0.5
 @export var battle_reveal_duration: float = 0.3
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
+@export var region_fade_duration: float = 0.3
 var story_flags: Dictionary = {}
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
@@ -110,7 +111,7 @@ func travel(destination: String, marker: String) -> void:
 	area_id = destination
 	entry_marker = marker
 	restore_position = false
-	if await transition_to("res://scenes/world/overworld.tscn"):
+	if await transition_to("res://scenes/world/overworld.tscn", false, true):
 		save_current()
 
 func begin_battle(position_before_battle: Vector2) -> void:
@@ -131,7 +132,7 @@ func grant_flooded_key() -> void:
 		call_deferred("_show_key_notification")
 
 func begin_boss2_battle(position_before_battle: Vector2) -> void:
-	if busy or area_id != "flooded_forest" or not story_flags.get("flooded_forest_key_obtained", false):
+	if busy or area_id != "flooded_forest" or not story_flags.get("flooded_forest_key_obtained", false) or story_flags.get("boss2_defeated", false):
 		return
 	return_position = position_before_battle
 	encounter_id = "boss2"
@@ -161,14 +162,15 @@ func main_menu() -> void:
 	encounter_active = false
 	await transition_to("res://scenes/main_menu.tscn")
 
-func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
+func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false) -> bool:
 	if busy:
 		return false
 	busy = true
 	close_pause()
 	get_tree().paused = false
 	battle_entry_pending = white_wipe
-	Music.prepare_transition(scene_path, battle_wipe_duration if white_wipe else transition_duration * 0.5)
+	var fade_duration := region_fade_duration if region_travel else transition_duration * 0.5
+	Music.prepare_transition(scene_path, battle_wipe_duration if white_wipe else fade_duration)
 	curtain.color = Color.WHITE if white_wipe else Color.BLACK
 	curtain.show()
 	curtain.modulate.a = 1.0 if white_wipe else 0.0
@@ -177,7 +179,7 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 	if white_wipe:
 		fade.tween_property(curtain, "position:y", 0.0, battle_wipe_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	else:
-		fade.tween_property(curtain, "modulate:a", 1.0, transition_duration * 0.5)
+		fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
 	await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
@@ -190,8 +192,15 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 		Music.sync_scene()
 	else:
 		await get_tree().scene_changed
+		if region_travel:
+			# Register destination bodies/camera while the curtain is fully black.
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			var camera: Camera2D = get_tree().current_scene.player.get_node("Camera2D")
+			camera.reset_smoothing()
+			camera.force_update_scroll()
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 0.0, battle_reveal_duration if white_wipe else transition_duration * 0.5)
+	fade.tween_property(curtain, "modulate:a", 0.0, battle_reveal_duration if white_wipe else fade_duration)
 	await fade.finished
 	curtain.hide()
 	curtain.position.y = 0.0
