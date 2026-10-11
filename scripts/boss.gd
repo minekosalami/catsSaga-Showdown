@@ -6,8 +6,9 @@ signal defeat_finished
 
 @export var enemy_bullet_scene: PackedScene = preload("res://scenes/enemybullet.tscn")
 
-var max_health: int = 180
-var health: int = 180
+@export_range(1, 10000, 1) var max_health: int = 300
+var health: int
+const MAX_PROJECTILES := 320
 
 # Health-based phases for the boss HUD.
 var phase: int = 1
@@ -29,6 +30,8 @@ var spiral_remaining: int = 0
 var spiral_angle: float = 0.0
 var spiral_angle_step: float = 0.23
 var spiral_double: bool = false
+var spiral_style: int = 0
+var spiral_curve: float = 0.0
 
 var defeated_already: bool = false
 var attacks_stopped: bool = false
@@ -45,6 +48,7 @@ var song_section: int = 0
 
 
 func _ready() -> void:
+	health = max_health
 	sprite_resting_scale = $Sprite2D.scale
 	add_to_group("enemies")
 	health_changed.emit(health, max_health, phase)
@@ -210,61 +214,63 @@ func attack() -> void:
 func arrival_attack() -> void:
 	match attack_index % 3:
 		0:
-			start_spiral(10, 0.20, false)
+			start_spiral(12, 0.20 * _spiral_direction(), false)
 		1:
 			fire_fan(3, 24.0, 150.0, Color("#55E8FF"))
 		2:
-			fire_ring(10, 145.0, 0.0, Color("#FF55BB"))
+			fire_gapped_ring(14, 145.0, elapsed * 0.12, Color("#FF55BB"))
 
 
 func rising_pressure_attack() -> void:
 	match attack_index % 3:
 		0:
-			start_spiral(16, 0.23, false)
+			start_spiral(18, 0.23 * _spiral_direction(), false, 3, 0.12 * _spiral_direction())
 		1:
 			fire_fan(5, 48.0, 175.0, Color("#55E8FF"))
 		2:
-			fire_ring(14, 175.0, 0.12, Color("#FF55BB"))
+			fire_flower(20, 170.0, 5, elapsed * 0.16, Color("#559BFF"))
 
 
 func Showdown() -> void:
 	match attack_index % 4:
 		0:
-			start_spiral(22, 0.25, true)
+			start_spiral(24, 0.25 * _spiral_direction(), true, 1, 0.10 * _spiral_direction())
 		1:
 			fire_fan(7, 72.0, 195.0, Color("#FF55BB"))
 		2:
-			fire_ring(18, 190.0, 0.0, Color("#55E8FF"))
+			fire_flower(24 if elapsed < 116.0 else 28, 185.0, 6, elapsed * 0.18, Color("#55E8FF"))
 		3:
-			fire_fan(5, 38.0, 215.0, Color("#FFE66D"))
+			fire_wave(13, 210.0, elapsed * 0.25)
 
 
 func breathing_room_attack() -> void:
 	match attack_index % 3:
 		0:
-			start_spiral(12, 0.19, false)
+			start_spiral(12, 0.19 * _spiral_direction(), false)
 		1:
 			fire_fan(3, 30.0, 155.0, Color("#55E8FF"))
 		2:
-			fire_ring(12, 155.0, 0.10, Color("#FF55BB"))
+			fire_gapped_ring(16, 150.0, elapsed * 0.1, Color("#FF55BB"))
 
 
 func final_climax_attack() -> void:
 	match attack_index % 4:
 		0:
-			start_spiral(26, 0.29, true)
+			start_spiral(26, 0.29 * _spiral_direction(), true, 1, 0.16 * _spiral_direction())
 		1:
 			fire_fan(9, 86.0, 210.0, Color("#FF55BB"))
 		2:
-			fire_ring(22, 205.0, 0.08, Color("#55E8FF"))
+			fire_flower(26, 195.0, 5, elapsed * 0.2, Color("#FF596F"))
 		3:
-			fire_fan(7, 48.0, 225.0, Color("#FFE66D"))
+			fire_wave(15, 215.0, elapsed * 0.3)
 
 
 func start_spiral(
 	shot_count: int,
 	angle_step: float,
-	double_spiral: bool
+	double_spiral: bool,
+	style: int = 0,
+	curve: float = 0.0
 ) -> void:
 	if attacks_stopped or elapsed >= SONG_END_TIME:
 		return
@@ -274,6 +280,8 @@ func start_spiral(
 	spiral_angle = elapsed * 1.7
 	spiral_angle_step = angle_step
 	spiral_double = double_spiral
+	spiral_style = style
+	spiral_curve = curve
 
 
 func get_spiral_interval() -> float:
@@ -302,7 +310,7 @@ func fire_spiral_step() -> void:
 	fire_bullet(
 		direction,
 		get_bullet_speed(),
-		Color("#FF55BB")
+		Color("#FF55BB"), spiral_style, spiral_curve
 	)
 
 	if spiral_double:
@@ -313,7 +321,7 @@ func fire_spiral_step() -> void:
 		fire_bullet(
 			second_direction,
 			get_bullet_speed(),
-			Color("#55E8FF")
+			Color("#55E8FF"), spiral_style, -spiral_curve
 		)
 
 	spiral_angle += spiral_angle_step
@@ -400,20 +408,50 @@ func get_bullet_speed() -> float:
 func fire_bullet(
 	bullet_direction: Vector2,
 	bullet_speed: float,
-	color: Color = Color("#55E8FF")
+	color: Color = Color("#55E8FF"),
+	style: int = 0,
+	curve: float = 0.0
 ) -> void:
 	if attacks_stopped or elapsed >= SONG_END_TIME:
 		return
-
+	if get_tree().get_nodes_in_group("enemy_bullets").size() >= MAX_PROJECTILES:
+		return
 	var bullet = enemy_bullet_scene.instantiate()
-	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
-
-	bullet.global_position = global_position
+	# Set appearance before _ready builds the matching collision radius.
 	bullet.direction = bullet_direction.normalized()
 	bullet.speed = bullet_speed
+	bullet.bullet_color = color
+	bullet.visual_style = style
+	bullet.angular_velocity = curve
+	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
+	bullet.global_position = global_position
 
-	if "bullet_color" in bullet:
-		bullet.bullet_color = color
+func _spiral_direction() -> float:
+	return 1.0 if int(attack_index / 3) % 2 == 0 else -1.0
+
+func fire_gapped_ring(count: int, bullet_speed: float, offset: float, color: Color) -> void:
+	var gap := PI / 2 + sin(elapsed * 0.2) * 0.35
+	for i in range(count):
+		var angle := offset + TAU * i / count
+		if absf(wrapf(angle - gap, -PI, PI)) > 0.30:
+			fire_bullet(Vector2.RIGHT.rotated(angle), bullet_speed, color)
+
+func fire_flower(count: int, bullet_speed: float, petals: int, offset: float, color: Color) -> void:
+	for i in range(count):
+		var angle := offset + TAU * i / count
+		var petal_speed := bullet_speed + 25.0 * cos(angle * petals)
+		var style := 2 if i % petals == 0 else 3
+		fire_bullet(Vector2.RIGHT.rotated(angle), petal_speed, color, style, 0.10 * _spiral_direction())
+
+func fire_wave(count: int, bullet_speed: float, offset: float) -> void:
+	# Mirror pairs with an explicit central escape corridor.
+	for i in range(count):
+		var x := float(i) / (count - 1)
+		var angle := PI / 2 + lerpf(-0.95, 0.95, x)
+		if absf(angle - PI / 2) < 0.14:
+			continue
+		var speed_offset := cos(x * TAU * 2 + offset) * 18.0
+		fire_bullet(Vector2.RIGHT.rotated(angle), bullet_speed + speed_offset, Color("#FFE66D"), 1)
 
 
 func set_attack_cooldown() -> void:
@@ -433,10 +471,10 @@ func set_attack_cooldown() -> void:
 
 
 func take_damage(amount: int) -> void:
-	if defeated_already or attacks_stopped:
+	if defeated_already or amount <= 0:
 		return
 
-	health = maxi(health - amount, 0)
+	health = clampi(health - amount, 0, max_health)
 
 	update_phase()
 	health_changed.emit(health, max_health, phase)
