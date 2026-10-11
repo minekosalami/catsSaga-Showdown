@@ -18,7 +18,7 @@ modulate = Color(0.6,0.75,0.8,1)
 [node name="Boss2Timeline" type="Node2D" parent="."]
 script = ExtResource("timeline")
 [node name="BossSprite" type="Sprite2D" parent="Boss2Timeline"]
-position = Vector2(270,150)
+position = Vector2(270,205)
 texture_filter = 1
 scale = Vector2(0.231405,0.231405)
 texture = ExtResource("boss")

@@ -1,25 +1,23 @@
 extends Node2D
 
 const BOUNDARIES := [0.0, 12.80, 38.40, 64.00, 70.40, 89.60, 140.80]
-const PHASES := ["Introduction()", "Opening()", "LaserAssault()", "Intermission()", "Convergence()", "Finale()", "Survived()"]
+const PHASES := ["Introduction()", "Opening()", "LaserAssault()", "RICOCHET()", "CrossLaser()", "Finale()", "Survived()"]
 const PROJECTILE_LIMIT := 240
-# 1.0 restores previous density/speed/cadence; phases and laser safety stay fixed.
+# Density and cadence remain independent of the requested normal speed increase.
 @export_range(1.0,1.6,0.05) var difficulty_multiplier := 1.25
 @export_range(0.5, 3.0, 0.1) var warning_duration := 1.2
 @export_range(1.0, 12.0, 0.1) var activation_duration := 6.0
 @export_range(0.5, 12.0, 0.1) var movement_duration := 5.0
-@export_range(1.0, 15.0, 0.1) var convergence_duration := 10.0
 @export_range(1.0, 4.0, 0.1) var easing_power := 2.0
 @export_range(8.0, 40.0, 1.0) var laser_width := 20.0
-# 0 derives a gap of two original player sprite widths; positive values override.
-@export var final_center_gap := 0.0
-@export var maximum_inward_travel := 135.0
+@export var normal_speed_multiplier := 1.3
+const RICOCHET_LIMIT := 30
+const MEASURE_SECONDS := 1.6
 @export var side_offset := 185.0
 @export var coordinated_travel := 45.0
 var phase := -1
 var attack_index := -1
 var clock := 0.0
-var resolved_gap := 194.0
 var boss: Sprite2D
 var lasers: Array[Area2D] = []
 var cross: Node2D
@@ -32,8 +30,6 @@ func initialize() -> void:
 	cross = $RotatingCross
 	boss.modulate.a = 0
 	create_tween().tween_property(boss,"modulate:a",1.0,0.6)
-	var player_sprite: Sprite2D = battle.player.get_node("Sprite2D")
-	resolved_gap = final_center_gap if final_center_gap > 0 else player_sprite.texture.get_width() * absf(player_sprite.scale.x) * 2.0
 	for index in range(2):
 		var beam := Area2D.new()
 		beam.set_script(preload("res://scripts/boss2/laser.gd"))
@@ -59,20 +55,22 @@ func advance(playback: float) -> void:
 		phase = next
 		attack_index = -1
 		battle.ui.show_phase(PHASES[phase])
-		if phase in [3, 5, 6]:
-			clear_hostiles()
+		# Clear before spawning the new phase. Cross shards survive only its finale transition.
+		clear_hostiles(phase == 5,phase == 4)
 		if phase == 6:
 			battle.finish_survival()
 			return
 	_update_formation()
-	if phase in [0, 3, 6]:
+	if phase in [0,4,6]:
 		return
-	var interval := 1.20 if phase in [1,5] else (0.72 if phase == 2 else 0.65)
-	interval /= difficulty_multiplier
-	var index := int((clock - BOUNDARIES[phase]) / interval)
+	var interval := MEASURE_SECONDS if phase in [3,5] else (1.20 if phase == 1 else 0.72)/difficulty_multiplier
+	var index := int((clock-BOUNDARIES[phase]+0.000001)/interval)
 	if index != attack_index:
 		attack_index = index
-		attack(index)
+		if phase == 3:
+			fire_ricochet_volley(index)
+		else:
+			attack(index)
 
 func _coordinated_center(local: float) -> float:
 	# Cosine-eased travel starts centered with zero velocity, never snaps per cycle.
@@ -94,45 +92,50 @@ func _update_formation() -> void:
 		right = center + side_offset
 		warning = cycle < warning_duration
 		dangerous = not warning
-		left_span = Rect2(270-side_offset-coordinated_travel-laser_width/2,270, coordinated_travel*2+laser_width,630)
-		right_span = Rect2(270+side_offset-coordinated_travel-laser_width/2,270, coordinated_travel*2+laser_width,630)
+		left_span = Rect2(left-laser_width/2,270,laser_width,630)
+		right_span = Rect2(right-laser_width/2,270,laser_width,630)
 	elif phase == 3:
-		center = lerpf(_coordinated_center(64.0-38.4), 270, easing((clock-64)/1.0))
-	elif phase == 4:
-		var local := clock - 70.40
-		warning = local < warning_duration
-		dangerous = not warning and clock < cross.activation_time()
-		warning = warning and clock < cross.activation_time()
-		# Stops at explicit limits. Width is measured between solid inner edges.
-		var travel := minf(maxf(0, maximum_inward_travel), maxf(0, side_offset-(resolved_gap+laser_width)/2))
-		var amount := travel * easing((local-warning_duration)/maxf(0.1,convergence_duration))
-		left += amount
-		right -= amount
-		left_span = Rect2(left-laser_width/2,270,travel+laser_width,630)
-		right_span = Rect2(right-travel-laser_width/2,270,travel+laser_width,630)
-	boss.position = Vector2(center,150)
+		center = lerpf(_coordinated_center(64.0-38.4),270,easing((clock-64)/1.0))
+	elif phase != 4:
+		center += sin(clock*TAU/9.6)*20
+	boss.position = Vector2(center,205)
 	lasers[0].present(left,dangerous,warning,left_span,clock)
 	lasers[1].present(right,dangerous,warning,right_span,clock)
-	cross.sample(clock if phase == 4 else -1.0)
+	cross.sample(clock)
 
-func clear_hostiles() -> void:
-	cross.sample(-1.0)
+func clear_hostiles(preserve_cross_shards: bool = false, shatter_ricochets: bool = false) -> void:
+	if not preserve_cross_shards:
+		cross.sample(-1.0)
 	for projectile in get_tree().get_nodes_in_group("boss2_projectiles"):
-		projectile.set_deferred("monitoring",false)
-		projectile.process_mode = Node.PROCESS_MODE_DISABLED
-		projectile.queue_free()
+		projectile.dissolve(shatter_ricochets and projectile.is_in_group("boss2_ricochets"))
 	for beam in lasers:
 		beam.present(beam.position.x,false,false,Rect2(),clock)
 
+func fire_ricochet_volley(index: int) -> void:
+	if phase != 3 or clock >= 70.40:
+		return
+	for i in range(-3,4):
+		var live := get_tree().get_nodes_in_group("boss2_ricochets").filter(func(p): return p.dangerous)
+		if live.size() >= RICOCHET_LIMIT:
+			live[0].dissolve(false)
+		var projectile := Projectile.instantiate()
+		projectile.set_script(preload("res://scripts/boss2/ricochet.gd"))
+		projectile.direction = Vector2.DOWN.rotated(i*0.30+(-0.12 if index%2 == 0 else 0.12))
+		projectile.speed = 320
+		projectile.bullet_color = Color("#15BFFF") if i%2 == 0 else Color("#FF299D")
+		projectile.position = boss.position+Vector2(0,55)
+		battle.add_child(projectile)
+
 func fire(direction: Vector2, speed: float, tint: Color) -> void:
-	if get_tree().get_nodes_in_group("boss2_projectiles").size() >= PROJECTILE_LIMIT:
+	# Phase guard prevents queued or manually invoked normal volleys in the cross.
+	if phase in [0,3,4,6] or get_tree().get_nodes_in_group("boss2_projectiles").filter(func(p): return p.dangerous).size() >= PROJECTILE_LIMIT:
 		return
 	var projectile := Projectile.instantiate()
 	projectile.direction = direction.normalized()
-	projectile.speed = speed * (1.0+(difficulty_multiplier-1.0)*0.4)
+	projectile.speed = speed*(1.0+(difficulty_multiplier-1.0)*0.4)*normal_speed_multiplier
 	projectile.bullet_color = tint
+	projectile.position = boss.position+Vector2(0,55)
 	battle.add_child(projectile)
-	projectile.position = boss.position + Vector2(0,55)
 
 func ring(count: int, speed: float, offset: float, tint: Color, gap: float = 0.27) -> void:
 	for i in range(count):
@@ -141,12 +144,14 @@ func ring(count: int, speed: float, offset: float, tint: Color, gap: float = 0.2
 			fire(Vector2.RIGHT.rotated(angle),speed,tint)
 
 func attack(index: int) -> void:
-	var hard := phase in [2,4]
-	var tint := Color("#6DDEFF") if not hard else Color("#A694FF")
+	if phase not in [1,2,5]:
+		return
+	var hard := phase == 2
+	var tint := Color("#20B9FF") if not hard else Color("#FF259C")
 	var kind := index % 3
 	var opening_growth := mini(3,int(maxf(0,clock-12.80)/8.0)) if phase == 1 else 0
 	if kind == 0:
-		ring(roundi((22 if hard else 16 + opening_growth*2)*difficulty_multiplier),145 if hard else 115 + opening_growth*5,clock * 0.11,tint,0.38 if phase == 4 else 0.27)
+		ring(roundi((22 if hard else (12 if phase == 5 else 16 + opening_growth*2))*difficulty_multiplier),145 if hard else 115 + opening_growth*5,clock * 0.11,tint,0.27)
 	elif kind == 1:
 		# Successive symmetric rotating pairs form reusable circular spirals.
 		for i in range(roundi((8 if hard else 5 + mini(2,opening_growth))*difficulty_multiplier)):
@@ -156,6 +161,6 @@ func attack(index: int) -> void:
 	else:
 		var origin := boss.position + Vector2(0,55)
 		var aim: Vector2 = (battle.player.get_node("CollisionShape2D").position + battle.player.position - origin).normalized()
-		var half := 2 if phase != 4 else 1
+		var half := 2
 		for i in range(-half,half+1):
-			fire(aim.rotated(i * 0.14),155 if hard else 125,Color("#F5B7FF"))
+			fire(aim.rotated(i * 0.14),155 if hard else 125,Color("#FF259C"))

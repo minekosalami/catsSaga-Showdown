@@ -83,14 +83,14 @@ func run() -> void:
 	for clock in [85.0,85.06,85.8]:
 		sprite.apply_clock(clock)
 		check(sprite.position+Vector2(0,55) == spawn0 and left.position == left0,"sprite animation keeps laser formation and projectile origin stable at "+str(clock))
-	check(is_equal_approx(right.position.x-left.position.x-timeline.laser_width,timeline.resolved_gap),"convergence stopping gap is unchanged")
+	check(timeline.cross.position == timeline.cross.pivot_center and not left.active and not right.active,"fixed cross is independent of inactive blue formation")
 	check(left.collision.shape.size == Vector2(20,630) and left.collision.position.y == 585,"redesigned laser body preserves exact collision geometry")
-	timeline.advance(70.40)
-	check(left.warning and not left.active,"red warnings remain non-damaging at exact convergence boundary")
-	timeline.advance(71.601)
+	timeline.advance(38.40)
+	check(left.warning and not left.active,"blue warnings remain non-damaging at exact assault boundary")
+	timeline.advance(39.601)
 	check(left.active and not left.warning,"warning ends at original 1.2-second activation boundary (first sample after it)")
 	var time0: float = left.activation_clock
-	timeline.advance(71.9)
+	timeline.advance(39.9)
 	check(left.activation_clock == time0,"visual energy ramp does not restart during active movement")
 	for cue in [12.80,38.40,64.00,70.40,89.60]:
 		timeline.advance(cue)
@@ -104,7 +104,7 @@ func run() -> void:
 	check(hud.timer_label.text == "00:00.00" and hud.song_progress.value == hud.song_progress.max_value,"survival timer and progress clamp at the ending")
 	check(hud.find_children("*Boss*","ProgressBar",true,false).is_empty(),"survival HUD has no boss HP bar")
 	hud.phase_transition.update_clock(89.7)
-	check(hud.phase_label.modulate.a > 0 and hud.phase_label.modulate.a < 1,"phase title eases in from audio time")
+	check(not hud.phase_label.visible,"compact phase caption avoids covering the arena")
 	hud.phase_transition.update_clock(91.0)
 	check(not hud.phase_label.visible,"transient phase title hides without removing persistent current phase")
 	game.player.health = 2

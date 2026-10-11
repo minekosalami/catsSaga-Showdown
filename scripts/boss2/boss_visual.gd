@@ -30,7 +30,9 @@ func apply_clock(playback: float) -> void:
 			envelope = smoothstep(0.0,rise,measure_phase)
 		else:
 			envelope = 1-smoothstep(rise,pulse_duration,measure_phase)
-	scale = rest_scale * (1+pulse_amount * envelope)
+	var attack_emphasis := 1-smoothstep(70.40,70.80,playback) if playback >= 70.40 else 0.0
+	scale = rest_scale * (1+pulse_amount * envelope+0.035*attack_emphasis)
+	self_modulate = Color.WHITE.lerp(Color(1.5,1.2,1.2),attack_emphasis)
 	float_pixels = sin(playback * TAU / float_cycle) * float_amplitude
 	# offset moves drawing only; position stays the stable formation/spawn origin.
 	offset = rest_offset + Vector2(0,float_pixels/maxf(0.001,scale.y))

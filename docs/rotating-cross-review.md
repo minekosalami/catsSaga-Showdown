@@ -1,5 +1,7 @@
 # Boss presentation and rotating cross review
 
+> Superseded by [Boss2 survival overhaul](boss2-survival-overhaul-review.md). This document records the prior cross implementation.
+
 Boss2 now declares **NOW DIE!** at 70.40 seconds, then uses a moving, alternating red cross formation during the same hardest phase. Both perpendicular beams share one pivot and two rectangular damage shapes. Brilliant gradient cores, electrical lines, flow, sparks, red targeting zones and warning triangles are procedural CanvasItem effects; no artwork files were added or altered.
 
 ## Fair sequencing and exact music timing

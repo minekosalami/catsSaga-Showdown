@@ -1,30 +1,21 @@
 extends Node2D
-
 const Energy = preload("res://scripts/ui/energy_laser_style.gd")
 const RED := Color("#FF2347")
-# Defaults sequence full existing blue convergence first, then the red formation.
 @export var start_time := 70.40
 @export var end_time := 89.60
-@export var warning_start := 79.20
 @export var warning_duration := 0.80
-@export var charging_duration := 1.60
-@export var activation_duration := 7.60
-@export var initial_rotation_speed := 0.32 # radians/second, clockwise in canvas coordinates
-@export var maximum_rotation_speed := 1.10
-@export_range(0.5,4.0,0.1) var acceleration_curve := 1.4
-@export var reversal_interval := 1.60 # one measure at 150 BPM
-@export var reversal_easing := 0.28
-@export var pivot_center := Vector2(270,400)
-@export var pivot_amplitude := Vector2(72,55)
-@export var pivot_cycle := 6.40
-@export var pivot_bounds := Rect2(150,310,240,190)
-@export var beam_width := 24.0
+@export var charging_duration := 0.80
+@export var maximum_rpm := 50.0
+@export var acceleration_seconds := 3.2
+@export var deceleration_seconds := 3.2
+@export var pivot_center := Vector2(270,410)
+@export var beam_width := 24.0 # visual energy only
+@export var core_width := 3.0 # the sole damaging width, drawn explicitly white
 @export var beam_length := 1600.0
 @export_range(0.0,1.0,0.05) var glow_intensity := 0.65
-@export var shatter_time := 89.20
 @export_range(8,96,1) var fragment_count := 64
 @export var fragment_velocity := 280.0
-@export var fragment_lifetime := 0.38
+@export var fragment_lifetime := 0.5
 var clock := 0.0
 var active := false
 var warning := false
@@ -38,17 +29,17 @@ var fragments: Array[Dictionary] = []
 var shatter_count := 0
 var cancelled := false
 var last_clock := -1.0
-var integral := PackedFloat64Array([0.0])
-var integral_key := ""
+var last_damage_clock := -1.0
 
 func activation_time() -> float:
-	return maxf(start_time,warning_start)+warning_duration+charging_duration
+	return snappedf(start_time+warning_duration+charging_duration,0.000001)
 
 func break_time() -> float:
-	return maxf(activation_time(),minf(end_time,minf(shatter_time,activation_time()+activation_duration)))
+	return end_time
 
 func _ready() -> void:
 	z_index = -1
+	position = pivot_center
 	for i in range(2):
 		var beam := Area2D.new()
 		beam.name = "Horizontal" if i == 0 else "Vertical"
@@ -68,8 +59,12 @@ func _ready() -> void:
 
 func _set_shapes(enabled: bool) -> void:
 	for shape in shapes:
-		(shape.shape as RectangleShape2D).size = Vector2(beam_length,beam_width)
+		(shape.shape as RectangleShape2D).size = Vector2(beam_length,core_width)
 		shape.set_deferred("disabled",not enabled)
+	# Layer changes are immediate; deferred shape updates cannot leave a live hit.
+	for beam in beams:
+		beam.collision_layer = 4 if enabled else 0
+		beam.collision_mask = 2 if enabled else 0
 
 func cancel() -> void:
 	cancelled = true
@@ -85,79 +80,88 @@ func sample(playback: float) -> void:
 	clock = playback
 	if cancelled:
 		return
-	# Deterministic seeking and retry; no frame/delta accumulation for pose or shards.
 	if playback < last_clock:
 		fragments.clear()
 		shatter_count = 0
+		last_damage_clock = -1
 	last_clock = playback
-	var warning_begin := maxf(start_time,warning_start)
 	var begins := activation_time()
-	var breaks := break_time()
-	warning = clock >= warning_begin and clock < warning_begin+warning_duration
-	charging = clock >= warning_begin+warning_duration and clock < begins
-	active = clock >= begins and clock < breaks and clock < end_time
-	shattering = clock >= breaks and clock < end_time
-	visible = clock >= warning_begin and clock < end_time
+	var warning_end := snappedf(start_time+warning_duration,0.000001)
+	warning = clock >= start_time and clock < warning_end-0.000000001
+	charging = clock >= warning_end-0.000000001 and clock < begins
+	active = clock >= begins and clock < end_time
+	shattering = clock >= end_time and clock < end_time+fragment_lifetime
+	visible = warning or charging or active or shattering
 	_set_shapes(active)
-	energy = pow(clampf((clock-begins)/maxf(0.001,breaks-begins),0,1),acceleration_curve)
-	var motion_time := clampf(clock,begins,breaks)-begins
-	position = pivot_at(maxf(0,motion_time))
-	rotation = angle_at(maxf(0,motion_time))
-	angular_speed = velocity_at(maxf(0,motion_time)) if active else 0
+	position = pivot_center
+	rotation = angle_at(clampf(clock-begins,0,end_time-begins))
+	angular_speed = velocity_at(clock-begins) if active else 0
+	energy = angular_speed/maxf(0.001,maximum_rpm*TAU/60)
 	if shattering and fragments.is_empty():
 		_build_fragments()
-	if clock >= end_time or clock < begins:
+	if clock >= end_time+fragment_lifetime or clock < begins:
 		fragments.clear()
+	if not active:
+		last_damage_clock = -1
 	queue_redraw()
 
-func pivot_at(t: float) -> Vector2:
-	# Starts at rest; intentional bounded ellipse with no player tracking.
-	var p := t*TAU/maxf(0.1,pivot_cycle)
-	var envelope := smoothstep(0,0.8,t)
-	var point := pivot_center+Vector2(sin(p),sin(p*0.5))*pivot_amplitude*envelope
-	return Vector2(clampf(point.x,pivot_bounds.position.x,pivot_bounds.end.x),clampf(point.y,pivot_bounds.position.y,pivot_bounds.end.y))
+func pivot_at(_t: float) -> Vector2:
+	return pivot_center
 
 func velocity_at(t: float) -> float:
-	var span := maxf(0.001,break_time()-activation_time())
-	var speed := lerpf(initial_rotation_speed,maximum_rotation_speed,pow(clampf(t/span,0,1),acceleration_curve))
-	var interval := maxf(0.2,reversal_interval)
-	var cycle := int(t/interval)
-	var sign_now := 1.0 if cycle%2 == 0 else -1.0
-	var local := fmod(t,interval)
-	var reverse := minf(reversal_easing,interval*0.45)
-	if cycle > 0 and local < reverse:
-		sign_now *= lerpf(-1,1,smoothstep(0,reverse,local))
-	# Slow first launch; reversals smoothly pass through zero angular velocity.
-	return speed*sign_now*smoothstep(0,0.35,t)
+	var span := end_time-activation_time()
+	var maximum := maximum_rpm*TAU/60
+	if t <= 0 or t >= span:
+		return 0
+	if t < acceleration_seconds:
+		return maximum*(1-cos(PI*t/acceleration_seconds))*0.5
+	if t > span-deceleration_seconds:
+		return maximum*(1+cos(PI*(t-(span-deceleration_seconds))/deceleration_seconds))*0.5
+	return maximum
 
 func angle_at(t: float) -> float:
-	# Cache a fixed-grid integral of the analytical velocity. Frames only sample
-	# this curve; seeking or frame rate cannot alter the resulting pose.
-	const STEP := 1.0/120.0
-	var key := str([initial_rotation_speed,maximum_rotation_speed,acceleration_curve,reversal_interval,reversal_easing,break_time(),activation_time()])
-	if key != integral_key:
-		integral_key = key
-		integral = PackedFloat64Array([0.0])
-	var count := int(t/STEP)
-	while integral.size() <= count:
-		var i := integral.size()-1
-		integral.append(integral[i]+(velocity_at(i*STEP)+velocity_at((i+1)*STEP))*STEP*0.5)
-	var remainder := t-count*STEP
-	return integral[count]+(velocity_at(count*STEP)+velocity_at(t))*remainder*0.5
+	# Closed-form integral of the sine-eased speed, sampled from music time.
+	var maximum := maximum_rpm*TAU/60
+	var span := end_time-activation_time()
+	var time := clampf(t,0,span)
+	var a := minf(time,acceleration_seconds)
+	var angle := maximum*0.5*(a-acceleration_seconds/PI*sin(PI*a/acceleration_seconds))
+	angle += maximum*clampf(time-acceleration_seconds,0,span-acceleration_seconds-deceleration_seconds)
+	var d := clampf(time-(span-deceleration_seconds),0,deceleration_seconds)
+	angle += maximum*0.5*(d+deceleration_seconds/PI*sin(PI*d/deceleration_seconds))
+	return angle
 
-func _physics_process(_delta: float) -> void:
+func swept_contact(before: Vector2, after: Vector2, from_clock: float, to_clock: float, radius: float) -> bool:
+	# Relative polar motion against four arms. Small substeps bound curvature of
+	# the player's straight physics segment; crossing a quadrant detects an arm
+	# even when the fast beam has passed entirely between two rendered poses.
+	var steps := maxi(1,ceili(maxf(0,to_clock-from_clock)*240))
+	for i in range(steps):
+		var a := before.lerp(after,i/float(steps))-pivot_center
+		var b := before.lerp(after,(i+1)/float(steps))-pivot_center
+		var closest := Geometry2D.get_closest_point_to_segment(Vector2.ZERO,a,b).length()
+		if closest <= radius+core_width/2:
+			return true
+		var ta := lerpf(from_clock,to_clock,i/float(steps))-activation_time()
+		var tb := lerpf(from_clock,to_clock,(i+1)/float(steps))-activation_time()
+		var relative_a := a.angle()-angle_at(ta)
+		var relative_b := a.angle()+wrapf(b.angle()-a.angle(),-PI,PI)-angle_at(tb)
+		var tolerance := asin(clampf((radius+core_width/2)/closest,0,1))
+		var low := minf(relative_a,relative_b)-tolerance
+		var high := maxf(relative_a,relative_b)+tolerance
+		if ceil(low/(PI/2)) <= floor(high/(PI/2)):
+			return true
+	return false
+
+func _physics_process(delta: float) -> void:
 	if not active:
 		return
-	for shape in shapes:
-		var query := PhysicsShapeQueryParameters2D.new()
-		query.shape = shape.shape
-		query.transform = shape.global_transform
-		query.collision_mask = 2
-		query.collide_with_areas = true
-		query.collide_with_bodies = false
-		for hit in get_world_2d().direct_space_state.intersect_shape(query,4):
-			if hit.collider.is_in_group("player"):
-				hit.collider.take_damage(1)
+	var player: Node = get_parent().battle.player
+	var from_clock := maxf(activation_time(),clock-delta) if last_damage_clock < 0 else last_damage_clock
+	last_damage_clock = clock
+	if swept_contact(player.previous_hit_center,player.hit_center(),from_clock,clock,player.damage_hitbox_radius):
+		player.notify_laser_contact(player.hit_center())
+		player.take_damage(1)
 
 func _draw() -> void:
 	if shattering:
@@ -166,34 +170,22 @@ func _draw() -> void:
 	for i in range(2):
 		draw_set_transform(Vector2.ZERO,i*PI/2)
 		if warning or charging:
-			_draw_warning()
+			var alpha := 0.4 if charging else 0.22
+			draw_rect(Rect2(-beam_length/2,-core_width/2,beam_length,core_width),Color(RED,alpha))
+			draw_line(Vector2(-beam_length/2,-beam_width/2),Vector2(beam_length/2,-beam_width/2),Color(RED,0.35),1,true)
+			draw_line(Vector2(-beam_length/2,beam_width/2),Vector2(beam_length/2,beam_width/2),Color(RED,0.35),1,true)
 		if active:
 			Energy.draw_beam(self,beam_length,beam_width,RED,clock,energy,glow_intensity)
-			var crack := smoothstep(break_time()-0.12,break_time(),clock)
-			if crack > 0:
-				draw_rect(Rect2(-beam_length/2,-beam_width/2,beam_length,beam_width),Color(1,1,1,crack*0.25))
-				for j in range(12):
-					var x := -500+j*90
-					draw_polyline(PackedVector2Array([Vector2(x,-beam_width/2),Vector2(x+6,0),Vector2(x-3,beam_width/2)]),Color(1,1,1,crack),1,true)
+			draw_rect(Rect2(-beam_length/2,-core_width/2,beam_length,core_width),Color.WHITE)
 	draw_set_transform(Vector2.ZERO)
-
-func _draw_warning() -> void:
-	var pulse := 0.12+0.05*sin(clock*TAU/0.8)
-	draw_rect(Rect2(-beam_length/2,-beam_width/2,beam_length,beam_width),Color(RED,pulse))
-	for side in [-1,1]:
-		draw_line(Vector2(-beam_length/2,side*beam_width/2),Vector2(beam_length/2,side*beam_width/2),Color(RED,0.8),1,true)
-	draw_line(Vector2(-beam_length/2,0),Vector2(beam_length/2,0),Color(1,0.5,0.5,0.9),1,true)
-	for x in [-210,210]:
-		var triangle := PackedVector2Array([Vector2(x,-18),Vector2(x-7,-31),Vector2(x+7,-31)])
-		draw_colored_polygon(triangle,RED)
-		draw_line(Vector2(x,-28),Vector2(x,-23),Color.WHITE,1)
-	if charging:
-		var build := smoothstep(0,charging_duration,clock-maxf(start_time,warning_start)-warning_duration)
-		draw_rect(Rect2(-beam_length/2,-2,beam_length,4),Color(1,0.65,0.65,build*0.65))
-		draw_circle(Vector2.ZERO,12+5*build,Color(RED,0.15))
+	draw_circle(Vector2.ZERO,12,Color(RED,0.5))
+	draw_arc(Vector2.ZERO,13,0,TAU,32,Color.WHITE,1.5,true)
+	draw_circle(Vector2.ZERO,3,Color.WHITE)
 
 func _build_fragments() -> void:
 	shatter_count += 1
+	get_parent().battle.effects.burst(position,RED,12,240,0.35)
+	get_parent().battle.effects.burst(position,Color.WHITE,8,170,0.28)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1940892
 	for i in range(fragment_count):
@@ -212,11 +204,10 @@ func _build_fragments() -> void:
 
 func _draw_fragments() -> void:
 	var age := maxf(0,clock-break_time())
-	var fade := 1-smoothstep(0,minf(fragment_lifetime,end_time-break_time()),age)
+	var fade := 1-smoothstep(0,fragment_lifetime,age)
 	var travel := (1-exp(-age*5))/5
 	for piece in fragments:
 		var point: Vector2 = piece.origin+piece.velocity*travel
-		draw_set_transform(point,piece.angle+piece.spin*age)
 		draw_set_transform(point,piece.angle+piece.spin*age,Vector2.ONE*1.25)
 		draw_colored_polygon(piece.polygon,Color(RED,fade*0.07*glow_intensity))
 		draw_set_transform(point,piece.angle+piece.spin*age)
