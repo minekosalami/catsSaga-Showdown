@@ -85,10 +85,10 @@ func run() -> void:
 	# Inspect authored scenes and full visual bounds, not merely tree origins.
 	for filename in ["forest_entrance", "deep_forest", "bart_area"]:
 		var map: Node = load("res://scenes/world/" + filename + ".tscn").instantiate()
+		root.add_child(map)
 		var trees: Array = map.get_node("Trees").get_children()
 		if filename == "forest_entrance": trees.append(map.get_node("Characters/InspectableTree/Tree"))
-		var path: Node = map.get_node("PathPlaceholder")
-		var path_rect := Rect2(path.position - path.box_size / 2, path.box_size)
+		var path: TileMapLayer = map.get_node("Paths")
 		var above := 0
 		var below := 0
 		var clear := true
@@ -98,12 +98,14 @@ func run() -> void:
 			var foot: Vector2 = tree.position
 			if tree.get_parent().name == "InspectableTree": foot += tree.get_parent().position
 			var rect := Rect2(foot + sprite.position, sprite.texture.get_size() * sprite.scale)
-			clear = clear and not rect.intersects(path_rect)
-			if foot.y < path_rect.position.y: above += 1
+			for cell_y in range(floori(rect.position.y / 16), ceili(rect.end.y / 16)):
+				for cell_x in range(floori(rect.position.x / 16), ceili(rect.end.x / 16)):
+					clear = clear and path.get_cell_source_id(Vector2i(cell_x,cell_y)) == -1
+			if foot.y < map.map_size.y / 2: above += 1
 			else: below += 1
 			correct = correct and sprite.texture.resource_path == "res://assets/enironment/tree.png" and sprite.scale.x == sprite.scale.y and sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
 			var shape: CapsuleShape2D = tree.get_node("CollisionShape2D").shape
-			correct = correct and shape.radius == 8 and shape.height == 24 and tree.collision_layer == 1
+			correct = correct and is_equal_approx(shape.radius, 8 * tree.get_size_multiplier()) and is_equal_approx(shape.height, 24 * tree.get_size_multiplier()) and tree.collision_layer == 1
 			# Keep sprite rectangles away from NPC visuals and spawn/portal positions.
 			for npc in map.get_node("Characters").get_children():
 				if npc.name != "InspectableTree": clear = clear and not rect.grow(16).has_point(npc.position)
