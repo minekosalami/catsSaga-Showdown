@@ -24,9 +24,9 @@ func setup(host: Node2D) -> void:
 	world = host
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 30
-	var terrain: Texture2D = load("res://resources/maps/world_terrain.res")
+	var terrain: Texture2D = load("res://resources/maps/underground_terrain.res" if Session.area_id == "underground_cave" else "res://resources/maps/world_terrain.res")
 	boss_locations = terrain.get_meta("boss_locations", {})
-	fog_image = Session.exploration.visibility_image()
+	fog_image = Session.exploration.visibility_image(Session.area_id)
 	fog_texture = ImageTexture.create_from_image(fog_image)
 	minimap = Control.new()
 	minimap.name = "Minimap"
@@ -35,7 +35,7 @@ func setup(host: Node2D) -> void:
 	minimap.position = Vector2(24,24)
 	minimap.size = Vector2(150,150)
 	add_child(minimap)
-	minimap.configure(terrain,fog_texture,true)
+	minimap.configure(terrain,fog_texture,true,Session.area_id)
 	map_frame = Control.new()
 	map_frame.name = "WorldMap"
 	add_child(map_frame)
@@ -46,7 +46,7 @@ func setup(host: Node2D) -> void:
 	map_frame.add_child(paper)
 	paper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var title := Label.new()
-	title.text = "WORLD_MAP()"
+	title.text = "UNDERGROUND_MAP()" if Session.area_id == "underground_cave" else "WORLD_MAP()"
 	title.position = Vector2(28,18)
 	title.add_theme_font_size_override("font_size",26)
 	map_frame.add_child(title)
@@ -60,7 +60,7 @@ func setup(host: Node2D) -> void:
 	full_map.offset_top = 64
 	full_map.offset_right = -24
 	full_map.offset_bottom = -56
-	full_map.configure(terrain,fog_texture,false)
+	full_map.configure(terrain,fog_texture,false,Session.area_id)
 	var footer := Label.new()
 	footer.text = "ARROWS  Pan   |   SCROLL  Zoom   |   M / ESC  Close"
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -203,7 +203,7 @@ func _process(delta: float) -> void:
 	if opened:
 		var direction := Vector2(float(Input.is_key_pressed(KEY_RIGHT))-float(Input.is_key_pressed(KEY_LEFT)),float(Input.is_key_pressed(KEY_DOWN))-float(Input.is_key_pressed(KEY_UP))).normalized()
 		full_map.center_world += direction*260.0*delta/full_map.zoom
-		full_map.center_world = full_map.center_world.clamp(Vector2.ZERO,Vector2(Layout.SIZE))
+		full_map.center_world = full_map.center_world.clamp(Vector2.ZERO,Vector2(Layout.atlas_size(Session.area_id)))
 		full_map.zoom = lerpf(full_map.zoom,target_zoom,1.0-exp(-14.0*delta))
 	elif normal_exploration() and sequence.is_empty():
 		var current := Vector2i(world.player.position/64.0)

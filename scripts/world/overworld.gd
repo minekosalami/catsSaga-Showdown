@@ -4,7 +4,8 @@ const MAPS := {
 	"entrance": preload("res://scenes/world/forest_entrance.tscn"),
 	"deep_forest": preload("res://scenes/world/deep_forest.tscn"),
 	"bart_area": preload("res://scenes/world/bart_area.tscn"),
-	"flooded_forest": preload("res://scenes/world/flooded_forest.tscn")
+	"flooded_forest": preload("res://scenes/world/flooded_forest.tscn"),
+	"underground_cave": preload("res://scenes/world/underground_cave.tscn")
 }
 var map: Node2D
 var player: CharacterBody2D
@@ -77,7 +78,7 @@ func _validate_saved_position() -> void:
 	query.transform = player.global_transform
 	query.collision_mask = player.collision_mask
 	query.exclude = [player.get_rid()]
-	if not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+	if (map.has_method("is_walkable_position") and not map.is_walkable_position(player.position)) or not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
 		var marker := map.get_node_or_null("Entries/" + Session.entry_marker) as Marker2D
 		if marker == null:
 			marker = map.get_node("Entries").get_child(0) as Marker2D
@@ -135,7 +136,7 @@ func _process(_delta: float) -> void:
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
 		interaction_indicator.position = nearest_npc.position + Vector2(-16, -62)
-	interaction_hint.text = "Z  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
+	interaction_hint.text = nearest_npc.get_meta("interaction_label","Z  Interact") if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
 
 func _input(event: InputEvent) -> void:
 	if map_ui.handle_input(event):

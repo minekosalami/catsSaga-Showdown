@@ -12,4 +12,19 @@ const REGIONS := {
 }
 
 static func world_point(area: String, local_point: Vector2) -> Vector2:
-	return Vector2(REGIONS[area].offset)+local_point/TILE_PIXELS
+	return Vector2(region(area).offset)+local_point/TILE_PIXELS
+
+# Underground terrain has its own atlas; the existing forest atlas stays intact.
+const UNDERGROUND := {"underground_cave":{"scene":"underground_cave","name":"Underground Cave","offset":Vector2i.ZERO,"size":Vector2i(1280,1024)}}
+static func all_regions() -> Dictionary:
+	var result := REGIONS.duplicate()
+	result.merge(UNDERGROUND)
+	return result
+static func region(area: String) -> Dictionary:
+	return UNDERGROUND[area] if UNDERGROUND.has(area) else REGIONS[area]
+static func atlas_size(area: String) -> Vector2i:
+	return UNDERGROUND[area].size if UNDERGROUND.has(area) else SIZE
+static func visible_regions(area: String) -> Dictionary:
+	return UNDERGROUND if UNDERGROUND.has(area) else REGIONS
+static func same_map(a: String, b: String) -> bool:
+	return UNDERGROUND.has(a) == UNDERGROUND.has(b)

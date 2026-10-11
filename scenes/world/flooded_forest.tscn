@@ -15,6 +15,8 @@
 [ext_resource type="TileSet" path="res://resources/world/gfx_boulders.tres" id="13_latg6"]
 [ext_resource type="TileSet" path="res://resources/world/gfx_plants.tres" id="14_4qhed"]
 
+[ext_resource type="PackedScene" path="res://scenes/world/cave_hole.tscn" id="cave_hole"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f8ray"]
 size = Vector2(112, 96)
 
@@ -848,3 +850,10 @@ tile_map_data = PackedByteArray("AABUAFUAAAADAAwAAAB2AAQAAAADAAwAAACCADUAAAABAAg
 tile_set = ExtResource("14_4qhed")
 collision_enabled = false
 navigation_enabled = false
+
+[node name="FromCave" type="Marker2D" parent="Entries"]
+position = Vector2(1696, 864)
+metadata/facing_direction = Vector2(0, 1)
+
+[node name="CaveHole" parent="Characters" instance=ExtResource("cave_hole")]
+position = Vector2(1696, 1008)

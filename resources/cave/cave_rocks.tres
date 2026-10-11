@@ -1,0 +1,21 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/gfx/cave.png" id="1_nop4s"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q6r3n"]
+texture = ExtResource("1_nop4s")
+7:5/size_in_atlas = Vector2i(2, 2)
+7:5/0 = 0
+7:5/0/y_sort_origin = 10
+7:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-13, 0, 11, -2, 15, 9, 10, 14, -11, 14, -15, 8)
+5:4/0 = 0
+5:4/0/y_sort_origin = 10
+5:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6, -1, 6, -1, 7, 5, -7, 6)
+6:4/0 = 0
+6:4/0/y_sort_origin = 10
+6:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6, -1, 6, -1, 7, 5, -7, 6)
+
+[resource]
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 2
+sources/0 = SubResource("TileSetAtlasSource_q6r3n")
