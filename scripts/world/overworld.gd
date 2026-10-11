@@ -14,12 +14,14 @@ var nearest_npc: Node2D
 var interaction_indicator: Label
 var conversation_flag: String = ""
 var awaiting_victory_dialogue: bool = false
+var checking_spawn: bool = false
 
 func _ready() -> void:
 	map = MAPS[Session.area_id].instantiate()
 	add_child(map)
 	player = preload("res://scenes/world/player.tscn").instantiate()
 	player.position = Session.return_position if Session.restore_position else map.get_node("Entries/" + Session.entry_marker).position
+	checking_spawn = Session.restore_position
 	Session.restore_position = false
 	add_child(player)
 	var camera: Camera2D = player.get_node("Camera2D")
@@ -44,6 +46,9 @@ func _ready() -> void:
 	interaction_indicator.add_theme_constant_override("outline_size", 6)
 	add_child(interaction_indicator)
 	interaction_indicator.hide()
+	if checking_spawn:
+		player.movement_locked = true
+		call_deferred("_validate_saved_position")
 	awaiting_victory_dialogue = Session.area_id == "bart_area" and Session.evil_bart_defeated and Session.story_flags.get("bart_victory_dialogue_pending", false) and not Session.story_flags.get("bart_victory_dialogue_seen", false)
 	if awaiting_victory_dialogue:
 		player.movement_locked = true
@@ -51,6 +56,24 @@ func _ready() -> void:
 			Session.transition_finished.connect(_show_victory_dialogue, CONNECT_ONE_SHOT)
 		else:
 			call_deferred("_show_victory_dialogue")
+
+func _validate_saved_position() -> void:
+	# Wait until the new map's bodies are registered with the physics world.
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = player.get_node("CollisionShape2D").shape
+	query.transform = player.global_transform
+	query.collision_mask = player.collision_mask
+	query.exclude = [player.get_rid()]
+	if not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+		var marker := map.get_node_or_null("Entries/" + Session.entry_marker) as Marker2D
+		if marker == null:
+			marker = map.get_node("Entries").get_child(0) as Marker2D
+		player.position = marker.position
+		player.velocity = Vector2.ZERO
+		player.get_node("Camera2D").reset_smoothing()
+	checking_spawn = false
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
@@ -68,7 +91,7 @@ func _build_hud() -> void:
 	var row := HBoxContainer.new()
 	margin.add_child(row)
 	var title := Label.new()
-	title.text = "// " + map.display_name.to_upper() + "  [TEMP MAP]"
+	title.text = "// " + map.display_name.to_upper()
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
 	var back := Button.new()
@@ -85,7 +108,7 @@ func _build_hud() -> void:
 	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
 
 func _process(_delta: float) -> void:
-	player.movement_locked = dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open()
+	player.movement_locked = checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):
@@ -95,14 +118,14 @@ func _process(_delta: float) -> void:
 		if distance <= npc.interaction_radius and distance < closest:
 			closest = distance
 			nearest_npc = npc
-	interaction_hint.visible = not Session.world_menu_open() and not dialogue.active and not awaiting_victory_dialogue and not Session.busy and not get_tree().paused
+	interaction_hint.visible = not checking_spawn and not Session.world_menu_open() and not dialogue.active and not awaiting_victory_dialogue and not Session.busy and not get_tree().paused
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
 		interaction_indicator.position = nearest_npc.position + Vector2(-16, -62)
 	interaction_hint.text = "Z  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
 
 func _input(event: InputEvent) -> void:
-	if not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
+	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
 		pending_battle = false
 		conversation_flag = nearest_npc.completion_flag
 		var custom: Array = nearest_npc.custom_lines()
@@ -129,7 +152,7 @@ func _on_dialogue_finished() -> void:
 		Session.save_current()
 
 func _travel(destination: String, entry: String) -> void:
-	if dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open():
+	if checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open():
 		return
 	player.movement_locked = true
 	Session.travel(destination, entry)

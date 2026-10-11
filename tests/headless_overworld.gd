@@ -66,12 +66,12 @@ func run() -> void:
 	key(KEY_D, false)
 	key(KEY_S, false)
 	# Probe a real StaticBody2D obstacle using the player collision shape.
-	player.position = Vector2(490, 240)
+	player.position = Vector2(405, 268)
 	player.velocity = Vector2.ZERO
 	key(KEY_D, true)
 	await create_timer(0.55).timeout
 	key(KEY_D, false)
-	check(player.position.x < 507 and player.is_on_wall(), "environment blocks movement through obstacle")
+	check(player.position.x < 431 and player.get_slide_collision_count() > 0, "tree trunk blocks overworld movement")
 	player.position = Vector2(55, 450)
 	player.velocity = Vector2.ZERO
 	key(KEY_LEFT, true)
