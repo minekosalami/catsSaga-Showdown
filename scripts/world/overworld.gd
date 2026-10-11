@@ -17,6 +17,7 @@ var conversation_flag: String = ""
 var awaiting_victory_dialogue: bool = false
 var checking_spawn: bool = false
 var pending_encounter := "bart"
+var map_ui: CanvasLayer
 
 func _ready() -> void:
 	map = MAPS[Session.area_id].instantiate()
@@ -48,6 +49,11 @@ func _ready() -> void:
 	interaction_indicator.add_theme_constant_override("outline_size", 6)
 	add_child(interaction_indicator)
 	interaction_indicator.hide()
+	map_ui = CanvasLayer.new()
+	map_ui.name = "Cartography"
+	map_ui.set_script(preload("res://scripts/maps/map_ui.gd"))
+	add_child(map_ui)
+	map_ui.setup(self)
 	if checking_spawn:
 		player.movement_locked = true
 		call_deferred("_validate_saved_position")
@@ -89,7 +95,7 @@ func _build_hud() -> void:
 	root.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	for side in ["left", "right", "top"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
+		margin.add_theme_constant_override("margin_" + side, 196 if side == "left" else 24)
 	var row := HBoxContainer.new()
 	margin.add_child(row)
 	var title := Label.new()
@@ -107,10 +113,11 @@ func _build_hud() -> void:
 	interaction_hint.offset_top = -56
 	interaction_hint.offset_bottom = -24
 	interaction_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
+	interaction_hint.add_theme_font_size_override("font_size",14)
+	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
 
 func _process(_delta: float) -> void:
-	player.movement_locked = checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open()
+	player.movement_locked = checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or not map_ui.sequence.is_empty()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):
@@ -124,9 +131,12 @@ func _process(_delta: float) -> void:
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
 		interaction_indicator.position = nearest_npc.position + Vector2(-16, -62)
-	interaction_hint.text = "Z  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   ESC  Pause"
+	interaction_hint.text = "Z  Interact" if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
 
 func _input(event: InputEvent) -> void:
+	if map_ui.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
 		if nearest_npc.has_method("handle_interaction") and nearest_npc.handle_interaction(self):
 			get_viewport().set_input_as_handled()
@@ -169,6 +179,13 @@ func _travel(destination: String, entry: String) -> void:
 func hide_interaction() -> void:
 	interaction_indicator.hide()
 	interaction_hint.hide()
+	if map_ui != null: map_ui.minimap.hide()
+
+func map_modal_open() -> bool:
+	return map_ui != null and map_ui.modal_open()
+
+func update_map_exploration() -> void:
+	if map_ui != null: map_ui.update_exploration()
 
 func _show_victory_dialogue() -> void:
 	if not awaiting_victory_dialogue or Session.busy:

@@ -47,7 +47,7 @@ func run() -> void:
 		query.shape = body
 		query.collision_mask = 1
 		for cell in paths.get_used_cells():
-			soil_only = soil_only and paths.get_cell_atlas_coords(cell).x == 6
+			soil_only = soil_only and paths.get_cell_atlas_coords(cell) in [Vector2i(1,30),Vector2i(2,32)]
 			query.transform = Transform2D(0, paths.map_to_local(cell))
 			# Leave the outermost edge of painted paths for natural terrain borders.
 			var interior := true
@@ -55,7 +55,7 @@ func run() -> void:
 				interior = interior and reachable.has(cell + step)
 			if interior:
 				route_clear = route_clear and map.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
-		check(soil_only, filename + " uses existing single-cell soil tiles")
+		check(soil_only, filename + " uses GFX single-cell soil tiles")
 		check(route_clear, filename + " interior path cells fit actual player collision shape")
 		var important_clear := true
 		for group in ["Entries", "Portals"]:

@@ -1,0 +1,17 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/gfx/Overworld.png" id="1_w2nfp"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k01vh"]
+texture = ExtResource("1_w2nfp")
+5:9/0 = 0
+7:9/0 = 0
+5:10/0 = 0
+8:10/0 = 0
+17:30/0 = 0
+18:30/0 = 0
+1:30/0 = 0
+2:32/0 = 0
+
+[resource]
+sources/0 = SubResource("TileSetAtlasSource_k01vh")

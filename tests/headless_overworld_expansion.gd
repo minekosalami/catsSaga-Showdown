@@ -40,7 +40,13 @@ func navigation(map: Node2D, size: Vector2i) -> AStarGrid2D:
 			block_rect(grid,collider.global_transform*collider.shape.get_rect())
 	for node in map.get_children():
 		if node is TileMapLayer and node.collision_enabled and node.tile_set.get_physics_layers_count() > 0:
-			for cell in node.get_used_cells(): block_rect(grid,Rect2(Vector2(cell*16),Vector2(16,16)))
+			for cell in node.get_used_cells():
+				var data: TileData = node.get_cell_tile_data(cell)
+				for index in data.get_collision_polygons_count(0):
+					var polygon := data.get_collision_polygon_points(0,index)
+					var rect := Rect2(node.to_global(node.map_to_local(cell)+polygon[0]),Vector2.ZERO)
+					for point in polygon: rect = rect.expand(node.to_global(node.map_to_local(cell)+point))
+					block_rect(grid,rect)
 	return grid
 
 func cell(point: Vector2) -> Vector2i:
@@ -77,7 +83,7 @@ func run() -> void:
 				check(not nav.get_id_path(start,cell(marker.position)).is_empty(),filename+" walking route reaches "+group+"/"+marker.name)
 		check(map.get_node("Discoveries").get_child_count() == 6,filename+" has six empty, reachable environmental discoveries")
 		var water: TileMapLayer = map.get_node("ExpansionWater")
-		check(water.get_used_cells().size() > 150 and water.tile_set.resource_path == "res://resources/world/placeholder_water.tres",filename+" reuses existing water resource")
+		check(water.get_used_cells().size() > 150 and water.tile_set.resource_path == "res://resources/world/gfx_water.tres",filename+" uses shared GFX water resource")
 		query.transform = Transform2D(0,water.map_to_local(water.get_used_cells()[0]))
 		check(not map.get_world_2d().direct_space_state.intersect_shape(query,1).is_empty(),filename+" new water blocks actual player collision shape")
 		var shore := Vector2.ZERO

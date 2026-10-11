@@ -1,0 +1,16 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/gfx/Overworld.png" id="1_p6jvn"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4q1hi"]
+texture = ExtResource("1_p6jvn")
+10:11/size_in_atlas = Vector2i(2, 2)
+10:11/0 = 0
+10:11/0/y_sort_origin = 12
+10:11/0/physics_layer_0/polygon_0/points = PackedVector2Array(-11, 0, 11, 0, 12, 12, -12, 12)
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 2
+sources/0 = SubResource("TileSetAtlasSource_4q1hi")
