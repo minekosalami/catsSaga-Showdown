@@ -68,7 +68,7 @@ func run() -> void:
 	var player: Area2D = game.player
 	player.position = Vector2(270,650)
 	player.velocity = Vector2.ZERO
-	check(not player.invincible and player.health == 3 and player.get_node("CollisionShape2D").shape.radius == 7, "fresh battle starts with active seven-pixel damage hitbox and CATA disabled")
+	check(not player.invincible and player.health == 3 and player.get_node("CollisionShape2D").shape.radius == 7.5, "fresh battle starts with active 7.5-pixel damage hitbox and CATA disabled")
 	check(player.get_node("CollisionShape2D").position.is_equal_approx(player.get_node("Sprite2D").position), "damage circle follows visible sprite center rather than displaced root")
 	check(not player.get_node("HitboxDebug").visible, "developer hitbox overlay is hidden in normal gameplay")
 	if OS.is_debug_build():

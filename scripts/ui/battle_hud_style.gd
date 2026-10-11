@@ -13,7 +13,11 @@ static func theme() -> Theme:
 
 static func card() -> StyleBoxFlat:
 	var box := Sketch.box(Color(INK,0.94),EDGE)
-	box.set_content_margin_all(8)
+	box.set_content_margin_all(9)
+	box.border_width_left = 2
+	box.border_width_right = 1
+	box.border_width_top = 1
+	box.border_width_bottom = 1
 	box.corner_radius_top_left = 4
 	box.corner_radius_top_right = 4
 	box.corner_radius_bottom_left = 4

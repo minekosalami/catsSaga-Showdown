@@ -22,12 +22,14 @@ var clock := 0.0
 var resolved_gap := 194.0
 var boss: Sprite2D
 var lasers: Array[Area2D] = []
+var cross: Node2D
 var battle: Node2D
 const Projectile := preload("res://scenes/boss2/projectile.tscn")
 
 func initialize() -> void:
 	battle = get_parent()
 	boss = $BossSprite
+	cross = $RotatingCross
 	boss.modulate.a = 0
 	create_tween().tween_property(boss,"modulate:a",1.0,0.6)
 	var player_sprite: Sprite2D = battle.player.get_node("Sprite2D")
@@ -37,6 +39,7 @@ func initialize() -> void:
 		beam.set_script(preload("res://scripts/boss2/laser.gd"))
 		beam.name = "LeftLaser" if index == 0 else "RightLaser"
 		beam.beam_width = laser_width
+		beam.charge_duration = warning_duration
 		add_child(beam)
 		lasers.append(beam)
 
@@ -98,7 +101,8 @@ func _update_formation() -> void:
 	elif phase == 4:
 		var local := clock - 70.40
 		warning = local < warning_duration
-		dangerous = not warning
+		dangerous = not warning and clock < cross.activation_time()
+		warning = warning and clock < cross.activation_time()
 		# Stops at explicit limits. Width is measured between solid inner edges.
 		var travel := minf(maxf(0, maximum_inward_travel), maxf(0, side_offset-(resolved_gap+laser_width)/2))
 		var amount := travel * easing((local-warning_duration)/maxf(0.1,convergence_duration))
@@ -109,8 +113,10 @@ func _update_formation() -> void:
 	boss.position = Vector2(center,150)
 	lasers[0].present(left,dangerous,warning,left_span,clock)
 	lasers[1].present(right,dangerous,warning,right_span,clock)
+	cross.sample(clock if phase == 4 else -1.0)
 
 func clear_hostiles() -> void:
+	cross.sample(-1.0)
 	for projectile in get_tree().get_nodes_in_group("boss2_projectiles"):
 		projectile.set_deferred("monitoring",false)
 		projectile.process_mode = Node.PROCESS_MODE_DISABLED

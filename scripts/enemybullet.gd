@@ -1,4 +1,5 @@
 extends Area2D
+const Energy = preload("res://scripts/ui/projectile_energy.gd")
 
 enum Style { STANDARD, FAST, HEAVY, DIAMOND }
 const RADII := [6.5, 4.5, 8.0, 6.0]
@@ -35,10 +36,7 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _draw() -> void:
-	var shimmer := 0.94 + 0.06 * sin(animation_time * 4.0)
-	# Antialias the silhouette/rim only; interior layers are already inside it.
-	# Radius never pulses: the saturated rim ends at the actual dangerous radius.
-	draw_circle(Vector2.ZERO,body_radius+2.5,Color(bullet_color,0.055*shimmer))
+	Energy.draw_orb(self,body_radius,bullet_color,animation_time)
 	if visual_style == Style.FAST:
 		for i in range(3):
 			var start := -direction * (body_radius+float(i)*4)
@@ -48,12 +46,9 @@ func _draw() -> void:
 		for i in range(5):
 			corners.append(Vector2.RIGHT.rotated(i*PI/2+animation_time*0.55)*body_radius*1.35)
 		draw_polyline(corners,Color(bullet_color,0.3),1,true)
-	draw_circle(Vector2.ZERO,body_radius,bullet_color.darkened(0.28))
-	draw_arc(Vector2.ZERO,body_radius-0.6,0,TAU,32,bullet_color,1.2,true)
-	draw_circle(Vector2.ZERO,body_radius*0.61,bullet_color.lightened(0.4))
-	draw_circle(Vector2.ZERO,body_radius*0.32,Color(1,1,1,shimmer))
 	if visual_style == Style.HEAVY:
-		draw_arc(Vector2.ZERO,body_radius*0.77,0.2,TAU-0.2,28,bullet_color.lightened(0.5),0.8)
+		draw_arc(Vector2.ZERO,body_radius*0.74,animation_time*1.4,animation_time*1.4+PI*0.8,16,bullet_color.lightened(0.6),1.2)
+		draw_arc(Vector2.ZERO,body_radius*0.5,-animation_time*1.2,-animation_time*1.2+PI,16,Color(1,1,1,0.5),1)
 	if animation_time < 0.12:
 		var birth := 1-animation_time/0.12
 		draw_arc(Vector2.ZERO,body_radius+5*birth,0,TAU,24,Color(bullet_color,0.1*birth),1,true)

@@ -62,6 +62,7 @@ func play_theme(theme: String) -> void:
 		elif stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
 			stream.loop = true
 		streams[theme] = stream
+	player.bus = "Overworld" if theme == "overworld" else "Master"
 	player.stream = streams[theme]
 	player.volume_db = -60.0
 	player.play()
