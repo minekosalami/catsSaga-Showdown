@@ -35,6 +35,11 @@ func finish_dialogue(dialogue: Node) -> void:
 		await press(KEY_ENTER)
 
 func run() -> void:
+	var save_manager = root.get_node("Session").saves
+	save_manager.save_path = "user://validation-headless_overworld.json"
+	for suffix in ["", ".bak", ".tmp"]:
+		if FileAccess.file_exists(save_manager.save_path + suffix):
+			DirAccess.remove_absolute(save_manager.save_path + suffix)
 	root.size = Vector2i(1280, 720)
 	session = root.get_node("Session")
 	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 1280 and ProjectSettings.get_setting("display/window/size/viewport_height") == 720, "project base resolution is 1280x720")
@@ -47,7 +52,7 @@ func run() -> void:
 	check(world.name == "Overworld" and session.area_id == "entrance", "new game starts in Forest Entrance")
 	check(world.player.position == Vector2(280, 450), "entrance start marker is honored")
 	check(get_nodes_in_group("combat_music").is_empty(), "overworld has no continuous soundtrack")
-	check(world.map.get_node("Characters").get_child_count() == 0, "entrance has no extra NPCs")
+	check(world.map.get_node("Characters").get_child_count() == 1, "entrance has one inspectable placeholder")
 	var player: CharacterBody2D = world.player
 	var camera: Camera2D = player.get_node("Camera2D")
 	check(camera.enabled and camera.limit_right == 1600 and camera.limit_bottom == 900, "player-follow camera uses map boundaries")

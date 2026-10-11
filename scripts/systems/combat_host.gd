@@ -26,6 +26,7 @@ func _layout_arena() -> void:
 func record_victory() -> void:
 	if Session.encounter_active:
 		Session.evil_bart_defeated = true
+		Session.save_boss_victory()
 
 func return_to_forest() -> void:
 	Session.return_to_forest()

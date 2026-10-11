@@ -12,9 +12,19 @@ var speaker_label: Label
 var text_label: Label
 var prompt_label: Label
 var database: Dictionary = {}
+@export var typing_sound: AudioStream
+@export_range(1, 20) var characters_per_sound: int = 6
+@export_range(0.5, 2.0) var typing_pitch: float = 1.0
+@export_range(-60.0, 0.0) var typing_volume_db: float = -20.0
+@export_range(0.03, 0.5) var sound_interval: float = 0.08
+var audio: AudioStreamPlayer
+var sound_clock: float = 0.0
+var last_sound_character: int = 0
 
 func _ready() -> void:
 	layer = 10
+	audio = AudioStreamPlayer.new()
+	add_child(audio)
 	database = JSON.parse_string(FileAccess.get_file_as_string("res://data/dialogue/test_dialogue.json"))
 	var root := Control.new()
 	add_child(root)
@@ -51,18 +61,29 @@ func _ready() -> void:
 	stack.add_child(prompt_label)
 	panel.hide()
 
-func start(dialogue_id: String) -> void:
+func start(dialogue_id: String, voice: AudioStream = null) -> void:
 	if active or not database.has(dialogue_id):
 		return
-	lines = database[dialogue_id]
+	start_lines(database[dialogue_id], voice)
+
+func start_lines(content: Array, voice: AudioStream = null) -> void:
+	if active or content.is_empty():
+		return
+	lines = content
 	line_index = 0
 	active = true
+	audio.stream = voice if voice != null else typing_sound
+	audio.pitch_scale = typing_pitch
+	audio.volume_db = typing_volume_db
 	panel.show()
 	_show_line()
 
 func _show_line() -> void:
 	speaker_label.text = "> " + lines[line_index]["speaker"]
 	text_label.text = lines[line_index]["text"]
+	audio.stop()
+	sound_clock = 0.0
+	last_sound_character = 0
 	revealed = 0.0
 	text_label.visible_characters = 0
 
@@ -71,6 +92,13 @@ func _process(delta: float) -> void:
 		return
 	revealed = minf(revealed + characters_per_second * delta, text_label.get_total_character_count())
 	text_label.visible_characters = int(revealed)
+	sound_clock += delta
+	if is_revealed():
+		audio.stop()
+	elif audio.stream != null and not audio.playing and sound_clock >= sound_interval and text_label.visible_characters - last_sound_character >= characters_per_sound:
+		audio.play()
+		last_sound_character = text_label.visible_characters
+		sound_clock = 0.0
 	cursor_clock += delta
 	prompt_label.text = "E / ENTER  " + ("advance" if is_revealed() else "reveal") + ("  _" if fmod(cursor_clock, 1.0) < 0.5 else "   ")
 
@@ -80,6 +108,7 @@ func is_revealed() -> bool:
 func advance() -> void:
 	if not active:
 		return
+	audio.stop()
 	if not is_revealed():
 		revealed = text_label.get_total_character_count()
 		text_label.visible_characters = int(revealed)
