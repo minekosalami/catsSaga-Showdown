@@ -1,6 +1,8 @@
 extends CanvasLayer
 
 const SketchTheme = preload("res://scripts/ui/sketch_theme.gd")
+const HUDStyle = preload("res://scripts/ui/battle_hud_style.gd")
+const Transition = preload("res://scripts/ui/battle_phase_transition.gd")
 const SketchButton = preload("res://scripts/ui/sketch_button.gd")
 
 var health_label: Label
@@ -24,7 +26,8 @@ var entrance_flash: ColorRect
 var entrance_tween: Tween
 @export_range(0.0, 0.25, 0.01) var phase_flash_strength := 0.12
 var phase_label: Label
-var phase_tween: Tween
+var phase_transition: Control
+var entrance_ui_tween: Tween
 
 func _label(parent: Node, text: String, font_size: int, color: Color = SketchTheme.PAPER) -> Label:
 	var label := Label.new()
@@ -38,7 +41,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var root := Control.new()
 	root.name = "HUD"
-	root.theme = SketchTheme.create()
+	root.theme = HUDStyle.theme()
 	add_child(root)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -50,7 +53,7 @@ func _ready() -> void:
 	for side in ["left", "right", "top"]:
 		margin.add_theme_constant_override("margin_" + side, 12)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 8)
+	stack.add_theme_constant_override("separation", 6)
 	margin.add_child(stack)
 	health_card = PanelContainer.new()
 	health_card.name = "PlayerCard"
@@ -61,14 +64,14 @@ func _ready() -> void:
 	var health_column := VBoxContainer.new()
 	health_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(health_column)
-	_label(health_column, "EVIL BART", 10, SketchTheme.MUTED)
+	_label(health_column, "PLAYER / HP", 10, SketchTheme.MUTED)
 	health_label = get_node("HealthLabel")
 	health_label.reparent(health_column)
-	health_label.add_theme_font_size_override("font_size", 20)
+	health_label.add_theme_font_size_override("font_size", 18)
 	var time_column := VBoxContainer.new()
 	row.add_child(time_column)
-	_label(time_column, "RUN TIME", 10, SketchTheme.MUTED)
-	timer_label = _label(time_column, "00:00", 22)
+	_label(time_column, "ELAPSED", 10, SketchTheme.MUTED)
+	timer_label = _label(time_column, "00:00", 20)
 	timer_label.name = "TimeLabel"
 
 	boss_panel = PanelContainer.new()
@@ -85,7 +88,7 @@ func _ready() -> void:
 	boss_bar = ProgressBar.new()
 	boss_bar.name = "BossHealthBar"
 	boss_bar.custom_minimum_size.y = 12
-	boss_bar.show_percentage = false
+	HUDStyle.progress(boss_bar,SketchTheme.PAPER)
 	boss_stack.add_child(boss_bar)
 	boss_panel.hide()
 
@@ -135,19 +138,14 @@ func _ready() -> void:
 	entrance_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(entrance_flash)
 	entrance_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	phase_label = _label(root, "", 32)
-	phase_label.name = "PhaseAnnouncement"
-	phase_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	phase_label.offset_left = -250
-	phase_label.offset_right = 250
-	phase_label.offset_top = -60
-	phase_label.offset_bottom = 10
-	phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	phase_label.add_theme_constant_override("outline_size", 5)
-	phase_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	phase_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	phase_label.hide()
+	phase_transition = Control.new()
+	phase_transition.set_script(Transition)
+	root.add_child(phase_transition)
+	phase_label = phase_transition.label
 	_build_victory(root)
+	margin.modulate.a = 0.0
+	entrance_ui_tween = create_tween()
+	entrance_ui_tween.tween_property(margin,"modulate:a",1.0,0.25).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _ignore_pointer(node: Node) -> void:
 	if node is Control:
@@ -171,6 +169,7 @@ func _process(_delta: float) -> void:
 		var ability_state := "[ UNLIMITED ]" if player.unlimited_saturate else ("[ USED ]" if player.saturate_used else "[ READY ]")
 		saturate_label.text = "X  /  SATURATE     " + ability_state
 		saturate_label.modulate = SketchTheme.MUTED if player.saturate_used and not player.unlimited_saturate else SketchTheme.ACCENT
+	phase_transition.update_clock(game.elapsed_time)
 	var seconds := int(game.elapsed_time)
 	timer_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
 	if is_instance_valid(game.boss) and game.boss != observed_boss:
@@ -199,7 +198,7 @@ func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
 	if is_instance_valid(bar_tween):
 		bar_tween.kill()
 	bar_tween = create_tween()
-	bar_tween.tween_property(boss_bar, "value", float(health), 0.18)
+	bar_tween.tween_property(boss_bar, "value", float(health), 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func show_boss_entrance() -> void:
 	# One short pulse, called only by the guarded boss spawn at the music drop.
@@ -208,23 +207,8 @@ func show_boss_entrance() -> void:
 	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.10)
 
 func show_phase(title: String, color: Color, dramatic: bool = false) -> void:
-	if is_instance_valid(phase_tween):
-		phase_tween.kill()
-	phase_label.text = title
-	phase_label.add_theme_font_size_override("font_size", 44 if dramatic else 28)
-	phase_label.modulate = Color(color, 0.0)
-	phase_label.show()
-	phase_tween = create_tween()
-	phase_tween.tween_property(phase_label, "modulate:a", 0.85, 0.15)
-	phase_tween.tween_interval(0.65 if dramatic else 0.45)
-	phase_tween.tween_property(phase_label, "modulate:a", 0.0, 0.4)
-	phase_tween.tween_callback(phase_label.hide)
-	if title != "Introduction()":
-		if is_instance_valid(entrance_tween):
-			entrance_tween.kill()
-		entrance_flash.modulate.a = minf(phase_flash_strength * (1.5 if dramatic else 1.0), 0.25)
-		entrance_tween = create_tween()
-		entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.16)
+	phase_transition.flash_strength = minf(phase_flash_strength,0.12)
+	phase_transition.present(title,color,get_parent().elapsed_time,dramatic)
 
 func show_impact_flash() -> void:
 	if is_instance_valid(entrance_tween):

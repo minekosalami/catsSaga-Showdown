@@ -3,6 +3,8 @@ extends Node2D
 const BOUNDARIES := [0.0, 12.80, 38.40, 64.00, 70.40, 89.60, 140.80]
 const PHASES := ["Introduction()", "Opening()", "LaserAssault()", "Intermission()", "Convergence()", "Finale()", "Survived()"]
 const PROJECTILE_LIMIT := 240
+# 1.0 restores previous density/speed/cadence; phases and laser safety stay fixed.
+@export_range(1.0,1.6,0.05) var difficulty_multiplier := 1.25
 @export_range(0.5, 3.0, 0.1) var warning_duration := 1.2
 @export_range(1.0, 12.0, 0.1) var activation_duration := 6.0
 @export_range(0.5, 12.0, 0.1) var movement_duration := 5.0
@@ -63,6 +65,7 @@ func advance(playback: float) -> void:
 	if phase in [0, 3, 6]:
 		return
 	var interval := 1.20 if phase in [1,5] else (0.72 if phase == 2 else 0.65)
+	interval /= difficulty_multiplier
 	var index := int((clock - BOUNDARIES[phase]) / interval)
 	if index != attack_index:
 		attack_index = index
@@ -120,7 +123,7 @@ func fire(direction: Vector2, speed: float, tint: Color) -> void:
 		return
 	var projectile := Projectile.instantiate()
 	projectile.direction = direction.normalized()
-	projectile.speed = speed
+	projectile.speed = speed * (1.0+(difficulty_multiplier-1.0)*0.4)
 	projectile.bullet_color = tint
 	battle.add_child(projectile)
 	projectile.position = boss.position + Vector2(0,55)
@@ -137,10 +140,10 @@ func attack(index: int) -> void:
 	var kind := index % 3
 	var opening_growth := mini(3,int(maxf(0,clock-12.80)/8.0)) if phase == 1 else 0
 	if kind == 0:
-		ring(22 if hard else 16 + opening_growth*2,145 if hard else 115 + opening_growth*5,clock * 0.11,tint,0.38 if phase == 4 else 0.27)
+		ring(roundi((22 if hard else 16 + opening_growth*2)*difficulty_multiplier),145 if hard else 115 + opening_growth*5,clock * 0.11,tint,0.38 if phase == 4 else 0.27)
 	elif kind == 1:
 		# Successive symmetric rotating pairs form reusable circular spirals.
-		for i in range(8 if hard else 5 + mini(2,opening_growth)):
+		for i in range(roundi((8 if hard else 5 + mini(2,opening_growth))*difficulty_multiplier)):
 			var angle := clock * 0.6 + i * 0.23
 			fire(Vector2.RIGHT.rotated(angle),150 if hard else 120,tint)
 			fire(Vector2.LEFT.rotated(-angle),150 if hard else 120,tint)
