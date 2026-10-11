@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3]
 [ext_resource type="Script" path="res://scripts/boss2/battle.gd" id="battle"]
-[ext_resource type="Texture2D" path="res://assets/enironment/bosses/bosstwo.png" id="boss"]
+[ext_resource type="Texture2D" path="res://assets/enironment/bosses/boss2/bosstwo.png" id="boss"]
 [ext_resource type="Texture2D" path="res://assets/levelbg.png" id="background"]
 [ext_resource type="AudioStream" path="res://assets/soundtrack/SyNaPse - 003.mp3" id="music"]
 [ext_resource type="Script" path="res://scripts/boss2/timeline.gd" id="timeline"]

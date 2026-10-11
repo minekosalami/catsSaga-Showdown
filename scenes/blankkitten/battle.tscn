@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://scripts/blankkitten/battle.gd" id="battle"]
+[ext_resource type="Script" path="res://scripts/blankkitten/presentation.gd" id="visual"]
+[ext_resource type="Script" path="res://scripts/blankkitten/hud.gd" id="hud"]
+[ext_resource type="AudioStream" path="res://assets/soundtrack/catVibes - 004.mp3" id="song"]
+[ext_resource type="Resource" path="res://resources/blankkitten/timeline.tres" id="cue"]
+[node name="BlankKittenBattle" type="Node2D"]
+script = ExtResource("battle")
+cue_sheet = ExtResource("cue")
+[node name="Background" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(0, 0, 540, 0, 540, 900, 0, 900)
+color = Color(0.026, 0.029, 0.039, 1)
+[node name="CinematicArena" type="Node2D" parent="."]
+script = ExtResource("visual")
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("song")
+volume_db = -12.0
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("hud")
+[connection signal="finished" from="Music" to="." method="_on_music_finished"]

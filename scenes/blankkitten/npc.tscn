@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://scripts/blankkitten/npc.gd" id="npc"]
+[ext_resource type="Texture2D" path="res://assets/enironment/bosses/boss3-BlankKitten/normalKitten-transparent.png" id="art"]
+[sub_resource type="CircleShape2D" id="trunk"]
+radius = 16.0
+[node name="BlankKitten" type="Node2D"]
+script = ExtResource("npc")
+interaction_radius = 112.0
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(0, -38)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("art")
+[node name="Body" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 2
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+shape = SubResource("trunk")

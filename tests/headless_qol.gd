@@ -221,7 +221,7 @@ func run() -> void:
 	check(session.saves.read_save().area == "bart_area", "area transitions autosave destination")
 	session.begin_battle(Vector2(1000, 520))
 	check(not session.save_current(), "manual save prevented during transition")
-	await create_timer(0.95).timeout
+	while session.busy: await process_frame
 	var host: Node = current_scene
 	var game: Node = host.battle
 	check(host.arena.size == Vector2i(540, 900), "combat viewport remains 540x900")

@@ -125,7 +125,7 @@ func run() -> void:
 	check(world.dialogue.active and not world.pending_battle, "Bart interaction starts dialogue before battle")
 	check(current_scene.name == "Overworld", "battle does not start before dialogue finishes")
 	await finish_dialogue(world.dialogue)
-	await create_timer(0.95).timeout
+	while session.busy: await process_frame
 	var host: Node = current_scene
 	check(host.name == "CombatHost" and session.encounter_active, "completed Bart conversation loads combat host")
 	check(host.arena.size == Vector2i(540, 900) and host.arena_container.scale == Vector2(0.8, 0.8), "battle retains portrait coordinates and uniform scale")

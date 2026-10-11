@@ -1,0 +1,10 @@
+{
+  "start": "intro",
+  "nodes": {
+    "intro": {
+      "speaker": "BlankKitten",
+      "lines": ["You... COME HERE", "Let me tell you something... I. HATE. COLOR!"],
+      "end": "battle"
+    }
+  }
+}

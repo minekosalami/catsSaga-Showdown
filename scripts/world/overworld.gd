@@ -167,7 +167,9 @@ func _on_dialogue_finished() -> void:
 	if dialogue.outcome == "battle":
 		pending_battle = true
 		player.movement_locked = true
-		if pending_encounter == "boss2":
+		if pending_encounter == "blankkitten":
+			Session.begin_blankkitten_battle(player.position)
+		elif pending_encounter == "boss2":
 			Session.begin_boss2_battle(player.position)
 		else:
 			Session.begin_battle(player.position)

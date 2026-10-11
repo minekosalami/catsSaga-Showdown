@@ -82,7 +82,7 @@ func run() -> void:
 		previous = point
 	check(clear_route,"entire entry-to-boss trail is clear for actual player shape")
 	var npc: Node = world.map.get_node("Characters/Boss2NPC")
-	check(npc.get_node("Sprite2D").texture.resource_path == "res://assets/enironment/bosses/bosstwo.png","new NPC references authorized original bosstwo texture")
+	check(npc.get_node("Sprite2D").texture.resource_path == "res://assets/enironment/bosses/boss2/bosstwo.png","new NPC references authorized original bosstwo texture")
 	check(world.map.y_sort_enabled and get_nodes_in_group("world_trees").size() >= 80,"trees use existing size variation and Y-sort")
 	check(session.save_current(),"Flooded Forest position and flags save through existing storage")
 	var saved: Dictionary = session.saves.read_save()

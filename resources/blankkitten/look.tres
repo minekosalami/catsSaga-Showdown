@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/ui/battle_look.gd" id="look"]
+[resource]
+script = ExtResource("look")
+boss_name = "BlankKitten"
+accent = Color(0.92, 0.92, 0.97, 1)
+secondary = Color(0.86, 0.3, 0.52, 1)
+flooded = true
+measure_seconds = 1.7142857
+final_phase_time = 102.85

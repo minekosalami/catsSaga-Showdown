@@ -13,7 +13,7 @@ var encounter_id := "bart"
 var key_notification_pending := false
 var busy: bool = false
 var battle_entry_pending: bool = false
-@export var battle_wipe_duration: float = 0.5
+@export var battle_wipe_duration: float = 1.2
 @export var battle_reveal_duration: float = 0.3
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 @export var region_fade_duration: float = 0.3
@@ -27,6 +27,7 @@ var confirmation: ConfirmationDialog
 var suspended_modes: Dictionary = {}
 var last_save_message: String = ""
 var curtain: ColorRect
+var battle_walls: Control
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -36,6 +37,10 @@ func _ready() -> void:
 	add_child(curtain)
 	curtain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	curtain.hide()
+	battle_walls = Control.new()
+	battle_walls.name = "BattleWalls"
+	battle_walls.set_script(preload("res://scripts/ui/black_wall_entry.gd"))
+	add_child(battle_walls)
 	pause_menu = CanvasLayer.new()
 	pause_menu.set_script(preload("res://scripts/ui/pause_menu.gd"))
 	add_child(pause_menu)
@@ -139,6 +144,27 @@ func begin_boss2_battle(position_before_battle: Vector2) -> void:
 	encounter_active = true
 	await transition_to("res://scenes/boss2/combat_host.tscn", true)
 
+## Future encounters use this entry point without duplicating the curtain.
+func begin_encounter(identifier: String, host_path: String, before: Vector2, completed_flag: String) -> void:
+	if busy or story_flags.get(completed_flag, false):
+		return
+	return_position = before
+	encounter_id = identifier
+	encounter_active = true
+	if not await transition_to(host_path, true):
+		encounter_active = false
+
+func begin_blankkitten_battle(before: Vector2) -> void:
+	await begin_encounter("blankkitten", "res://scenes/blankkitten/combat_host.tscn", before, "blankkitten_defeated")
+
+func return_from_blankkitten() -> void:
+	if busy or not story_flags.get("blankkitten_defeated", false):
+		return
+	restore_position = true
+	encounter_active = false
+	if await transition_to("res://scenes/world/overworld.tscn"):
+		save_current()
+
 func return_to_flooded_forest() -> void:
 	if busy or not story_flags.get("boss2_defeated", false):
 		return
@@ -171,16 +197,23 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	battle_entry_pending = white_wipe
 	var fade_duration := region_fade_duration if region_travel else transition_duration * 0.5
 	Music.prepare_transition(scene_path, battle_wipe_duration if white_wipe else fade_duration)
-	curtain.color = Color.WHITE if white_wipe else Color.BLACK
-	curtain.show()
-	curtain.modulate.a = 1.0 if white_wipe else 0.0
-	curtain.position.y = -get_viewport().get_visible_rect().size.y if white_wipe else 0.0
-	var fade := create_tween()
+	# white_wipe is retained as the existing call-site compatibility flag.
+	# All boss hosts now enter through the same black-wall presentation.
+	curtain.color = Color.BLACK
+	curtain.position = Vector2.ZERO
+	var fade: Tween
 	if white_wipe:
-		fade.tween_property(curtain, "position:y", 0.0, battle_wipe_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		battle_walls.duration = battle_wipe_duration
+		await battle_walls.close_walls()
+		curtain.modulate.a = 1.0
+		curtain.show()
+		battle_walls.hide()
 	else:
+		curtain.modulate.a = 0.0
+		curtain.show()
+		fade = create_tween()
 		fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
-	await fade.finished
+		await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
 		audio.stop()
@@ -227,7 +260,8 @@ func save_current() -> bool:
 
 func save_boss_victory() -> void:
 	# Save only the known overworld return point, never combat runtime objects.
-	if encounter_active and (evil_bart_defeated if encounter_id == "bart" else story_flags.get("boss2_defeated", false)):
+	var completed: bool = evil_bart_defeated if encounter_id == "bart" else story_flags.get(encounter_id + "_defeated", false)
+	if encounter_active and completed:
 		var ok := saves.write_save(snapshot(area_id, return_position))
 		last_save_message = "Progress saved." if ok else saves.last_error
 
