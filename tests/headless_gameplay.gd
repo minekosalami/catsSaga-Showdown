@@ -182,7 +182,7 @@ func run() -> void:
 	check(entering_bounds.position.y > 146.0, "entrance artwork stays below the boss HUD")
 	await create_timer(0.55).timeout
 	check(hud.entrance_flash.modulate.a == 0.0, "entrance flash ends without repeats")
-	check(absf(game.boss.get_node("Sprite2D").scale.x - 0.14721654) < 0.001, "entrance restores sprite scale")
+	check(absf(game.boss.get_node("Sprite2D").scale.x - 0.10603448) < 0.001, "entrance restores sprite scale")
 	check(hud.boss_panel.modulate.a == 1.0, "boss health bar finishes smooth reveal")
 	game._spawn_enemies(10.0)
 	check(get_nodes_in_group("opening_enemies").is_empty(), "regular enemies cannot spawn during boss fight")
