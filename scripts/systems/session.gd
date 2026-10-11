@@ -20,6 +20,7 @@ var battle_entry_pending: bool = false
 var story_flags: Dictionary = {}
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
+var unrestricted_region_access := false # Debug only; deliberately absent from saves.
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
 var options_dialog: AcceptDialog
@@ -117,7 +118,12 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 	entry_marker = marker
 	restore_position = false
 	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
+		if destination == "underground_cave":
+			story_flags["underground_cave_discovered"] = true
 		save_current()
+
+func region_access_allowed(normal_access: bool) -> bool:
+	return unrestricted_region_access or normal_access
 
 func begin_battle(position_before_battle: Vector2) -> void:
 	if busy or evil_bart_defeated:
@@ -395,18 +401,25 @@ func _show_key_notification() -> void:
 	if not key_notification_pending:
 		return
 	key_notification_pending = false
+	show_notification("Obtained: Flooded Forest Key", "KeyRewardNotification")
+
+func show_notification(message: String, notification_name := "DebugNotification") -> void:
+	var previous := get_node_or_null(NodePath(notification_name))
+	if previous != null:
+		remove_child(previous)
+		previous.queue_free()
 	var label := Label.new()
-	label.name = "KeyRewardNotification"
+	label.name = notification_name
 	add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	label.offset_top = 76
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.text = "Obtained: Flooded Forest Key"
+	label.text = message
 	label.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono.ttf"))
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 6)
-	var fade := create_tween()
+	var fade := label.create_tween()
 	fade.tween_interval(3.0)
 	fade.tween_property(label,"modulate:a",0.0,0.5)
 	fade.tween_callback(label.queue_free)

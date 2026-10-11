@@ -3,6 +3,10 @@ extends CanvasLayer
 const Layout = preload("res://scripts/maps/world_layout.gd")
 const Canvas = preload("res://scripts/maps/map_canvas.gd")
 const CODE := "thefogisleaving"
+const DEBUG_CODES := ["mycoordinates", "anywhereiwant"]
+var debug_sequence := ""
+var debug_sequence_time := 0.0
+var debug_completion_key := KEY_NONE
 var world: Node2D
 var minimap: Control
 var full_map: Control
@@ -150,11 +154,15 @@ func close_modals() -> void:
 	_refresh()
 
 func handle_input(event: InputEvent) -> bool:
+	if event is InputEventKey and not event.pressed and event.keycode == debug_completion_key:
+		debug_completion_key = KEY_NONE
 	var focus := get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is TextEdit:
 		sequence = ""
+		debug_sequence = ""
 		return false
 	if event is InputEventKey and event.pressed and not event.echo:
+		if _handle_debug_code(event): return true
 		if modal_open():
 			if event.keycode in [KEY_ESCAPE,KEY_X] or (opened and event.keycode == KEY_M) or (inventory_opened and event.keycode == KEY_SPACE): close_modals()
 			# All keyboard gameplay input stays inside the active map/inventory modal.
@@ -196,8 +204,49 @@ func handle_input(event: InputEvent) -> bool:
 		return true
 	return false
 
+func typing_code() -> bool:
+	# Single M/A presses retain map navigation and movement; recognized words lock movement.
+	return not sequence.is_empty() or debug_sequence.length() > 1 or debug_completion_key != KEY_NONE
+
+func _handle_debug_code(event: InputEventKey) -> bool:
+	if not sequence.is_empty():
+		debug_sequence = ""
+		return false
+	if not normal_exploration() and not (opened and not Session.busy and not get_tree().paused):
+		debug_sequence = ""
+		return false
+	if event.keycode < KEY_A or event.keycode > KEY_Z:
+		debug_sequence = ""
+		return false
+	var letter := char(event.keycode).to_lower()
+	var candidate := debug_sequence + letter
+	if not DEBUG_CODES.any(func(code: String): return code.begins_with(candidate)):
+		candidate = letter
+	if not DEBUG_CODES.any(func(code: String): return code.begins_with(candidate)):
+		debug_sequence = ""
+		return false
+	debug_sequence = candidate
+	debug_sequence_time = 1.6
+	if candidate.length() > 1:
+		world.player.movement_locked = true
+		world.player.velocity = Vector2.ZERO
+	if candidate in DEBUG_CODES:
+		debug_sequence = ""
+		debug_completion_key = event.keycode
+		if candidate == "mycoordinates":
+			var point: Vector2 = world.player.global_position
+			Session.show_notification("X: %s | Y: %s" % [str(point.x), str(point.y)])
+		else:
+			Session.unrestricted_region_access = not Session.unrestricted_region_access
+			Session.show_notification("Unrestricted region access: " + ("enabled" if Session.unrestricted_region_access else "disabled"))
+		return true
+	return candidate != "m"
+
 func _process(delta: float) -> void:
 	if world == null: return
+	if debug_completion_key != KEY_NONE and not Input.is_key_pressed(debug_completion_key): debug_completion_key = KEY_NONE
+	debug_sequence_time -= delta
+	if debug_sequence_time <= 0 or (not normal_exploration() and not opened): debug_sequence = ""
 	sequence_time -= delta
 	if sequence_time <= 0 or not normal_exploration(): sequence = ""
 	if opened:
@@ -234,4 +283,14 @@ func visible_boss_markers() -> Array:
 		var cell := Vector2i(boss.local_position / Layout.TILE_PIXELS) / Session.exploration.CELL_TILES
 		if not Session.map_reveal_cheat and not Session.exploration.visited(boss.area, cell): continue
 		markers.append({"id":id, "point":Layout.world_point(boss.area, boss.local_position), "defeated":Session.evil_bart_defeated if id == "bart" else Session.story_flags.get("boss2_defeated", false)})
+	if Layout.same_map(Session.area_id, "flooded_forest") and Session.story_flags.get("underground_cave_discovered", false):
+		# Read the authored entrance position without instantiating the forest or duplicating coordinates.
+		var state: SceneState = world.MAPS["flooded_forest"].get_state()
+		for index in state.get_node_count():
+			if state.get_node_path(index) != NodePath("./Characters/CaveHole"): continue
+			for property in state.get_node_property_count(index):
+				if state.get_node_property_name(index, property) == "position":
+					var point: Vector2 = state.get_node_property_value(index, property)
+					markers.append({"id":"underground_cave", "point":Layout.world_point("flooded_forest", point), "defeated":false, "color":Color("#D9DED2"), "label":"Underground Cave"})
+			break
 	return markers
