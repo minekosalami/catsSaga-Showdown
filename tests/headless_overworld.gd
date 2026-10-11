@@ -53,7 +53,7 @@ func run() -> void:
 	check(world.map.get_node("Characters").get_child_count() == 1, "entrance has one inspectable placeholder")
 	var player: CharacterBody2D = world.player
 	var camera: Camera2D = player.get_node("Camera2D")
-	check(camera.enabled and camera.limit_right == 1600 and camera.limit_bottom == 900, "player-follow camera uses map boundaries")
+	check(camera.enabled and camera.limit_right == 3200 and camera.limit_bottom == 1824, "player-follow camera uses map boundaries")
 	var start := player.position
 	key(KEY_D, true)
 	await create_timer(0.5).timeout
@@ -85,7 +85,7 @@ func run() -> void:
 	world = current_scene
 	check(session.area_id == "deep_forest" and world.map.display_name == "Deep Forest", "entrance portal transitions to Deep Forest")
 	check(world.player.position == Vector2(280, 540), "arrival marker avoids immediate portal bounce")
-	check(world.map.map_size == Vector2(2560, 1440), "Deep Forest is larger than entrance")
+	check(world.map.map_size == Vector2(5120, 2880), "Deep Forest is larger than entrance")
 	check(world.map.get_node("Characters").has_node("ForestNPC") and world.map.get_node("Characters").has_node("FloodedGate"), "Deep Forest preserves its NPC and adds the Flooded Forest gate")
 	var npc: Node2D = world.map.get_node("Characters/ForestNPC")
 	world.player.position = npc.position + Vector2(0, 60)

@@ -50,7 +50,7 @@ func run() -> void:
 	world = current_scene
 	check(session.area_id == "flooded_forest" and session.story_flags.flooded_forest_unlocked,"Z gate action unlocks and travels with key")
 	check(session.story_flags.flooded_forest_key_obtained,"gate never consumes key")
-	check(world.map.map_size == Vector2(2048,1536) and world.player.get_node("Camera2D").limit_right == 2048,"new map and camera retain widescreen architecture")
+	check(world.map.map_size == Vector2(4096,3072) and world.player.get_node("Camera2D").limit_right == 4096,"new map and camera retain widescreen architecture")
 	var water: TileMapLayer = world.map.get_node("PlaceholderWater")
 	check(water.get_used_cells().size() > 3000 and water.tile_set.get_physics_layers_count() == 1,"separate editable water layer has physical terrain")
 	var query := PhysicsShapeQueryParameters2D.new()
