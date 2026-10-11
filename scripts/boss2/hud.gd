@@ -26,6 +26,7 @@ var battle: Node
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	battle = get_parent()
+	var look: Resource = battle.get_node("CinematicArena").look
 	var root := Control.new()
 	add_child(root)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -43,6 +44,19 @@ func _ready() -> void:
 	var stack := VBoxContainer.new()
 	stack.add_theme_constant_override("separation",2)
 	panel.add_child(stack)
+	var headings := HBoxContainer.new()
+	stack.add_child(headings)
+	var hp_heading := Label.new()
+	hp_heading.text = "PLAYER / HP"
+	hp_heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hp_heading.add_theme_font_size_override("font_size",10)
+	hp_heading.add_theme_color_override("font_color",Color("#999890"))
+	headings.add_child(hp_heading)
+	var time_heading := Label.new()
+	time_heading.text = "REMAINING"
+	time_heading.add_theme_font_size_override("font_size",10)
+	time_heading.add_theme_color_override("font_color",Color("#999890"))
+	headings.add_child(time_heading)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation",16)
 	stack.add_child(row)
@@ -62,16 +76,16 @@ func _ready() -> void:
 	current_phase_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	phase_row.add_child(current_phase_label)
 	var caption := Label.new()
-	caption.text = "SURVIVAL()"
+	caption.text = look.boss_name.to_upper()+" / SURVIVAL"
 	caption.add_theme_font_size_override("font_size",10)
-	caption.add_theme_color_override("font_color",Color("#999890"))
+	caption.add_theme_color_override("font_color",look.accent)
 	phase_row.add_child(caption)
 	song_progress = ProgressBar.new()
 	song_progress.name = "SongProgress"
 	song_progress.custom_minimum_size.y = 3
 	song_progress.max_value = 140.80
 	song_progress.step = 0.001
-	HUDStyle.progress(song_progress)
+	HUDStyle.progress(song_progress,look.accent)
 	stack.add_child(song_progress)
 	var sprint_row := HBoxContainer.new()
 	stack.add_child(sprint_row)
@@ -105,10 +119,11 @@ func _ready() -> void:
 	root.add_child(arena_overlay)
 	arena_overlay.battle = battle
 	_ignore_pointer(root)
-	end_screen = ColorRect.new()
+	end_screen = Control.new()
+	end_screen.set_script(preload("res://scripts/ui/cinematic_result.gd"))
+	end_screen.look = look
 	root.add_child(end_screen)
 	end_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	end_screen.color = Color(0.02,0.03,0.05,0.95)
 	var center := CenterContainer.new()
 	end_screen.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -117,6 +132,7 @@ func _ready() -> void:
 	center.add_child(content)
 	result_label = Label.new()
 	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_label.add_theme_font_override("font",preload("res://assets/ui/fonts/DejaVuSansMono-Bold.ttf"))
 	result_label.add_theme_font_size_override("font_size",40)
 	content.add_child(result_label)
 	for action in ["RETURN TO FLOODED FOREST","RETRY","MAIN MENU"]:
@@ -152,13 +168,15 @@ func update(clock: float) -> void:
 	song_progress.max_value = battle.end_time
 	song_progress.value = clampf(clock,0,battle.end_time)
 	phase_transition.update_clock(clock)
-	# Persistent phase caption provides the cue without blocking the arena.
-	phase_label.hide()
+	# Existing cross warning remains the sole warning typography.
+	if battle.timeline.phase in [0,4] or clock-phase_transition.cue_time > phase_transition.duration:
+		phase_label.hide()
 	arena_overlay.update_clock(clock)
 	stamina_bar.value = battle.player.stamina
 	stamina_bar.modulate = Color("#F48BB6") if battle.player.stamina < 0.2 else Color.WHITE
 	stamina_caption.text = "SPRINT() / RELEASE X" if battle.player.exhausted_until_release else ("SPRINT() / EMPTY" if battle.player.stamina <= 0.001 else "SPRINT() / X")
-	dialogue_label.visible = clock < 12.80 or (clock >= 64.00 and clock < 70.00) or (clock >= 70.40 and clock < 71.20)
+	var authored_intro: bool = not battle.introductory_dialogue.begins_with("[Automatic introductory dialogue placeholder")
+	dialogue_label.visible = (clock < 12.80 and authored_intro) or (clock >= 64.00 and clock < 70.00) or (clock >= 70.40 and clock < 71.20)
 	dialogue_label.text = battle.introductory_dialogue if clock < 12.80 else ("NOW DIE!" if clock >= 70.40 else "You're stronger than you look. But how long can you survive?")
 
 func show_phase(title: String) -> void:
@@ -168,7 +186,7 @@ func show_phase(title: String) -> void:
 	var tint := Color("#B6EAF2") if title in ["RICOCHET()","Finale()"] else HUDStyle.BLUE
 	if title == "CrossLaser()":
 		tint = Color("#FF4766")
-	phase_transition.present("NOW DIE!" if title == "CrossLaser()" else title,tint,battle.timeline.clock,title == "CrossLaser()")
+	phase_transition.present("NOW DIE!" if title == "CrossLaser()" else ("Showdown()" if title == "Finale()" else title),tint,battle.timeline.clock,title == "Finale()")
 	if title != "Introduction()":
 		battle.shake_time = maxf(battle.shake_time,0.16)
 		battle.shake_strength = maxf(battle.shake_strength,4.0 if title == "CrossLaser()" else 1.5)
@@ -180,11 +198,15 @@ func _ignore_pointer(node: Node) -> void:
 		_ignore_pointer(child)
 
 func show_result(victory: bool) -> void:
+	var introduction := get_child(0).get_node_or_null("CinematicIntroduction")
+	if introduction != null:
+		introduction.hide()
 	phase_transition.hide()
 	create_tween().tween_property(top_margin,"modulate:a",0.0,0.2)
 	dialogue_label.hide()
 	arena_overlay.hide()
 	result_label.text = "VICTORY()" if victory else "GAME OVER()"
+	result_label.add_theme_font_size_override("font_size",48 if victory else 40)
 	return_button.visible = victory
 	end_screen.show()
 	end_screen.modulate.a = 0

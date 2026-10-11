@@ -54,6 +54,7 @@ func run() -> void:
 	await press(KEY_Z)
 	await create_timer(0.45).timeout
 	check(current_scene.name == "Overworld", "Z confirms Start and enters overworld")
+	while session.busy: await process_frame
 	await session.travel("bart_area", "FromDeep")
 	var world: Node = current_scene
 	world.player.position = Vector2(1000, 520)

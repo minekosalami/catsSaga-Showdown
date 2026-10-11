@@ -175,7 +175,7 @@ func _draw() -> void:
 			draw_line(Vector2(-beam_length/2,-beam_width/2),Vector2(beam_length/2,-beam_width/2),Color(RED,0.35),1,true)
 			draw_line(Vector2(-beam_length/2,beam_width/2),Vector2(beam_length/2,beam_width/2),Color(RED,0.35),1,true)
 		if active:
-			Energy.draw_beam(self,beam_length,beam_width,RED,clock,energy,glow_intensity)
+			Energy.draw_beam(self,beam_length,beam_width,RED,clock,energy,glow_intensity,1.0,core_width)
 			draw_rect(Rect2(-beam_length/2,-core_width/2,beam_length,core_width),Color.WHITE)
 	draw_set_transform(Vector2.ZERO)
 	draw_circle(Vector2.ZERO,12,Color(RED,0.5))

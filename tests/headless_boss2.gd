@@ -132,10 +132,10 @@ func run() -> void:
 	check(timeline.phase == 0 and get_nodes_in_group("boss2_projectiles").is_empty(),"introduction is safe and has no bullets")
 	battle.finish_survival()
 	check(not battle.victory_started and not session.story_flags.get("boss2_defeated",false),"survival completion rejects an early victory call")
-	check(battle.ui.dialogue_label.visible and battle.ui.dialogue_label.text.begins_with("[Automatic"),"automatic introduction clearly marks configurable placeholder")
+	check(not battle.ui.dialogue_label.visible and battle.ui.dialogue_label.text.begins_with("[Automatic"),"technical authoring placeholder stays configurable but is not displayed to players")
 	key(KEY_Z,true)
 	key(KEY_Z,false)
-	check(battle.ui.dialogue_label.visible,"Z cannot skip automatic dialogue")
+	check(not battle.ui.dialogue_label.visible,"Z does not turn the authoring placeholder into visible dialogue")
 	key(KEY_SHIFT,true)
 	key(KEY_RIGHT,true)
 	await create_timer(0.18).timeout

@@ -46,11 +46,6 @@ func dissolve(shatter: bool = false) -> void:
 	queue_free()
 
 func _draw() -> void:
-	var halo := body_radius*2.8
-	draw_texture_rect_region(Energy.shared_atlas(),Rect2(-halo,-halo,halo*2,halo*2),Rect2(0,128,64,64),bullet_color)
-	for i in range(3):
-		var point := -direction*(body_radius+3+i*5)
-		draw_line(point,point-direction*6,Color(bullet_color.lightened(0.35),0.6-i*0.17),2.4-i*0.5,true)
 	super._draw()
 	if bounce_flash > 0:
 		draw_circle(Vector2.ZERO,body_radius,Color(1,1,1,bounce_flash/0.12*0.65))

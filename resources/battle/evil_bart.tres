@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/ui/battle_look.gd" id="look"]
+[resource]
+script = ExtResource("look")
+boss_name = "Evil Bart"
+accent = Color(0.96, 0.23, 0.38, 1)
+secondary = Color(0.51, 0.23, 0.65, 1)
+angular = true
+measure_seconds = 1.7125
+cues = PackedFloat32Array(0, 6.85, 20.57, 34.28, 48, 61.71, 89.14, 116)
+stages = PackedFloat32Array(0.05, 0.18, 0.35, 0.47, 0.28, 0.64, 0.9, 1)
+final_phase_time = 89.14

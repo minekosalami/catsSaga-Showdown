@@ -43,7 +43,16 @@ static func shared_atlas() -> ImageTexture:
 
 static func draw_orb(canvas: CanvasItem, radius: float, tint: Color, clock: float) -> void:
 	var shared := shared_atlas()
-	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*(-radius-3),Vector2.ONE*(radius+3)*2),Rect2(0,128,64,64),tint)
+	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*(-radius-4),Vector2.ONE*(radius+4)*2),Rect2(0,128,64,64),tint)
 	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*-radius,Vector2.ONE*radius*2),Rect2(0,0,64,64),tint)
 	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*-radius*0.64,Vector2.ONE*radius*1.28),Rect2(0,64,64,64),Color(1,1,1,0.94+0.06*sin(clock*4)))
 	canvas.draw_arc(Vector2.ZERO,radius-0.5,0,TAU,24,tint.lightened(0.25),1,true)
+
+static func draw_motion_trail(canvas: CanvasItem, radius: float, tint: Color, direction: Vector2, speed: float) -> void:
+	# Low-opacity tail outside the crisp core. No stored positions or nodes.
+	var length := clampf((speed-90.0)*0.035,0,12)
+	if length <= 0:
+		return
+	for i in range(3):
+		var p := -direction*(radius+1+length*i/3)
+		canvas.draw_line(p,p-direction*length/3,Color(tint,0.22-i*0.065),maxf(1,2-i*0.45),true)

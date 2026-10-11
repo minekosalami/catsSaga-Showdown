@@ -12,16 +12,16 @@ static func theme() -> Theme:
 	return result
 
 static func card() -> StyleBoxFlat:
-	var box := Sketch.box(Color(INK,0.94),EDGE)
-	box.set_content_margin_all(9)
-	box.border_width_left = 2
+	var box := Sketch.box(Color(INK,0.90),Color("#374554"))
+	box.set_content_margin_all(8)
+	box.border_width_left = 1
 	box.border_width_right = 1
 	box.border_width_top = 1
 	box.border_width_bottom = 1
-	box.corner_radius_top_left = 4
-	box.corner_radius_top_right = 4
-	box.corner_radius_bottom_left = 4
-	box.corner_radius_bottom_right = 4
+	box.corner_radius_top_left = 2
+	box.corner_radius_top_right = 2
+	box.corner_radius_bottom_left = 2
+	box.corner_radius_bottom_right = 2
 	return box
 
 static func progress(bar: ProgressBar, tint: Color = BLUE) -> void:

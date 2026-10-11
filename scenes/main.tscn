@@ -9,6 +9,9 @@
 
 [ext_resource type="Script" path="res://scripts/ui/battle_presentation.gd" id="presentation"]
 
+[ext_resource type="Script" path="res://scripts/ui/cinematic_arena.gd" id="cinematic"]
+[ext_resource type="Resource" path="res://resources/battle/evil_bart.tres" id="look"]
+
 [node name="Main" type="Node2D" unique_id=1036784788 groups=["combat_root"]]
 script = ExtResource("1_0wfyh")
 
@@ -50,3 +53,7 @@ bus = &"Master"
 
 [node name="BattlePresentation" type="Node2D" parent="."]
 script = ExtResource("presentation")
+
+[node name="CinematicArena" type="Node2D" parent="."]
+script = ExtResource("cinematic")
+look = ExtResource("look")

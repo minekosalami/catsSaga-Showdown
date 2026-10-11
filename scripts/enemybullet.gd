@@ -37,11 +37,8 @@ func _physics_process(delta: float) -> void:
 
 func _draw() -> void:
 	Energy.draw_orb(self,body_radius,bullet_color,animation_time)
-	if visual_style == Style.FAST:
-		for i in range(3):
-			var start := -direction * (body_radius+float(i)*4)
-			draw_line(start,start-direction*4,Color(bullet_color,0.24-float(i)*0.065),2-float(i)*0.4)
-	elif visual_style == Style.DIAMOND:
+	Energy.draw_motion_trail(self,body_radius,bullet_color,direction,speed)
+	if visual_style == Style.DIAMOND:
 		var corners := PackedVector2Array()
 		for i in range(5):
 			corners.append(Vector2.RIGHT.rotated(i*PI/2+animation_time*0.55)*body_radius*1.35)
