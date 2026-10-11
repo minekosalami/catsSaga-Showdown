@@ -6,6 +6,7 @@ extends CharacterBody2D
 @export var sprite_height: float = 64.0
 @export var artwork_faces_left: bool = true
 var facing_left: bool = true
+var facing_direction := Vector2.LEFT
 var sprite: Sprite2D
 
 @export var acceleration: float = 1800.0
@@ -29,6 +30,8 @@ func _physics_process(delta: float) -> void:
 		float(Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT)) - float(Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT)),
 		float(Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN)) - float(Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP))
 	).normalized()
+	if direction != Vector2.ZERO:
+		facing_direction = direction
 	if direction.x != 0:
 		facing_left = direction.x < 0
 		sprite.flip_h = facing_left != artwork_faces_left

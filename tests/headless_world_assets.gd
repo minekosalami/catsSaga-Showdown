@@ -44,13 +44,13 @@ func run() -> void:
 		var ground: TileMapLayer = map.get_node("GrassGround")
 		var details: TileMapLayer = map.get_node("GrassDetails")
 		check(not map.has_node("BackgroundPlaceholder"), name + " replaces solid grass placeholder")
-		check(ground.tile_set == tileset and details.tile_set == tileset, name + " layers share editable external TileSet")
+		check(ground.tile_set.resource_path == "res://resources/world/gfx_terrain.tres" and details.tile_set == tileset, name + " GFX terrain and preserved details use editable shared resources")
 		check(ground.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST and details.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST, name + " layers use nearest filtering")
 		check(not ground.collision_enabled and not details.collision_enabled and not ground.navigation_enabled and not details.navigation_enabled, name + " grass and flowers do not block movement")
 		check(ground.get_used_rect() == Rect2i(Vector2i.ZERO, Vector2i(ceili(map.map_size.x / 16), ceili(map.map_size.y / 16))), name + " ground covers entire existing map")
 		var ground_ok := true
 		for cell in ground.get_used_cells():
-			ground_ok = ground_ok and ground.get_cell_atlas_coords(cell) in [Vector2i(3, 1), Vector2i(3, 0), Vector2i(3, 2)]
+			ground_ok = ground_ok and ground.get_cell_atlas_coords(cell) in [Vector2i(5,9),Vector2i(7,9),Vector2i(5,10),Vector2i(8,10)]
 		check(ground_ok, name + " ground uses only appropriate single-cell grass")
 		check(details.get_used_cells().size() > 0 and details.get_used_cells().size() <= 12, name + " sparse authored details avoid filling map with every atlas tile")
 		var placement_ok := true
@@ -73,11 +73,11 @@ func run() -> void:
 			check(npc.position == Vector2(1000, 450) and npc.interaction_radius == 100 and npc.starts_battle and npc.dialogue_id == "bart_encounter", "Bart location and interaction settings preserved")
 			check(npc.get_script() != boss.get_script(), "NPC and boss retain separate gameplay scripts")
 		# Resource packing mirrors saving an edited layer in the Godot editor.
-		ground.set_cell(Vector2i(1, 1), 0, Vector2i(4, 0))
+		ground.set_cell(Vector2i(1, 1), 0, Vector2i(8,10))
 		var packed := PackedScene.new()
 		check(packed.pack(map) == OK, name + " painted layers can be saved as scene data")
 		var copy: Node = packed.instantiate()
-		check(copy.get_node("GrassGround").get_cell_atlas_coords(Vector2i(1, 1)) == Vector2i(4, 0), name + " manual tile painting survives scene reload")
+		check(copy.get_node("GrassGround").get_cell_atlas_coords(Vector2i(1, 1)) == Vector2i(8,10), name + " manual tile painting survives scene reload")
 		copy.free()
 		map.free()
 	boss.free()

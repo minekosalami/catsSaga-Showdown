@@ -72,6 +72,10 @@ func run() -> void:
 	for code in [KEY_E, KEY_ENTER, KEY_SPACE]:
 		await press(code)
 		check(not world.dialogue.active, "removed key cannot interact: " + str(code))
+		if code == KEY_SPACE:
+			check(world.map_ui.inventory_opened, "Space opens inventory without interacting with Bart")
+			await press(KEY_SPACE)
+			check(not world.map_ui.inventory_opened, "Space closes inventory before Bart interaction")
 	await press(KEY_Z)
 	var d: Node = world.dialogue
 	check(d.active and d.node_id == "BART_001" and d.text_label.visible_characters < d.text_label.get_total_character_count(), "Z starts opening with typewriter")

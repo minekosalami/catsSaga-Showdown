@@ -1,0 +1,33 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/gfx/Overworld.png" id="1_e36ok"]
+[ext_resource type="Texture2D" path="res://assets/enironment/gfx/objects.png" id="2_qyb0f"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ok1vg"]
+texture = ExtResource("1_e36ok")
+5:16/size_in_atlas = Vector2i(2, 2)
+5:16/0 = 0
+5:16/0/y_sort_origin = 15
+5:16/0/physics_layer_0/polygon_0/points = PackedVector2Array(-3, 8, 3, 8, 4, 12, 3, 15, -3, 15, -4, 12)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qiaxo"]
+texture = ExtResource("2_qyb0f")
+12:12/size_in_atlas = Vector2i(2, 2)
+12:12/0 = 0
+12:12/0/y_sort_origin = 15
+12:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-3, 8, 3, 8, 4, 12, 3, 15, -3, 15, -4, 12)
+14:12/size_in_atlas = Vector2i(2, 2)
+14:12/0 = 0
+14:12/0/y_sort_origin = 15
+14:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-3, 8, 3, 8, 4, 12, 3, 15, -3, 15, -4, 12)
+16:12/size_in_atlas = Vector2i(2, 2)
+16:12/0 = 0
+16:12/0/y_sort_origin = 15
+16:12/0/physics_layer_0/polygon_0/points = PackedVector2Array(-3, 8, 3, 8, 4, 12, 3, 15, -3, 15, -4, 12)
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 2
+sources/0 = SubResource("TileSetAtlasSource_ok1vg")
+sources/1 = SubResource("TileSetAtlasSource_qiaxo")

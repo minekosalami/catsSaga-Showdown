@@ -17,6 +17,8 @@ var battle_entry_pending: bool = false
 @export var battle_reveal_duration: float = 0.3
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 var story_flags: Dictionary = {}
+var exploration := preload("res://scripts/maps/exploration.gd").new()
+var map_reveal_cheat := false
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
 var options_dialog: AcceptDialog
@@ -95,6 +97,8 @@ func new_game() -> void:
 	restore_position = false
 	evil_bart_defeated = false
 	story_flags.clear()
+	exploration.reset()
+	map_reveal_cheat = false
 	key_notification_pending = false
 	encounter_active = false
 	if await transition_to("res://scenes/world/overworld.tscn"):
@@ -200,13 +204,14 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 	return error == OK
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return saves.validate({"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate()})
+	return saves.validate({"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "exploration": exploration.snapshot()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
 	if busy or world == null or world.name != "Overworld" or world.dialogue.active:
 		saves.last_error = "Save unavailable during dialogue, transitions or combat."
 		return false
+	world.update_map_exploration()
 	var ok := saves.write_save(snapshot(area_id, world.player.position))
 	last_save_message = "Saved." if ok else saves.last_error
 	return ok
@@ -240,18 +245,22 @@ func load_game() -> bool:
 	restore_position = true
 	evil_bart_defeated = data.evil_bart_defeated
 	story_flags = data.story_flags.duplicate()
+	exploration.restore(data.exploration)
+	map_reveal_cheat = false
 	encounter_active = false
 	return await transition_to("res://scenes/world/overworld.tscn")
 
 func world_menu_open() -> bool:
-	return (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
+	var world := get_tree().current_scene
+	var map_modal: bool = world != null and world.has_method("map_modal_open") and world.map_modal_open()
+	return map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
 
 func can_pause() -> bool:
 	var scene := get_tree().current_scene
 	if busy or scene == null or get_tree().paused:
 		return false
 	if scene.name == "Overworld":
-		return not scene.dialogue.active
+		return not scene.dialogue.active and not scene.map_modal_open()
 	if scene.has_method("record_victory"):
 		return not scene.battle.game_over and not scene.battle.victory_started
 	return false

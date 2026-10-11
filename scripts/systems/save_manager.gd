@@ -35,9 +35,12 @@ func validate(value: Variant) -> Dictionary:
 	for flag in ["flooded_forest_unlocked", "boss2_defeated"]:
 		if not flags.has(flag):
 			flags[flag] = false
+	var exploration := preload("res://scripts/maps/exploration.gd").new()
+	if not exploration.restore(value.get("exploration", {})):
+		return {}
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true
-	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate()}
+	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
