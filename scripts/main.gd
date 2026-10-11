@@ -31,12 +31,14 @@ var restart_button: Button
 # Scene references
 var player: Area2D
 var boss: Node2D
+var presentation: Node2D
 var music_player: AudioStreamPlayer
 
 
 func _ready() -> void:
 	original_position = position
 
+	presentation = $BattlePresentation
 	_find_scene_nodes()
 	if player != null:
 		player.position = Vector2(get_viewport_rect().size.x * 0.5, get_viewport_rect().size.y - 120.0)
@@ -162,6 +164,7 @@ func _process(delta: float) -> void:
 
 	_update_screen_shake(delta)
 	_update_boss()
+	presentation.update_clock(elapsed_time)
 	_spawn_enemies(delta)
 
 
@@ -228,9 +231,9 @@ func _update_screen_shake(delta: float) -> void:
 			randf_range(-shake_strength, shake_strength)
 		)
 
-		position = original_position + offset
+		presentation.apply_shake(offset)
 	else:
-		position = original_position
+		presentation.apply_shake(Vector2.ZERO)
 		shake_strength = 0.0
 
 
@@ -270,6 +273,7 @@ func _on_boss_defeated() -> void:
 	position = original_position
 	shake_time = 0.0
 	# Disable input/movement without pausing the defeat tween or audio mixer.
+	player.get_node("HitboxDebug").hide()
 	player.process_mode = Node.PROCESS_MODE_DISABLED
 	player.set_deferred("monitoring", false)
 	player.set_deferred("monitorable", false)

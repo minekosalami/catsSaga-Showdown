@@ -26,6 +26,7 @@ var invulnerability_timer: float = 0.0
 const INVULNERABILITY_DURATION: float = 1.0
 
 var velocity: Vector2 = Vector2.ZERO
+var debug_hitbox_enabled := false
 
 # SATURATE special attack.
 var saturate_used: bool = false
@@ -77,7 +78,8 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event.keycode == KEY_F3 and OS.is_debug_build():
-		$HitboxDebug.visible = not $HitboxDebug.visible
+		debug_hitbox_enabled = not debug_hitbox_enabled
+		$HitboxDebug.visible = debug_hitbox_enabled or Input.is_key_pressed(KEY_SHIFT)
 		return
 
 	# Press X to activate SATURATE.
@@ -306,6 +308,7 @@ func take_damage(amount: int) -> void:
 	print("Player health: ", health)
 
 	if health <= 0:
+		$HitboxDebug.hide()
 		_play_death_effect()
 		game_over.emit()
 		print("GAME OVER")
