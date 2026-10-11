@@ -36,6 +36,9 @@ func _ready() -> void:
 	add_child(pause_menu)
 
 func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("menu_back") and not event.is_echo() and back_outside_battle():
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if pause_menu.opened:
 			if not is_instance_valid(confirmation) and not (is_instance_valid(options_dialog) and options_dialog.visible):
@@ -47,6 +50,36 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
 		toggle_fullscreen()
 		get_viewport().set_input_as_handled()
+
+func back_outside_battle() -> bool:
+	var scene := get_tree().current_scene
+	# X belongs exclusively to SATURATE in combat, including combat pause.
+	if busy or scene == null or scene.has_method("record_victory"):
+		return false
+	if is_instance_valid(confirmation) and confirmation.visible:
+		confirmation.hide()
+		confirmation.canceled.emit()
+		return true
+	if is_instance_valid(options_dialog) and options_dialog.visible:
+		options_dialog.hide()
+		if pause_menu.opened:
+			pause_menu.buttons.Options.grab_focus()
+		elif scene.name == "Mainmenu":
+			scene.menu_container.get_node("OptionsButton").grab_focus()
+		return true
+	if pause_menu.opened:
+		close_pause()
+		return true
+	if scene.name == "Mainmenu" and scene.info_container.visible:
+		scene._back_to_menu()
+		return true
+	# Branching dialogue has no safe history/back operation; never skip it.
+	return false
+
+func _attach_menu_back(window: Window) -> void:
+	var input_handler := Node.new()
+	input_handler.set_script(preload("res://scripts/ui/menu_back_input.gd"))
+	window.add_child(input_handler)
 
 func toggle_fullscreen() -> void:
 	var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
@@ -227,6 +260,7 @@ func open_options() -> void:
 		options_dialog = AcceptDialog.new()
 		options_dialog.set_script(preload("res://scripts/ui/options_dialog.gd"))
 		add_child(options_dialog)
+		_attach_menu_back(options_dialog)
 	options_dialog.open()
 
 func confirm_action(message: String, action: Callable) -> void:
@@ -239,6 +273,8 @@ func confirm_action(message: String, action: Callable) -> void:
 	confirmation.dialog_text = message
 	add_child(confirmation)
 	var dialog := confirmation
+	var return_focus := get_viewport().gui_get_focus_owner()
+	_attach_menu_back(dialog)
 	dialog.confirmed.connect(func():
 		confirmation = null
 		dialog.queue_free()
@@ -247,6 +283,8 @@ func confirm_action(message: String, action: Callable) -> void:
 	dialog.canceled.connect(func():
 		confirmation = null
 		dialog.queue_free()
+		if is_instance_valid(return_focus):
+			return_focus.grab_focus()
 	)
 	dialog.popup_centered(Vector2i(440, 180))
 

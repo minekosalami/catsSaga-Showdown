@@ -182,7 +182,7 @@ func _build_controls() -> void:
 				label.add_theme_font_size_override("font_size", 15)
 				grid.add_child(label)
 	var note := Label.new()
-	note.text = "SATURATE: once per run.\nOverworld: Z — interact / dialogue\nSHIFT — sprint   ESC — pause\nZ — menu confirm   F11 — fullscreen"
+	note.text = "SATURATE: once per run.\nOverworld: Z — interact / dialogue\nSHIFT — sprint   ESC — pause\nZ — menu confirm   X — back / cancel\nF11 — fullscreen"
 	note.add_theme_font_size_override("font_size", 13)
 	note.add_theme_color_override("font_color", SketchTheme.MUTED)
 	content.add_child(note)

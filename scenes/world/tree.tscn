@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/tree.png" id="texture"]
+
+[sub_resource type="CapsuleShape2D" id="trunk"]
+radius = 8.0
+height = 24.0
+
+[node name="Tree" type="StaticBody2D" groups=["world_trees"]]
+collision_layer = 1
+collision_mask = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(-70, -132.22222)
+scale = Vector2(0.3888889, 0.3888889)
+texture = ExtResource("texture")
+centered = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -12)
+shape = SubResource("trunk")
