@@ -1,0 +1,57 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enironment/grass-tileset.png" id="1_oaor7"]
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_ibro8"]
+tile_data = PackedInt32Array(0, 0, 0, 1, 65536, 0, 2, 131072, 0, 65536, 0, 1, 65537, 65536, 1, 65538, 131072, 1, 131072, 0, 2, 131073, 65536, 2, 131074, 131072, 2)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nwjwp"]
+texture = ExtResource("1_oaor7")
+0:0/0 = 0
+0:0/0/custom_data_0 = "3x3 cutout edge: use together"
+1:0/0 = 0
+1:0/0/custom_data_0 = "3x3 cutout edge: use together"
+2:0/0 = 0
+2:0/0/custom_data_0 = "3x3 cutout edge: use together"
+3:0/0 = 0
+3:0/0/custom_data_0 = "grass"
+4:0/0 = 0
+4:0/0/custom_data_0 = "grass"
+5:0/0 = 0
+5:0/0/custom_data_0 = "grass"
+6:0/0 = 0
+6:0/0/custom_data_0 = "soil"
+0:1/0 = 0
+0:1/0/custom_data_0 = "3x3 cutout edge: use together"
+1:1/0 = 0
+1:1/0/custom_data_0 = "3x3 cutout edge: use together"
+2:1/0 = 0
+2:1/0/custom_data_0 = "3x3 cutout edge: use together"
+3:1/0 = 0
+3:1/0/custom_data_0 = "grass"
+4:1/0 = 0
+4:1/0/custom_data_0 = "grass"
+5:1/0 = 0
+5:1/0/custom_data_0 = "grass"
+6:1/0 = 0
+6:1/0/custom_data_0 = "soil"
+0:2/0 = 0
+0:2/0/custom_data_0 = "3x3 cutout edge: use together"
+1:2/0 = 0
+1:2/0/custom_data_0 = "3x3 cutout edge: use together"
+2:2/0 = 0
+2:2/0/custom_data_0 = "3x3 cutout edge: use together"
+3:2/0 = 0
+3:2/0/custom_data_0 = "grass"
+4:2/0 = 0
+4:2/0/custom_data_0 = "flowers"
+5:2/0 = 0
+5:2/0/custom_data_0 = "flowers"
+6:2/0 = 0
+6:2/0/custom_data_0 = "soil"
+
+[resource]
+custom_data_layer_0/name = "kind"
+custom_data_layer_0/type = 4
+sources/0 = SubResource("TileSetAtlasSource_nwjwp")
+pattern_0 = SubResource("TileMapPattern_ibro8")
