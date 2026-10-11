@@ -1,5 +1,8 @@
 # BlankKitten encounter and universal battle entry
 
+> This records the first implementation. For current Sequence() mechanics,
+> controls, screenshots and validation, see [the second-pass review](blankkitten-sequence-review.md).
+
 BlankKitten is an additional survival encounter. Existing Evil Bart and
 Doppelcat attacks, clocks, HP, projectiles, player abilities, dialogue and
 rewards remain intact. All three encounter entries and retries now use the

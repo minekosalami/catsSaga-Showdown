@@ -13,6 +13,9 @@ var result: Control
 var result_label: Label
 var retry_button: Button
 var return_button: Button
+var practice_choice: OptionButton
+var practice_button: Button
+var effects_toggle: CheckButton
 var menu_button: Button
 
 func label(text: String, rect: Rect2, font_size: int) -> Label:
@@ -35,7 +38,7 @@ func _ready() -> void:
 	root.theme = preload("res://scripts/ui/battle_hud_style.gd").theme()
 	add_child(root)
 	label("BLANKKITTEN",Rect2(20,24,500,34),25)
-	label("// SURVIVE THE ABSENCE",Rect2(20,62,500,24),12)
+	label("Sequence() // SURVIVE THE ABSENCE",Rect2(20,62,500,24),12)
 	stage_label = label("Introduction",Rect2(20,365,500,32),17)
 	var hud_back := ColorRect.new()
 	hud_back.position = Vector2(20,795)
@@ -60,8 +63,8 @@ func _ready() -> void:
 	phase_title = Control.new()
 	phase_title.set_script(preload("res://scripts/ui/battle_phase_transition.gd"))
 	root.add_child(phase_title)
-	phase_title.label.offset_top = 397
-	phase_title.label.offset_bottom = 437
+	phase_title.label.offset_top = 386
+	phase_title.label.offset_bottom = 426
 	result = Control.new()
 	result.name = "ResultScreen"
 	result.set_script(preload("res://scripts/ui/cinematic_result.gd"))
@@ -69,7 +72,7 @@ func _ready() -> void:
 	result.size = Vector2(540,900)
 	root.add_child(result)
 	var stack := VBoxContainer.new()
-	stack.position = Vector2(60,320)
+	stack.position = Vector2(60,290)
 	stack.size = Vector2(420,340)
 	stack.add_theme_constant_override("separation",18)
 	stack.theme = root.theme
@@ -89,7 +92,23 @@ func _ready() -> void:
 	retry_button = action(stack,"RETRY()",func(): get_tree().current_scene.retry())
 	return_button = action(stack,"RETURN()",func(): get_tree().current_scene.return_to_forest())
 	menu_button = action(stack,"MAIN MENU",func(): get_tree().current_scene.main_menu())
+	practice_choice = OptionButton.new()
+	practice_choice.custom_minimum_size = Vector2(420,36)
+	practice_choice.add_theme_font_size_override("font_size",13)
+	stack.add_child(practice_choice)
+	practice_button = action(stack,"PRACTICE()",func(): get_tree().current_scene.practice(practice_choice.get_selected_id()))
 	result.hide()
+	effects_toggle = CheckButton.new()
+	effects_toggle.text = "REDUCED FX"
+	effects_toggle.focus_mode = Control.FOCUS_NONE
+	effects_toggle.position = Vector2(361,90)
+	effects_toggle.size = Vector2(158,30)
+	effects_toggle.add_theme_font_size_override("font_size",11)
+	effects_toggle.set_pressed_no_signal(bool(Session.get_meta("blankkitten_reduced_effects",false)))
+	effects_toggle.toggled.connect(func(on):
+		battle.reduced_effects = on
+		Session.set_meta("blankkitten_reduced_effects",on))
+	root.add_child(effects_toggle)
 
 func action(stack: VBoxContainer, text: String, callback: Callable) -> Button:
 	var button := Button.new()
@@ -107,20 +126,35 @@ func update_clock(clock: float) -> void:
 	stage_label.text = Cue.NAMES[battle.stage]
 	controls_label.text = "← / →  Move    Z  Jump (hold for height)" if Cue.GRAVITY[battle.stage] else "↑ / ↓ / ← / →  Move"
 	progress.value = clock
+	phase_title.flash_strength = .025 if battle.reduced_effects else .08
 	phase_title.update_clock(clock)
+	timer_label.modulate = Color(.83,.86,.92).lerp(Color.WHITE,(1-smoothstep(0,.13,fposmod(clock,Cue.MEASURE)))*.4)
+	health_label.add_theme_color_override("font_color",Color("#FFF2F4") if health > 2 else Color("#FF6D93"))
+	if battle.practice_mode: stage_label.text = "PRACTICE // "+Cue.NAMES[battle.stage]
+	elif battle.development_run: stage_label.text = "PREVIEW // "+Cue.NAMES[battle.stage]
 	ending_label.visible = battle.stage == 7 and not battle.cue_sheet.ending_lines.is_empty()
 	if ending_label.visible:
 		var index := mini(battle.cue_sheet.ending_lines.size()-1,int((clock-130.28)/(Cue.END-130.28)*battle.cue_sheet.ending_lines.size()))
 		ending_label.text = battle.cue_sheet.ending_lines[index]
 
 func stage_changed(stage: int, clock: float) -> void:
-	if stage == 6:
-		phase_title.present("Showdown()",Color("#FF9477"),clock,true)
+	var titles := {1:"FALLING PILLARS",2:"BOUNCING FIREBALL",4:"LASERS!",5:"JUMPING BEAMS",6:"SHOWDOWN()"}
+	if titles.has(stage):
+		phase_title.present(titles[stage],Color("#FF9BAE") if stage in [1,6] else Color("#E4DBFF"),clock,stage == 6)
+		# Keep the announcement above every possible arena; it cannot hide a lane.
+		phase_title.label.offset_top = 386
+		phase_title.label.offset_bottom = 426
 
 func show_result(won: bool, reason := "") -> void:
 	result_label.text = "VICTORY()" if won else "GAME OVER()"
 	result.get_child(0).get_node("Subtitle").text = "// survived" if won else ("// signal lost" if reason.is_empty() else reason)
 	return_button.visible = won
+	practice_choice.clear()
+	var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})
+	for index in [1,2,4,5,6]:
+		if seen.has(index): practice_choice.add_item(Cue.NAMES[index],index)
+	practice_choice.visible = practice_choice.item_count > 0
+	practice_button.visible = practice_choice.visible
 	result.show()
 	result.modulate.a = 0
 	create_tween().tween_property(result,"modulate:a",1.0,0.3)

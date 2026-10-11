@@ -109,71 +109,85 @@ func jump_apex(game: Node, release_after: float) -> float:
 	return floor_y-minimum
 
 func hazards_and_movement(game: Node) -> void:
-	var short := jump_apex(game,0.025)
+	var short := jump_apex(game,.025)
 	var full := jump_apex(game,10)
-	check(short > 10 and short < full*0.5 and full > 80,"tap/hold variable jump: "+str(short)+" / "+str(full)+" px")
+	check(short > 10 and short < full*.5 and full > 80,"tap/hold jump preserved")
 	game.player.jump_requested = true
 	game.player.step(1.0/120,Vector2.ZERO)
 	var previous_velocity: float = game.player.velocity.y
 	game.player.jump_requested = true
 	game.player.step(1.0/120,Vector2.ZERO)
-	check(game.player.velocity.y > previous_velocity,"second Z cannot double jump in air")
+	check(game.player.velocity.y > previous_velocity,"no air double jump")
 	for stage in [1,6]:
 		game.rebuild_clock(Cue.STARTS[stage])
-		check(game.hazards.pillars.size() == 9 if stage == 1 else game.hazards.pillars.size() >= 25,"pillar strike count for stage "+str(stage)+": "+str(game.hazards.pillars.size()))
+		var arena: Rect2 = game.arena_rect
+		var width: float = arena.size.x/8
 		var grid: float = Cue.MEASURE if stage == 1 else Cue.HALF_MEASURE
 		var previous: Dictionary = {}
+		var masks := {}
+		check(game.hazards.pillars.size() >= (10 if stage == 1 else 25),"varied scheduled pillar phrases")
 		for pillar in game.hazards.pillars:
-			check(absf((pillar.impact-game.cue_sheet.musical_phase_offset)/grid-round((pillar.impact-game.cue_sheet.musical_phase_offset)/grid)) < 0.00001,"pillar ground impact lies on musical grid")
-			check(is_equal_approx(pillar.fall+game.hazards.pillar_fall,pillar.impact) and is_equal_approx(pillar.warning+game.hazards.pillar_warning,pillar.fall),"warning/fall scheduled backward from impact")
-			check(pillar.gap.size.x > game.player.RADIUS*2+50,"safe lane exceeds actual star diameter")
+			masks[pillar.mask] = true
+			check(absf(pillar.impact/grid-round(pillar.impact/grid)) < .00001,"every impact on precise musical grid")
+			check(pillar.fall-pillar.warning >= .48 and pillar.gap.size.x > game.player.RADIUS*2+24,"telegraph and safe width include reaction / silhouette margins")
+			check(pillar.impact+game.hazards.floor_hold+game.hazards.retract < Cue.STARTS[stage+1]-Cue.MORPH,"pillar clears before protected outgoing morph")
+			for block in pillar.blocks:
+				check(is_equal_approx(block.size.x,width) and is_equal_approx(fposmod(block.position.x-arena.position.x,width),0),"individual slabs align exactly to eight equal lanes")
 			if not previous.is_empty():
 				var travel: float = absf(pillar.gap.get_center().x-previous.gap.get_center().x)
-				var window: float = pillar.fall-previous.impact-game.hazards.floor_hold-0.06
-				check(travel/game.player.speed < window,"adjacent safe route reachable after previous pillar clears")
+				var window: float = pillar.fall-previous.impact-game.hazards.floor_hold-.04
+				check(travel/game.player.speed+.18 < window,"safe corridor reachable including 180ms human reaction")
 			previous = pillar
+		check(masks.size() >= 6,"learnable masks vary beyond two blocks")
 		var first: Dictionary = game.hazards.pillars[0]
-		game.advance_clock(first.impact-0.01)
-		game.advance_clock(first.impact+0.01)
-		check(game.hazards.impact_log.has(first.impact) and not game.hazards.debris.is_empty(),"ground impact emits debris and preserves exact logged cue")
+		game.advance_clock(first.impact+.01)
+		check(game.hazards.impact_log.has(first.impact) and not game.feedback.particles.is_empty(),"exact impact cue emits bounded cosmetic debris / smoke")
 		var duplicate: Array = game.hazards.pillars.duplicate(true)
 		game.rebuild_clock(Cue.STARTS[stage])
-		check(game.hazards.pillars == duplicate,"patterns deterministic across reconstruction/retry")
+		check(game.hazards.pillars == duplicate,"retry reconstructs identical lane patterns")
 	game.rebuild_clock(34.28)
-	check(not game.player.gravity_mode,"ball uses four-direction free movement")
-	var box: Rect2 = game.arena_rect.grow(-game.hazards.BALL_RADIUS-2)
+	var shapes: Array = game.hazards.shapes_at(36)
+	check(shapes.size() == 5 and shapes.filter(func(x): return x.has("circle")).size() == 1,"exactly one giant fireball and four walls")
+	check(game.hazards.BALL_VISUAL_RADIUS*2 == game.arena_rect.size.x*.5 and game.hazards.BALL_RADIUS < game.hazards.BALL_VISUAL_RADIUS,"half-width fireball has intuitive smaller core")
+	var box: Rect2 = game.arena_rect.grow(-game.hazards.BALL_VISUAL_RADIUS-game.hazards.WALL_DEPTH)
 	var contained := true
-	for index in 600:
-		var shape: Dictionary = game.hazards.shapes_at(34.28+index*0.04)[0]
-		contained = contained and box.grow(0.001).has_point(shape.circle)
-	check(contained,"ball ricochets within all four walls, including corners")
+	for i in 600: contained = contained and box.grow(.001).has_point(game.hazards.ball_position(34.28+i*.04))
+	check(contained,"entire flame envelope bounces inside burning walls")
+	game.player.invulnerability = 0
+	var hp: int = game.player.health
+	for wall in shapes.slice(1):
+		game.player.position = wall.rect.get_center()
+		game.player.previous_position = game.player.position
+		game.hazards.last_clock = 36
+		game.hazards.advance(36,true)
+	check(game.player.health == hp-1,"wall contact immediate, shared iframes prevent multiple damage")
 	game.rebuild_clock(68.57)
 	var safe := true
-	for index in 2400:
-		var beams: Array = game.hazards.shapes_at(68.57+index/120.0)
-		if beams.size() == 2:
-			var first: Rect2 = beams[0].rect
-			var second: Rect2 = beams[1].rect
-			var vertical := first.size.x < first.size.y
-			var point: Vector2 = game.arena_rect.get_center()
-			if vertical: point.y = (first.end.y+second.position.y)*0.5
-			else: point.x = (first.end.x+second.position.x)*0.5
-			safe = safe and not game.hazards.circle_hits_rect(point,game.player.RADIUS,first) and not game.hazards.circle_hits_rect(point,game.player.RADIUS,second)
-	check(safe,"every laser sweep preserves a wide accessible corridor, alternating positions")
-	game.advance_clock(89.14)
-	check(game.player.gravity_mode,"jumping beams restore gravity")
-	check(full > 72 and 1.9 > 2*game.player.jump_speed/game.player.gravity+0.2,"all beam heights and intervals respect the measured held jump")
-	# Real collision, iframe and immunity behavior; no attacking methods exist.
+	var crossed := false
+	for i in 2400:
+		var time := 68.57+i/120.0
+		var beams: Array = game.hazards.shapes_at(time)
+		var point: Vector2 = game.hazards.grid_pocket(time).get_center()
+		for beam in beams:
+			safe = safe and not game.hazards.circle_hits_rect(point,game.player.RADIUS,beam.rect)
+			for other in beams:
+				if not beam.warning and not other.warning and beam.axis != other.axis and beam.rect.intersects(other.rect): crossed = true
+	check(safe and crossed,"intersecting beams maintain a moving fully safe player-sized pocket")
+	game.rebuild_clock(89.14)
+	for pair in game.hazards.jump_pairs():
+		check(pair.gap > game.player.RADIUS*2+20 and pair.height < full,"paired opening accommodates complete hitbox / lower obstacle clearable")
+		check(pair.height+pair.gap-game.player.RADIUS*2 < full,"ceiling rejects max-height jump exploit")
 	game.rebuild_clock(15)
+	game.player.health = 5
 	game.player.invulnerability = 0
 	game.player.take_damage()
 	game.player.take_damage()
-	check(game.player.health == 4,"damage subtracts exactly one HP with a grace window")
+	check(game.player.health == 4,"exact one-HP damage with shared post-hit grace")
 	game.advance_clock(33.53)
 	game.player.invulnerability = 0
 	game.player.take_damage()
-	check(game.player.health == 4,"outgoing hazards cannot damage during morph")
-	check(not game.player.has_method("shoot") and not game.player.has_method("activate_saturate"),"star cannot shoot or attack; old combat players remain independent")
+	check(game.player.health == 4,"no damage during morph")
+	check(not game.player.has_method("shoot") and not game.player.has_method("activate_saturate"),"survival star retains no attacking abilities")
 
 func run() -> void:
 	session = root.get_node("Session")
@@ -241,7 +255,9 @@ func run() -> void:
 	for i in 5:
 		game.player.invulnerability = 0
 		game.player.take_damage()
-	check(game.game_over and not game.victory_started and game.player.health == 0 and not game.music_player.playing and game.hazards.stage == -1,"five hits stop music and all hazards; no accidental victory")
+	check(game.game_over and not game.victory_started and game.player.health == 0 and game.hazards.stage == -1 and game.feedback.death_age >= 0,"five hits clear hazards and start unique death sequence; no accidental victory")
+	await create_timer(.95).timeout
+	check(not game.music_player.playing and game.ui.result.visible,"death fragments resolve into retry UI with faded audio")
 	var old_game: WeakRef = weakref(game)
 	var retry_scene_id: int = current_scene.get_instance_id()
 	game.ui.retry_button.pressed.emit()
@@ -256,13 +272,14 @@ func run() -> void:
 		game = frozen_battle()
 		game.advance_clock(50)
 		game._on_music_finished()
+		await create_timer(.22).timeout
 		check(game.game_over and not game.victory_started and not game.music_player.playing,"unexpected early audio end fails safely without granting completion")
 		var previous_id: int = current_scene.get_instance_id()
 		var freed: WeakRef = weakref(game)
 		game.ui.retry_button.pressed.emit()
 		while current_scene == null or current_scene.get_instance_id() == previous_id or session.busy: await process_frame
 		game = current_scene.battle
-		check(freed.get_ref() == null and game.player.health == 5 and game.elapsed_time < 0.1 and game.hazards.get_child_count() == 0,"repeated Retry frees previous scene and resets all state")
+		check(freed.get_ref() == null and game.player.health == 5 and game.elapsed_time < 0.1 and game.hazards.get_child_count() == 2 and not game.hazards.ball_quad.visible and not game.hazards.wall_quad.visible,"repeated Retry frees previous scene and resets all state")
 	game = frozen_battle()
 	game.advance_clock(130.28)
 	check(game.state == game.State.ENDING and not game.hazards.damaging and game.music_player.playing and not game.ui.ending_label.visible,"ending clears hazards, continues music and invents no dialogue")

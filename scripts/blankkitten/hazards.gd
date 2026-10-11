@@ -2,7 +2,16 @@ extends Node2D
 ## Analytic hazards share the soundtrack clock; no spawning timers, physics
 ## impulses or delayed callbacks can leak across retries or stage changes.
 const Cue = preload("res://scripts/blankkitten/timeline.gd")
-const BALL_RADIUS := 24.0
+const BALL_RADIUS := 73.0
+const BALL_VISUAL_RADIUS := 85.0
+const WALL_DEPTH := 9.0
+const LANES := 8
+const BALL_SPEED := Vector2(79,67)
+var wall_quad: ColorRect
+var wall_material: ShaderMaterial
+var warning_seen: Dictionary = {}
+var ball_quad: ColorRect
+var ball_material: ShaderMaterial
 var battle: Node
 var stage := -1
 var phase_start := 0.0
@@ -14,15 +23,34 @@ var impact_log: Array[float] = []
 var debris: Array[Dictionary] = []
 var ghosts: Array[Dictionary] = []
 var last_clock := 0.0
-var pillar_warning := 0.95
+var last_ball_cell := Vector2i.ZERO
+var last_laser_cycle := -1
+var graze_until := 0.0
+var pillar_warning := 1.1
 var pillar_fall := 0.16
-var floor_hold := 0.22
-var retract := 0.24
+var floor_hold := 0.14
+var retract := 0.16
 
 func _ready() -> void:
 	if battle == null:
 		battle = get_parent().get_parent()
 	process_physics_priority = 0
+	ball_quad = ColorRect.new()
+	ball_quad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ball_quad.size = Vector2.ONE*BALL_VISUAL_RADIUS*2
+	ball_quad.z_index = 1
+	ball_material = ShaderMaterial.new()
+	ball_material.shader = preload("res://shaders/blankkitten_fireball.gdshader")
+	ball_quad.material = ball_material
+	add_child(ball_quad)
+	ball_quad.hide()
+	wall_quad = ColorRect.new()
+	wall_quad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wall_material = ShaderMaterial.new()
+	wall_material.shader = preload("res://shaders/blankkitten_walls.gdshader")
+	wall_quad.material = wall_material
+	add_child(wall_quad)
+	wall_quad.hide()
 
 func configure(next: int) -> void:
 	stage = next
@@ -30,43 +58,75 @@ func configure(next: int) -> void:
 	damaging = stage in [1,2,4,5,6]
 	pillars.clear()
 	impacts_seen.clear()
+	warning_seen.clear()
 	debris.clear()
+	ghosts.clear()
+	last_ball_cell = Vector2i.ZERO
+	last_laser_cycle = -1
+	graze_until = 0
 	last_clock = phase_start
 	if stage in [1,6]:
 		build_pillars(stage == 6)
 
 func build_pillars(extreme: bool) -> void:
-	pillar_warning = 0.68 if extreme else 0.95
-	pillar_fall = 0.13 if extreme else 0.16
+	pillar_warning = 1.12 if extreme else 1.20
+	pillar_fall = 0.18
 	var grid := Cue.HALF_MEASURE if extreme else Cue.MEASURE
 	var offset: float = battle.cue_sheet.musical_phase_offset
 	var first: float = offset + ceil((phase_start + pillar_warning + pillar_fall - offset) / grid)*grid
 	var arena: Rect2 = Cue.BOXES[stage]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = battle.cue_sheet.pattern_seed + stage
-	var lane := 2
-	var normal_steps := [0,1,2,4,5,6,8,9,10]
-	var count := 30 if extreme else 9
-	for i in range(count):
-		var target: float = first + (i if extreme else normal_steps[i])*grid
-		if target + floor_hold + retract >= Cue.STARTS[stage+1]-Cue.MORPH:
+	var lane_width := arena.size.x / LANES
+	var safe_lane := 3
+	var previous_center := 4.0
+	var sequence := [0,1,1,0,-1,-1,0,1,0,1,-1,0,-1,1]
+	var variation := posmod(int(battle.cue_sheet.pattern_seed),sequence.size())
+	for i in range(32 if extreme else 11):
+		var target := first + i*grid
+		if target+floor_hold+retract >= Cue.STARTS[stage+1]-Cue.MORPH:
 			break
-		# Adjacent safe lanes: 92-96 px travel, < warning*245. Designed
-		# reversals with small seeded variation, never an arbitrary full-width jump.
-		var step := (1 if int(i/3)%2 == 0 else -1)
-		if i%4 == 3:
-			step = rng.randi_range(-1,1)
-		lane = clampi(lane+step,0,4)
-		var lane_width := arena.size.x/5
-		var gap_width := 78.0 if extreme else 84.0
-		var center := arena.position.x + lane_width*(lane+0.5) + rng.randf_range(-3,3)
-		var gap := Rect2(center-gap_width/2,arena.position.y,gap_width,arena.size.y)
+		safe_lane = clampi(safe_lane+sequence[(i+variation)%sequence.size()],1,6)
+		var safe_count := 1 if extreme and i%3 != 0 and target < 127 else 2
+		var center_lane := safe_lane+safe_count*.5
+		if absf(center_lane-previous_center) > 1:
+			safe_lane += -1 if center_lane > previous_center else 1
+		previous_center = safe_lane+safe_count*.5
+		var safe_begin := safe_lane
+		var gap := Rect2(arena.position+Vector2(safe_begin*lane_width,0),Vector2(safe_count*lane_width,arena.size.y))
 		var blocks: Array[Rect2] = []
-		if gap.position.x > arena.position.x:
-			blocks.append(Rect2(arena.position,Vector2(gap.position.x-arena.position.x,arena.size.y)))
-		if gap.end.x < arena.end.x:
-			blocks.append(Rect2(Vector2(gap.end.x,arena.position.y),Vector2(arena.end.x-gap.end.x,arena.size.y)))
-		pillars.append({"impact":target,"warning":target-pillar_warning-pillar_fall,"fall":target-pillar_fall,"gap":gap,"blocks":blocks})
+		var mask := 0
+		for lane in LANES:
+			if lane >= safe_begin and lane < safe_begin+safe_count: continue
+			# Early patterns leave additional alternating openings; later phrases
+			# retain the explicit reachable corridor while combining adjacent lanes.
+			if not extreme and i < 3 and lane%2 == i%2: continue
+			if i%5 == 3 and lane == (safe_begin+4)%LANES: continue
+			mask |= 1 << lane
+			blocks.append(Rect2(arena.position+Vector2(lane*lane_width,0),Vector2(lane_width,arena.size.y)))
+		var warning := maxf(phase_start,target-pillar_warning-pillar_fall)
+		if not pillars.is_empty(): warning = maxf(warning,pillars[-1].impact+floor_hold+.04)
+		pillars.append({"impact":target,"warning":warning,"fall":target-pillar_fall,"gap":gap,"blocks":blocks,"mask":mask,"phrase":i,"climax":extreme and target >= 127})
+
+func ball_position(time: float) -> Vector2:
+	var arena: Rect2 = Cue.BOXES[2]
+	var inner := arena.grow(-BALL_VISUAL_RADIUS-WALL_DEPTH)
+	var distance := BALL_SPEED*maxf(0,time-Cue.STARTS[2])
+	return inner.position+Vector2(triangle(distance.x,inner.size.x),triangle(distance.y,inner.size.y))
+
+func grid_pocket(time: float) -> Rect2:
+	var arena: Rect2 = Cue.BOXES[4]
+	var age := maxf(0,time-Cue.STARTS[4])
+	var cycle := int(age/4.0)
+	var local := fposmod(age,4.0)
+	var centers := [Vector2(.5,.5),Vector2(.35,.4),Vector2(.65,.4),Vector2(.65,.65),Vector2(.35,.65),Vector2(.5,.5)]
+	var center: Vector2 = centers[mini(cycle,4)].lerp(centers[mini(cycle+1,5)],smoothstep(.9,3.3,local))
+	var gap := lerpf(112,88,clampf(age/18,0,1))
+	return Rect2(arena.position+arena.size*center-Vector2.ONE*gap/2,Vector2.ONE*gap)
+
+func jump_pairs() -> Array[Dictionary]:
+	var pairs: Array[Dictionary] = []
+	for i in 6:
+		pairs.append({"start":Cue.STARTS[5]+1.05+i*2.25,"speed":210.0+i%3*12,"height":[20.0,34.0,24.0,40.0,30.0,38.0][i],"gap":[50.0,56.0,52.0,58.0,54.0,56.0][i],"direction":-1 if i%3 != 2 else 1,"id":i})
+	return pairs
 
 func shapes_at(time: float) -> Array[Dictionary]:
 	var shapes: Array[Dictionary] = []
@@ -86,50 +146,49 @@ func shapes_at(time: float) -> Array[Dictionary]:
 					body = Rect2(Vector2(block.position.x,arena.end.y-5),Vector2(block.size.x,5))
 				shapes.append({"rect":body,"warning":warning,"tint":Color("#FF6E7E") if warning else Color("#08090C"),"pillar":true})
 	elif stage == 2:
-		var inner := arena.grow(-BALL_RADIUS-2)
-		var distance := Vector2(239,187)*maxf(0,age)
-		var pos := inner.position + Vector2(triangle(distance.x,inner.size.x),triangle(distance.y,inner.size.y))
-		shapes.append({"circle":pos,"radius":BALL_RADIUS,"warning":age < 0.7,"tint":Color("#FF637F")})
+		shapes.append({"circle":ball_position(time),"radius":BALL_RADIUS,"warning":age < 0.8,"tint":Color("#FF8838"),"fireball":true})
+		for wall in [Rect2(arena.position,Vector2(arena.size.x,WALL_DEPTH)),Rect2(Vector2(arena.position.x,arena.end.y-WALL_DEPTH),Vector2(arena.size.x,WALL_DEPTH)),Rect2(arena.position,Vector2(WALL_DEPTH,arena.size.y)),Rect2(Vector2(arena.end.x-WALL_DEPTH,arena.position.y),Vector2(WALL_DEPTH,arena.size.y))]:
+			shapes.append({"rect":wall,"warning":false,"tint":Color("#FF6934"),"wall":true})
 	elif stage == 4:
-		# Alternating axes avoid impossible simultaneous crossing walls. Each
-		# cycle gives a 0.7 s warning, 2.9 s sweep, then an open release interval.
-		var cycle := int(maxf(age,0)/4.2)
-		var local := fposmod(age,4.2)
-		var vertical := cycle%2 == 0
-		var sweep := smoothstep(0.7,3.6,local)
-		var progress := sweep if cycle%4 < 2 else 1-sweep
-		if local < 3.6:
-			var center := arena.position + arena.size*(Vector2(progress,0) if vertical else Vector2(0,progress))
-			var body := Rect2(center-Vector2(6,0),Vector2(12,arena.size.y)) if vertical else Rect2(center-Vector2(0,6),Vector2(arena.size.x,12))
-			# Split at a fixed, visible corridor: the player always has a route
-			# through each sweep. Corridors alternate in a predictable pattern.
-			var gap := 78.0
-			var fraction: float = [0.30,0.66,0.70,0.34][cycle%4]
-			var gap_center := (arena.position.y+arena.size.y*fraction) if vertical else (arena.position.x+arena.size.x*fraction)
-			var first := body
-			var second := body
-			if vertical:
-				first.size.y = gap_center-gap/2-body.position.y
-				second.position.y = gap_center+gap/2
-				second.size.y = body.end.y-second.position.y
-			else:
-				first.size.x = gap_center-gap/2-body.position.x
-				second.position.x = gap_center+gap/2
-				second.size.x = body.end.x-second.position.x
-			for piece in [first,second]:
-				shapes.append({"rect":piece,"warning":local < 0.7,"tint":Color("#FF3654"),"laser":true})
+		var cycle := int(maxf(age,0)/4)
+		var local := fposmod(age,4)
+		var pocket := grid_pocket(time)
+		if local < 3.65:
+			var sweep := smoothstep(.9,3.45,local)
+			for axis in (1 if cycle == 0 else 2):
+				var vertical := axis == 0
+				var warning := local < (.9 if axis == 0 else 1.25)
+				var progress := sweep if cycle%2 == 0 else 1-sweep
+				if axis == 1: progress = 1-progress
+				var center := arena.position+arena.size*(Vector2(progress,0) if vertical else Vector2(0,progress))
+				var body := Rect2(center-Vector2(4,0),Vector2(8,arena.size.y)) if vertical else Rect2(center-Vector2(0,4),Vector2(arena.size.x,8))
+				for replica in (2 if cycle >= 3 and vertical else 1):
+					var first := body
+					var second := body
+					if replica == 1:
+						first.position.x = arena.position.x+arena.size.x*(1-progress)-4
+						second.position.x = first.position.x
+					if vertical:
+						first.size.y = pocket.position.y-arena.position.y
+						second.position.y = pocket.end.y
+						second.size.y = arena.end.y-pocket.end.y
+					else:
+						first.size.x = pocket.position.x-arena.position.x
+						second.position.x = pocket.end.x
+						second.size.x = arena.end.x-pocket.end.x
+					for piece in [first,second]:
+						shapes.append({"rect":piece,"warning":warning,"tint":Color("#FC526D") if vertical else Color("#A17BFF"),"laser":true,"axis":axis,"cycle":cycle})
 	elif stage == 5:
-		# 1.9 s spacing exceeds the longest jump cycle (~0.75 s) plus landing
-		# recovery; even the tallest 72 px beam is below the 86 px held apex.
-		for i in range(8):
-			var start := phase_start+0.7+i*1.9
-			var speed := 255.0+i%3*20.0
-			var x := arena.end.x+30-(time-start)*speed
-			if time < start-0.65 or x < arena.position.x-30:
-				continue
-			var height: float = [38.0,56.0,72.0][i%3]
-			var body := Rect2((arena.end.x-14 if time < start else x-7),arena.end.y-height,14,height)
-			shapes.append({"rect":body,"warning":time < start,"tint":Color("#FFBE7B"),"laser":true})
+		for pair in jump_pairs():
+			var x: float = (arena.end.x+20 if pair.direction < 0 else arena.position.x-20)+(time-pair.start)*pair.speed*pair.direction
+			if time < pair.start-.95: continue
+			if time >= pair.start and (x < arena.position.x-24 or x > arena.end.x+24): continue
+			var warning: bool = time < pair.start
+			if warning: x = arena.end.x-7 if pair.direction < 0 else arena.position.x+7
+			var bottom := Rect2(x-7,arena.end.y-pair.height,14,pair.height)
+			var top := Rect2(x-7,arena.position.y,14,arena.size.y-pair.height-pair.gap)
+			for piece in [bottom,top]:
+				shapes.append({"rect":piece,"warning":warning,"tint":Color("#FFC68B"),"paired":true,"pair":pair.id,"direction":pair.direction})
 	return shapes
 
 static func triangle(distance: float, width: float) -> float:
@@ -150,21 +209,55 @@ func clear() -> void:
 	debris.clear()
 	pillars.clear()
 	stage = -1
+	ball_quad.hide()
+	wall_quad.hide()
 
 func advance(time: float, collisions: bool = false) -> void:
 	clock = time
+	wall_quad.visible = stage == 2 and damaging
+	if wall_quad.visible:
+		wall_quad.position = battle.arena_rect.position
+		wall_quad.size = battle.arena_rect.size
+		wall_material.set_shader_parameter("clock",time)
+		wall_material.set_shader_parameter("arena_size",battle.arena_rect.size)
+	ball_quad.visible = stage == 2 and damaging
+	if ball_quad.visible:
+		ball_quad.position = ball_position(time)-Vector2.ONE*BALL_VISUAL_RADIUS
+		ball_quad.modulate.a = .5 if time-phase_start < .8 else 1.0
+		ball_material.set_shader_parameter("clock",time)
+		ball_material.set_shader_parameter("reduced",1.0 if battle.reduced_effects else 0.0)
 	# Impacts are recorded at their scheduled musical position, even when a
 	# frame spans the timestamp. Seeking never replays a backlog of damage.
 	if damaging and stage in [1,6]:
 		for i in range(pillars.size()):
 			var p: Dictionary = pillars[i]
+			if time >= p.warning and not warning_seen.has(i):
+				warning_seen[i] = true
+				if time-p.warning < .15: battle.feedback.cue("warning",time)
 			if time >= p.impact and not impacts_seen.has(i):
 				impacts_seen[i] = true
 				impact_log.append(p.impact)
 				if time-p.impact < 0.18:
-					for edge in [p.gap.position.x-12,p.gap.end.x+12]:
-						for j in range(8 if stage == 6 else 5):
-							debris.append({"point":Vector2(edge,Cue.BOXES[stage].end.y),"start":p.impact,"velocity":Vector2((j-3)*37,-110-j*18)})
+					for block in p.blocks:
+						var point: Vector2 = Vector2(block.get_center().x,Cue.BOXES[stage].end.y)
+						battle.feedback.impact(point,(1.25 if p.climax else 1.0) if stage == 6 else .6,p.impact)
+	if damaging and stage == 2:
+		var inner := Cue.BOXES[2].grow(-BALL_VISUAL_RADIUS-WALL_DEPTH)
+		var travel := BALL_SPEED*maxf(0,time-phase_start)
+		var cell := Vector2i(floor(travel.x/inner.size.x),floor(travel.y/inner.size.y))
+		if cell != last_ball_cell and time-last_clock < .2:
+			battle.feedback.bounce(ball_position(time),time)
+		last_ball_cell = cell
+	if damaging and stage == 4:
+		var cycle := int(maxf(0,time-phase_start)/4)
+		if fposmod(time-phase_start,4) >= .9 and cycle != last_laser_cycle:
+			last_laser_cycle = cycle
+			battle.feedback.cue("laser",time)
+	if damaging and stage == 5:
+		for pair in jump_pairs():
+			if time >= pair.start-.95 and not warning_seen.has(pair.id):
+				warning_seen[pair.id] = true
+				if time-pair.start+.95 < .15: battle.feedback.cue("beam",time)
 	if collisions and damaging and not battle.player.transition_safe:
 		# Subsample one real frame (up to 1/15 s), including star movement.
 		# This prevents tunneling by a fast beam/ball without historical hits.
@@ -184,6 +277,11 @@ func advance(time: float, collisions: bool = false) -> void:
 					hit = circle_hits_rect(player_pos,battle.player.RADIUS,shape.rect)
 				if hit:
 					battle.player.take_damage()
+				elif time >= graze_until and not shape.get("wall",false):
+					var close: bool = player_pos.distance_to(shape.circle) < shape.radius+battle.player.RADIUS+8 if shape.has("circle") else circle_hits_rect(player_pos,battle.player.RADIUS+8,shape.rect)
+					if close:
+						graze_until = time+.65
+						battle.feedback.graze(player_pos,time)
 	if collisions:
 		last_clock = time
 	debris = debris.filter(func(p): return time-p.start < 0.5)
@@ -194,37 +292,18 @@ func _physics_process(_delta: float) -> void:
 		advance(battle.elapsed_time,true)
 
 func _draw_shape(shape: Dictionary, alpha: float) -> void:
-	var tint: Color = shape.tint
-	tint.a = alpha*(0.55+0.25*sin(clock*24) if shape.warning else 1.0)
-	if shape.has("circle"):
-		draw_circle(shape.circle,shape.radius+5,Color(tint,0.09*alpha))
-		draw_circle(shape.circle,shape.radius,tint,not shape.warning,2 if shape.warning else -1,true)
-		draw_arc(shape.circle,shape.radius-7,clock*3,clock*3+PI*1.4,32,Color(1,1,1,0.7*alpha),1.5,true)
-	else:
-		var rect: Rect2 = shape.rect
-		if shape.get("laser",false) and not shape.warning:
-			draw_rect(rect.grow(5),Color(tint,0.07*alpha))
-			draw_rect(rect,tint)
-			draw_rect(rect.grow(-3),Color(1,0.9,0.85,alpha))
-		elif shape.get("pillar",false) and not shape.warning:
-			draw_rect(rect,tint)
-			draw_rect(rect,Color(0.8,0.79,0.84,alpha),false,2,true)
-			draw_line(rect.position+Vector2(7,0),rect.position+Vector2(7,rect.size.y),Color(0.4,0.4,0.45,alpha),1)
-		else:
-			draw_rect(rect,tint,false,1.5,true)
+	preload("res://scripts/blankkitten/hazard_style.gd").draw_shape(self,shape,clock,alpha,battle.reduced_effects)
 
 func _draw() -> void:
-	# Clip every hazard to the box; the live collision uses the same rectangle.
-	var active: Array[Dictionary] = []
 	if damaging:
-		active = shapes_at(clock)
-	for shape in active:
-		_draw_shape(shape,1)
+		# Analytic, non-damaging fire trail; no nodes accumulate behind the ball.
+		if stage == 2:
+			for i in range(12,0,-1):
+				var point := ball_position(maxf(phase_start,clock-i*.045))
+				draw_circle(point,BALL_VISUAL_RADIUS*(1-i*.04),Color(1,.15,.025,.025*(1-i/14.0)))
+		for shape in shapes_at(clock): _draw_shape(shape,1)
+		if stage == 4:
+			preload("res://scripts/blankkitten/hazard_style.gd").intersections(self,shapes_at(clock),clock,battle.reduced_effects)
 	var target := Cue.morph_at(clock)
-	var fade := 0.0 if target < 0 else 1-smoothstep(0,0.3,clock-(Cue.STARTS[target]-Cue.MORPH))
-	for shape in ghosts:
-		_draw_shape(shape,fade)
-	for p in debris:
-		var age: float = clock-p.start
-		var pos: Vector2 = p.point+p.velocity*age+Vector2(0,280)*age*age
-		draw_rect(Rect2(pos,Vector2(3,3)),Color(0.9,0.88,0.87,(1-age/0.5)*0.7))
+	var fade := 0.0 if target < 0 else 1-smoothstep(0,.3,clock-(Cue.STARTS[target]-Cue.MORPH))
+	for shape in ghosts: _draw_shape(shape,fade)

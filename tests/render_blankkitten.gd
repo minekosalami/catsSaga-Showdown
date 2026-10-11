@@ -55,7 +55,7 @@ func run() -> void:
 	battle.player.set_physics_process(false)
 	battle.hazards.set_physics_process(false)
 	check(current_scene.arena.size == Vector2i(540,900),"internal viewport remains 540×900")
-	for time in [0.7,15.0,15.43,33.905,34.28,36.0,63.0,68.8,70.0,89.4,96.0,102.84,103.2,105.0,128.0,130.28,140.0]:
+	for time in [0.7,15.0,15.43,33.905,34.28,36.0,63.0,68.8,70.0,74.7,79.0,84.0,89.4,90.9,94.2,96.0,102.84,103.2,104.0,104.57,105.0,111.42,128.0,128.57,130.28,140.0]:
 		battle.rebuild_clock(time-0.4 if Cue.morph_at(time) >= 0 else time)
 		battle.advance_clock(time)
 		await capture("battle-"+str(time))
@@ -70,6 +70,27 @@ func run() -> void:
 	await process_frame
 	battle.rebuild_clock(105)
 	await capture("portrait-showdown")
+	var toggle: Control = battle.ui.effects_toggle
+	var point: Vector2 = current_scene.arena_container.position+current_scene.arena_container.scale*toggle.get_global_rect().get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	Input.parse_input_event(motion)
+	for down in [true,false]:
+		var click := InputEventMouseButton.new()
+		click.position = point
+		click.global_position = point
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = down
+		Input.parse_input_event(click)
+	Input.flush_buffered_events()
+	await process_frame
+	await process_frame
+	check(battle.reduced_effects,"actual mouse input through host viewport activates Reduced FX")
+	battle.advance_clock(105.2)
+	await capture("reduced-showdown")
+	check(battle.presentation.background_viewport.size == Vector2i(135,225) and current_scene.arena.size == Vector2i(540,900),"Reduced FX changes atmosphere resolution only")
+	battle.ui.effects_toggle.button_pressed = false
 	check(current_scene.arena_container.scale.is_equal_approx(Vector2.ONE) and current_scene.arena_container.position.is_equal_approx(Vector2.ZERO),"portrait window aligns the 540×900 arena exactly")
 	session.battle_walls.show()
 	session.battle_walls.update_progress(1)
@@ -90,7 +111,10 @@ func run() -> void:
 	battle.player.invulnerability = 0
 	battle.player.health = 1
 	battle.player.take_damage()
-	await create_timer(0.4).timeout
+	await create_timer(.15).timeout
+	await capture("death-fragments")
+	check(battle.feedback.death_age >= 0 and not battle.feedback.particles.is_empty() and not battle.ui.result.visible,"rainbow fragments render before retry overlay")
+	await create_timer(.95).timeout
 	await capture("defeat")
 	check(battle.ui.retry_button.visible and not battle.ui.return_button.visible,"defeat has Retry and Main Menu; Return restricted to victory")
 	await session.main_menu()
