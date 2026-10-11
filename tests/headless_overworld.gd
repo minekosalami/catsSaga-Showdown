@@ -86,7 +86,7 @@ func run() -> void:
 	check(session.area_id == "deep_forest" and world.map.display_name == "Deep Forest", "entrance portal transitions to Deep Forest")
 	check(world.player.position == Vector2(280, 540), "arrival marker avoids immediate portal bounce")
 	check(world.map.map_size == Vector2(2560, 1440), "Deep Forest is larger than entrance")
-	check(world.map.get_node("Characters").get_child_count() == 1, "Deep Forest has exactly one NPC")
+	check(world.map.get_node("Characters").has_node("ForestNPC") and world.map.get_node("Characters").has_node("FloodedGate"), "Deep Forest preserves its NPC and adds the Flooded Forest gate")
 	var npc: Node2D = world.map.get_node("Characters/ForestNPC")
 	world.player.position = npc.position + Vector2(0, 60)
 	await process_frame

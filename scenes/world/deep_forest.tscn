@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" path="res://scenes/world/tree.tscn" id="tree"]
 [ext_resource type="Script" path="res://scripts/world/placeholder.gd" id="visual"]
 
+[ext_resource type="Script" path="res://scripts/world/flooded_gate.gd" id="flooded_gate"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ckms3"]
 size = Vector2(2560, 30)
 
@@ -1352,3 +1354,22 @@ position = Vector2(1066, 202)
 collision_mask = 2
 script = ExtResource("7_ckms3")
 variation_seed = 39324281
+
+[node name="FromFlooded" type="Marker2D" parent="Entries"]
+position = Vector2(1750,1010)
+
+[node name="FloodedGate" type="Node2D" parent="Characters"]
+position = Vector2(1750,1090)
+script = ExtResource("flooded_gate")
+interaction_radius = 100.0
+
+[node name="Sign" type="Label" parent="Characters/FloodedGate"]
+offset_left = -95.0
+offset_top = -72.0
+offset_right = 95.0
+offset_bottom = -8.0
+theme_override_colors/font_outline_color = Color(0,0,0,1)
+theme_override_constants/outline_size = 5
+text = "FLOODED FOREST
+[ Z / KEY REQUIRED ]"
+horizontal_alignment = 1

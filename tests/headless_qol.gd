@@ -215,7 +215,7 @@ func run() -> void:
 	]:
 		check(session.saves.validate(invalid).is_empty(), "invalid schema/area/position/progression rejected")
 	var minimal: Dictionary = session.saves.validate({"version": 1, "area": "entrance", "position": [280, 450]})
-	check(not minimal.evil_bart_defeated and minimal.story_flags.is_empty(), "new optional save fields have safe defaults")
+	check(not minimal.evil_bart_defeated and not minimal.story_flags.bart_defeated and not minimal.story_flags.flooded_forest_key_obtained and not minimal.story_flags.flooded_forest_unlocked and not minimal.story_flags.boss2_defeated, "new optional save fields have safe defaults")
 	check(session.saves.write_save(data), "valid save restores storage after corruption")
 	await session.travel("bart_area", "FromDeep")
 	check(session.saves.read_save().area == "bart_area", "area transitions autosave destination")

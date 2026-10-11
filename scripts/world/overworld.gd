@@ -3,7 +3,8 @@ extends Node2D
 const MAPS := {
 	"entrance": preload("res://scenes/world/forest_entrance.tscn"),
 	"deep_forest": preload("res://scenes/world/deep_forest.tscn"),
-	"bart_area": preload("res://scenes/world/bart_area.tscn")
+	"bart_area": preload("res://scenes/world/bart_area.tscn"),
+	"flooded_forest": preload("res://scenes/world/flooded_forest.tscn")
 }
 var map: Node2D
 var player: CharacterBody2D
@@ -15,6 +16,7 @@ var interaction_indicator: Label
 var conversation_flag: String = ""
 var awaiting_victory_dialogue: bool = false
 var checking_spawn: bool = false
+var pending_encounter := "bart"
 
 func _ready() -> void:
 	map = MAPS[Session.area_id].instantiate()
@@ -126,6 +128,10 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
+		if nearest_npc.has_method("handle_interaction") and nearest_npc.handle_interaction(self):
+			get_viewport().set_input_as_handled()
+			return
+		pending_encounter = "boss2" if nearest_npc.has_meta("boss2") else "bart"
 		pending_battle = false
 		conversation_flag = nearest_npc.completion_flag
 		var custom: Array = nearest_npc.custom_lines()
@@ -146,7 +152,10 @@ func _on_dialogue_finished() -> void:
 	if dialogue.outcome == "battle":
 		pending_battle = true
 		player.movement_locked = true
-		Session.begin_battle(player.position)
+		if pending_encounter == "boss2":
+			Session.begin_boss2_battle(player.position)
+		else:
+			Session.begin_battle(player.position)
 	elif completed_victory:
 		Session.story_flags.erase("bart_victory_dialogue_pending")
 		Session.save_current()
