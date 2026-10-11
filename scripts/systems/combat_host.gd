@@ -33,6 +33,7 @@ func _layout_arena() -> void:
 func record_victory() -> void:
 	if Session.encounter_active:
 		Session.evil_bart_defeated = true
+		Session.grant_flooded_key()
 		if not Session.story_flags.get("bart_victory_dialogue_seen", false):
 			Session.story_flags["bart_victory_dialogue_pending"] = true
 		Session.save_boss_victory()

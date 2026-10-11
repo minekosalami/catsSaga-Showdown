@@ -1,0 +1,27 @@
+[gd_scene load_steps=7 format=3]
+[ext_resource type="Script" path="res://scripts/boss2/battle.gd" id="battle"]
+[ext_resource type="Texture2D" path="res://assets/enironment/bosses/bosstwo.png" id="boss"]
+[ext_resource type="Texture2D" path="res://assets/levelbg.png" id="background"]
+[ext_resource type="AudioStream" path="res://assets/soundtrack/SyNaPse - 003.mp3" id="music"]
+[ext_resource type="Script" path="res://scripts/boss2/timeline.gd" id="timeline"]
+[ext_resource type="Script" path="res://scripts/boss2/hud.gd" id="hud"]
+[node name="Boss2Battle" type="Node2D"]
+script = ExtResource("battle")
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(270,450)
+scale = Vector2(1,1)
+texture = ExtResource("background")
+modulate = Color(0.6,0.75,0.8,1)
+[node name="Boss2Timeline" type="Node2D" parent="."]
+script = ExtResource("timeline")
+[node name="BossSprite" type="Sprite2D" parent="Boss2Timeline"]
+position = Vector2(270,150)
+texture_filter = 1
+scale = Vector2(0.231405,0.231405)
+texture = ExtResource("boss")
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("music")
+volume_db = -12.0
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("hud")

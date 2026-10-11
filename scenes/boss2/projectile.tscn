@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemybullet.gd" id="1_fw86s"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sfeay"]
+radius = 6.5
+
+[node name="Boss2Projectile" type="Area2D" unique_id=148110196 groups=["enemy_bullets", "boss2_projectiles"]]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_fw86s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1952489550]
+shape = SubResource("CircleShape2D_sfeay")

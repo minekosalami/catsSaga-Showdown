@@ -151,6 +151,7 @@ func run() -> void:
 	game.boss.take_damage(game.boss.health)
 	await create_timer(1.35).timeout
 	check(game.ui.victory_screen.visible and session.story_flags.get("bart_victory_dialogue_pending", false), "confirmed victory preserves animation and queues dialogue")
+	check(session.story_flags.get("flooded_forest_key_obtained",false) and session.saves.read_save().story_flags.flooded_forest_key_obtained,"actual Bart victory awards and persists Flooded Forest Key")
 	check(session.saves.read_save().story_flags.bart_victory_dialogue_pending, "pending victory dialogue saved before navigation")
 	# Loading after a victory-screen interruption delivers the line without another fight.
 	await session.load_game()
@@ -182,6 +183,7 @@ func run() -> void:
 	check(current_scene.battle.game_over and not session.evil_bart_defeated and not session.story_flags.has("bart_victory_dialogue_pending"), "loss cannot mark victory or queue its dialogue")
 	await session.main_menu()
 	check(not session.evil_bart_defeated and session.story_flags.is_empty(), "aborted or lost encounter leaves no victory flags")
+	check(not session.story_flags.get("flooded_forest_key_obtained",false),"Bart defeat never awards Flooded Forest Key")
 	current_scene.queue_free()
 	await create_timer(0.25).timeout
 	print("BART VALIDATION: ", checks, " checks, ", failures, " failures")

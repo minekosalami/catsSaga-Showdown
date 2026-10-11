@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://oim0a77jaxxh"
+path="res://.godot/imported/SyNaPse - 003.mp3-66ce4fc1f4825618bcba75225ee691aa.mp3str"
+
+[deps]
+
+source_file="res://assets/soundtrack/SyNaPse - 003.mp3"
+dest_files=["res://.godot/imported/SyNaPse - 003.mp3-66ce4fc1f4825618bcba75225ee691aa.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

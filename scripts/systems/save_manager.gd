@@ -1,7 +1,7 @@
 extends RefCounted
 
 const VERSION := 1
-const AREA_SIZES := {"entrance": Vector2(1600, 900), "deep_forest": Vector2(2560, 1440), "bart_area": Vector2(1600, 900)}
+const AREA_SIZES := {"entrance": Vector2(1600, 900), "deep_forest": Vector2(2560, 1440), "bart_area": Vector2(1600, 900), "flooded_forest": Vector2(2048, 1536)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
 
@@ -21,12 +21,20 @@ func validate(value: Variant) -> Dictionary:
 		return {}
 	var defeated: Variant = value.get("evil_bart_defeated", false)
 	var flags: Variant = value.get("story_flags", {})
-	if not defeated is bool or not flags is Dictionary:
+	var legacy_bart: Variant = value.get("bart_defeated",false)
+	if not defeated is bool or not legacy_bart is bool or not flags is Dictionary:
 		return {}
 	for flag in flags:
 		if not flag is String or not flags[flag] is bool:
 			return {}
 	flags = flags.duplicate()
+	# Version-one saves retain every unrelated flag; old Bart victories earn the key.
+	defeated = defeated or legacy_bart or flags.get("bart_defeated", false)
+	flags["bart_defeated"] = defeated
+	flags["flooded_forest_key_obtained"] = defeated or flags.get("flooded_forest_key_obtained", false)
+	for flag in ["flooded_forest_unlocked", "boss2_defeated"]:
+		if not flags.has(flag):
+			flags[flag] = false
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true
 	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate()}

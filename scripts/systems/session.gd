@@ -9,6 +9,8 @@ var return_position: Vector2
 var restore_position: bool = false
 var evil_bart_defeated: bool = false
 var encounter_active: bool = false
+var encounter_id := "bart"
+var key_notification_pending := false
 var busy: bool = false
 var battle_entry_pending: bool = false
 @export var battle_wipe_duration: float = 0.5
@@ -93,6 +95,7 @@ func new_game() -> void:
 	restore_position = false
 	evil_bart_defeated = false
 	story_flags.clear()
+	key_notification_pending = false
 	encounter_active = false
 	if await transition_to("res://scenes/world/overworld.tscn"):
 		save_current()
@@ -110,8 +113,35 @@ func begin_battle(position_before_battle: Vector2) -> void:
 	if busy or evil_bart_defeated:
 		return
 	return_position = position_before_battle
+	encounter_id = "bart"
 	encounter_active = true
 	await transition_to("res://scenes/combat_host.tscn", true)
+
+func grant_flooded_key() -> void:
+	if not evil_bart_defeated:
+		return
+	story_flags["bart_defeated"] = true
+	if not story_flags.get("flooded_forest_key_obtained", false):
+		story_flags["flooded_forest_key_obtained"] = true
+		key_notification_pending = true
+		call_deferred("_show_key_notification")
+
+func begin_boss2_battle(position_before_battle: Vector2) -> void:
+	if busy or area_id != "flooded_forest" or not story_flags.get("flooded_forest_key_obtained", false):
+		return
+	return_position = position_before_battle
+	encounter_id = "boss2"
+	encounter_active = true
+	await transition_to("res://scenes/boss2/combat_host.tscn", true)
+
+func return_to_flooded_forest() -> void:
+	if busy or not story_flags.get("boss2_defeated", false):
+		return
+	area_id = "flooded_forest"
+	restore_position = true
+	encounter_active = false
+	if await transition_to("res://scenes/world/overworld.tscn"):
+		save_current()
 
 func return_to_forest() -> void:
 	if busy or not evil_bart_defeated:
@@ -170,7 +200,7 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 	return error == OK
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return {"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate()}
+	return saves.validate({"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
@@ -183,7 +213,7 @@ func save_current() -> bool:
 
 func save_boss_victory() -> void:
 	# Save only the known overworld return point, never combat runtime objects.
-	if encounter_active and evil_bart_defeated:
+	if encounter_active and (evil_bart_defeated if encounter_id == "bart" else story_flags.get("boss2_defeated", false)):
 		var ok := saves.write_save(snapshot(area_id, return_position))
 		last_save_message = "Progress saved." if ok else saves.last_error
 
@@ -295,3 +325,23 @@ func request_main_menu() -> void:
 		confirm_action("Return to the main menu and discard unsaved progress?", main_menu)
 	else:
 		main_menu()
+
+func _show_key_notification() -> void:
+	if not key_notification_pending:
+		return
+	key_notification_pending = false
+	var label := Label.new()
+	label.name = "KeyRewardNotification"
+	add_child(label)
+	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	label.offset_top = 76
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.text = "Obtained: Flooded Forest Key"
+	label.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono.ttf"))
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 6)
+	var fade := create_tween()
+	fade.tween_interval(3.0)
+	fade.tween_property(label,"modulate:a",0.0,0.5)
+	fade.tween_callback(label.queue_free)

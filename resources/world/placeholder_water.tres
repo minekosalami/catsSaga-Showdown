@@ -1,0 +1,19 @@
+[gd_resource type="TileSet" format=3]
+
+[sub_resource type="Gradient" id="Gradient_g5k01"]
+colors = PackedColorArray(0.09019608, 0.2627451, 0.41568628, 1, 0.1882353, 0.4627451, 0.6, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_0csov"]
+gradient = SubResource("Gradient_g5k01")
+width = 16
+height = 16
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h8d3v"]
+texture = SubResource("GradientTexture2D_0csov")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[resource]
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 2
+sources/0 = SubResource("TileSetAtlasSource_h8d3v")
