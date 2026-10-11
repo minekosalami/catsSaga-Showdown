@@ -82,7 +82,7 @@ func run() -> void:
 	check(not player.facing_left and player.sprite.flip_h, "right movement flips only sprite horizontally")
 	await create_timer(0.3).timeout
 	check(not player.facing_left, "right facing persists at rest")
-	player.position = Vector2(450, 445)
+	player.position = Vector2(450, 335)
 	player.velocity = Vector2.ZERO
 	await process_frame
 	await process_frame

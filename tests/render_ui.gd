@@ -44,6 +44,17 @@ func mouse_click(position: Vector2) -> void:
 		Input.parse_input_event(event)
 		await process_frame
 
+func press(code: Key, window: Window = null) -> void:
+	for down in [true, false]:
+		var event := InputEventKey.new()
+		event.keycode = code
+		event.pressed = down
+		if window == null:
+			Input.parse_input_event(event)
+		else:
+			window.push_input(event)
+		await process_frame
+
 func run() -> void:
 	var save_manager = root.get_node("Session").saves
 	save_manager.save_path = "user://validation-render_ui.json"
@@ -60,11 +71,13 @@ func run() -> void:
 	await snapshot("rpg-controls")
 	current_scene._show_credits()
 	await snapshot("rpg-credits")
-	current_scene._back_to_menu()
+	await press(KEY_X)
+	check(current_scene.menu_container.visible, "graphical X returns Info to main menu")
 	current_scene._open_options()
 	await process_frame
 	await snapshot("rpg-options")
-	current_scene.options_dialog.hide()
+	await press(KEY_X, current_scene.options_dialog)
+	check(not current_scene.options_dialog.visible, "graphical X closes modal Options viewport")
 	var fullscreen: CheckButton = current_scene.options_dialog.find_child("FullscreenToggle", true, false)
 	fullscreen.button_pressed = true
 	await create_timer(0.2).timeout
@@ -88,7 +101,7 @@ func run() -> void:
 	await create_timer(0.5).timeout
 	check(current_scene.name == "Overworld", "widescreen menu enters forest")
 	await snapshot("qol-entrance")
-	current_scene.player.position = Vector2(450, 445)
+	current_scene.player.position = Vector2(450, 335)
 	await create_timer(0.5).timeout
 	await snapshot("qol-indicator")
 	session.open_pause()
@@ -97,7 +110,12 @@ func run() -> void:
 	await snapshot("qol-pause")
 	session.pause_menu.buttons.Save.pressed.emit()
 	await snapshot("qol-saved")
-	session.close_pause()
+	session.open_options()
+	await process_frame
+	await press(KEY_X, session.options_dialog)
+	check(paused and not session.options_dialog.visible, "graphical X returns Options to paused parent")
+	await press(KEY_X)
+	check(not paused and not session.pause_menu.opened, "graphical X closes forest pause")
 	current_scene.dialogue.start_lines([{"speaker": "TREE", "text": "It's a tree."}, {"speaker": "TREE", "text": "Probably."}])
 	await create_timer(0.5).timeout
 	await snapshot("qol-inspection")
@@ -105,6 +123,10 @@ func run() -> void:
 	current_scene.player.position = Vector2(900, 490)
 	await create_timer(0.5).timeout
 	await snapshot("rpg-deep-forest")
+	# Show both denser grass-side clusters from an unobstructed path position.
+	current_scene.player.position = Vector2(1150, 540)
+	await create_timer(0.5).timeout
+	await snapshot("forest-deep-clusters")
 	current_scene.dialogue.start("forest_npc")
 	await create_timer(0.9).timeout
 	await snapshot("rpg-dialogue")
@@ -167,6 +189,8 @@ func run() -> void:
 	session.open_pause()
 	await create_timer(0.2).timeout
 	await snapshot("qol-combat-pause")
+	await press(KEY_X)
+	check(paused and session.pause_menu.opened, "graphical combat pause ignores forest X back")
 	session.close_pause()
 	# Test resizing on a larger PC display using the configured canvas stretch.
 	root.size = Vector2i(1600, 900)
@@ -175,7 +199,8 @@ func run() -> void:
 	check(is_equal_approx(host.arena_container.scale.x, host.arena_container.scale.y), "larger window preserves uniform arena scale")
 	await snapshot("rpg-combat-large-window")
 	root.size = Vector2i(1280, 720)
-	game.player.activate_saturate()
+	await press(KEY_X)
+	check(game.player.saturate_used, "graphical combat X activates SATURATE")
 	await create_timer(0.65).timeout
 	await snapshot("rpg-saturate")
 	await create_timer(1.0).timeout

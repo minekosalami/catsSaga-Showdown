@@ -3,6 +3,13 @@ extends Area2D
 signal health_changed(new_health: int)
 signal game_over
 
+# The sole enemy-projectile damage shape uses internal battle pixels.
+@export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 5.0:
+	set(value):
+		damage_hitbox_radius = clampf(value, 0.5, 32.0)
+		if is_node_ready():
+			($CollisionShape2D.shape as CircleShape2D).radius = damage_hitbox_radius
+
 @export var speed: float = 450.0
 @export var focus_speed: float = 150.0
 @export var acceleration: float = 1800.0
@@ -44,6 +51,9 @@ const BEAM_CHEAT_CODE: String = "BEAM"
 
 
 func _ready() -> void:
+	# Give each instance its own shape so tuning one player cannot affect another.
+	$CollisionShape2D.shape = $CollisionShape2D.shape.duplicate()
+	($CollisionShape2D.shape as CircleShape2D).radius = damage_hitbox_radius
 	add_to_group("player")
 	_collect_visual_nodes(self)
 
