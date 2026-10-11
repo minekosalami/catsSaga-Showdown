@@ -1,7 +1,7 @@
 extends Area2D
 
 signal travel_requested(destination: String, entry: String)
-@export_enum("entrance", "deep_forest", "bart_area") var destination: String = "entrance"
+@export_enum("entrance", "deep_forest", "bart_area", "flooded_forest") var destination: String = "entrance"
 @export var entry: String = "FromDeep"
 
 func _ready() -> void:

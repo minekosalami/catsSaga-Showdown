@@ -66,7 +66,7 @@ func run() -> void:
 		var tree_ok := true
 		var canopy_clear := true
 		var repeated := true
-		var boundaries := true
+		var landmarks_clear := true
 		for tree in map.get_node("Trees").get_children():
 			var factor: float = tree.get_size_multiplier()
 			bands[0 if factor < 0.9 else (1 if factor <= 1.2 else 2)] += 1
@@ -81,15 +81,16 @@ func run() -> void:
 			repeated = repeated and is_equal_approx(copy.get_size_multiplier(), factor)
 			copy.free()
 			if factor >= 1.25:
-				boundaries = boundaries and minf(minf(tree.position.x, map.map_size.x - tree.position.x), minf(tree.position.y, map.map_size.y - tree.position.y)) <= 240
+				for marker in map.get_node("Discoveries").get_children():
+					landmarks_clear = landmarks_clear and not rect.grow(32).has_point(marker.position)
 		check(tree_ok, filename + " uniformly scaled original trees have scaled trunk capsules")
 		check(bands[0] > 0 and bands[2] > 0 and bands[1] > bands[0] and bands[1] > bands[2], filename + " mixes sizes with medium most common: " + str(bands))
 		check(repeated, filename + " sizes survive reinstantiation with serialized seeds")
 		check(canopy_clear, filename + " full tree canopies leave painted routes unobstructed")
-		check(boundaries, filename + " larger trees frame forest boundaries")
+		check(landmarks_clear, filename + " larger trees leave reserved grassy clearings open")
 		check(map.y_sort_enabled and map.get_node("Trees").y_sort_enabled and map.get_node("Characters").y_sort_enabled, filename + " tree trunks and characters share Y-sorting")
 		if filename == "deep_forest":
-			check(map.map_size == Vector2(2560,1440) and map.get_node("Trees").get_child_count() >= 180, "Deep Forest expands physically and more than triples the previous 62 trees")
+			check(map.map_size == Vector2(5120,2880) and map.get_node("Trees").get_child_count() >= 180, "Deep Forest expands physically and more than triples the previous 62 trees")
 			check(paths.get_cell_source_id(Vector2i(120,33)) == -1 and reachable.has(Vector2i(77,74)), "Deep Forest replaces former east-west corridor with distant southern winding route")
 		map.free()
 	var tree: Node = tree_scene.instantiate()
@@ -127,7 +128,7 @@ func run() -> void:
 	check(current_scene.player.position == safe and not current_scene.checking_spawn, "valid saved position is retained")
 	await session.travel("deep_forest", "FromBart")
 	var expanded_spawn := Vector2(2280,1200)
-	check(current_scene.player.position == expanded_spawn and current_scene.player.get_node("Camera2D").limit_right == 2560 and current_scene.player.get_node("Camera2D").limit_bottom == 1440, "relocated Deep Forest arrival and camera follow expanded bounds")
+	check(current_scene.player.position == expanded_spawn and current_scene.player.get_node("Camera2D").limit_right == 5120 and current_scene.player.get_node("Camera2D").limit_bottom == 2880, "relocated Deep Forest arrival and camera follow expanded bounds")
 	check(session.saves.write_save(session.snapshot("deep_forest", expanded_spawn)), "version-one save accepts new Deep Forest coordinates")
 	await session.load_game()
 	await physics_frame
