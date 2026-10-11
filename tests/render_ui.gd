@@ -31,6 +31,22 @@ func snapshot(filename: String) -> void:
 	var error := root.get_texture().get_image().save_png(output_directory.path_join(filename + ".png"))
 	check(error == OK, "capture " + filename)
 
+func map_overview(filename: String) -> void:
+	var world: Node = current_scene
+	var camera: Camera2D = world.player.get_node("Camera2D")
+	var previous_position: Vector2 = world.player.position
+	var previous_zoom := camera.zoom
+	world.player.set_physics_process(false)
+	world.player.position = world.map.map_size / 2
+	camera.zoom = Vector2.ONE * minf(1280.0 / world.map.map_size.x, 720.0 / world.map.map_size.y) * 0.93
+	camera.reset_smoothing()
+	await create_timer(0.1).timeout
+	await snapshot(filename)
+	world.player.position = previous_position
+	camera.zoom = previous_zoom
+	camera.reset_smoothing()
+	world.player.set_physics_process(true)
+
 func mouse_click(position: Vector2) -> void:
 	var motion := InputEventMouseMotion.new()
 	motion.position = position
@@ -101,6 +117,7 @@ func run() -> void:
 	await create_timer(0.5).timeout
 	check(current_scene.name == "Overworld", "widescreen menu enters forest")
 	await snapshot("qol-entrance")
+	await map_overview("forest-entrance-restructured-overview")
 	current_scene.player.position = Vector2(450, 335)
 	await create_timer(0.5).timeout
 	await snapshot("qol-indicator")
@@ -123,6 +140,7 @@ func run() -> void:
 	current_scene.player.position = Vector2(900, 490)
 	await create_timer(0.5).timeout
 	await snapshot("rpg-deep-forest")
+	await map_overview("deep-forest-restructured-overview")
 	# Show both denser grass-side clusters from an unobstructed path position.
 	current_scene.player.position = Vector2(1150, 540)
 	await create_timer(0.5).timeout
@@ -134,6 +152,7 @@ func run() -> void:
 	current_scene.player.position = Vector2(1000, 520)
 	await create_timer(0.5).timeout
 	await snapshot("rpg-bart-area")
+	await map_overview("bart-area-restructured-overview")
 	var d: Node = current_scene.dialogue
 	d.start("bart_encounter")
 	d.advance()
@@ -232,4 +251,7 @@ func run() -> void:
 	current_scene.queue_free()
 	await create_timer(0.3).timeout
 	print("GRAPHICAL VALIDATION: ", failures, " failures")
+	# Allow the audio server to retire looping playback before test shutdown.
+	root.get_node("Music").play_theme("")
+	await create_timer(0.2).timeout
 	quit(0 if failures == 0 else 1)

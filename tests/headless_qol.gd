@@ -58,6 +58,10 @@ func run() -> void:
 	var player: CharacterBody2D = world.player
 	check(player.sprite_texture.resource_path == "res://assets/player/player.png.png" and not player.get_node("VisualPlaceholder").visible, "original supplied cat sprite replaces placeholder")
 	check(player.sprite.scale.x == player.sprite.scale.y and is_equal_approx(player.sprite.scale.y * player.sprite_texture.get_height(), player.sprite_height), "sprite retains original proportions at configured display height")
+	# Keep the speed/normalization probe on clear terrain in the redesigned trail.
+	player.position = Vector2(850,310)
+	player.velocity = Vector2.ZERO
+	await physics_frame
 	key(KEY_D, true)
 	await create_timer(0.3).timeout
 	check(is_equal_approx(player.velocity.length(), player.speed), "normal overworld speed preserved")
@@ -269,4 +273,7 @@ func run() -> void:
 	current_scene.queue_free()
 	await create_timer(0.25).timeout
 	print("QOL VALIDATION: ", checks, " checks, ", failures, " failures")
+	# Allow the audio server to retire looping playback before test shutdown.
+	root.get_node("Music").play_theme("")
+	await create_timer(0.2).timeout
 	quit(0 if failures == 0 else 1)

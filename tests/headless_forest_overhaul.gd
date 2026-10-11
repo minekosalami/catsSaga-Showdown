@@ -88,6 +88,9 @@ func run() -> void:
 		check(canopy_clear, filename + " full tree canopies leave painted routes unobstructed")
 		check(boundaries, filename + " larger trees frame forest boundaries")
 		check(map.y_sort_enabled and map.get_node("Trees").y_sort_enabled and map.get_node("Characters").y_sort_enabled, filename + " tree trunks and characters share Y-sorting")
+		if filename == "deep_forest":
+			check(map.map_size == Vector2(2560,1440) and map.get_node("Trees").get_child_count() >= 180, "Deep Forest expands physically and more than triples the previous 62 trees")
+			check(paths.get_cell_source_id(Vector2i(120,33)) == -1 and reachable.has(Vector2i(77,74)), "Deep Forest replaces former east-west corridor with distant southern winding route")
 		map.free()
 	var tree: Node = tree_scene.instantiate()
 	var other: Node = tree_scene.instantiate()
@@ -122,5 +125,16 @@ func run() -> void:
 	await physics_frame
 	await process_frame
 	check(current_scene.player.position == safe and not current_scene.checking_spawn, "valid saved position is retained")
+	await session.travel("deep_forest", "FromBart")
+	var expanded_spawn := Vector2(2280,1200)
+	check(current_scene.player.position == expanded_spawn and current_scene.player.get_node("Camera2D").limit_right == 2560 and current_scene.player.get_node("Camera2D").limit_bottom == 1440, "relocated Deep Forest arrival and camera follow expanded bounds")
+	check(session.saves.write_save(session.snapshot("deep_forest", expanded_spawn)), "version-one save accepts new Deep Forest coordinates")
+	await session.load_game()
+	await physics_frame
+	await physics_frame
+	check(current_scene.player.position == expanded_spawn, "expanded-area saved position survives real scene reload")
 	print("FOREST OVERHAUL VALIDATION: ", checks, " checks, ", failures, " failures")
+	# Allow the audio server to retire looping playback before test shutdown.
+	root.get_node("Music").play_theme("")
+	await create_timer(0.2).timeout
 	quit(0 if failures == 0 else 1)

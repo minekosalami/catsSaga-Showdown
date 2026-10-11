@@ -26,7 +26,7 @@ func _initialize() -> void:
 func bullet_probe(game: Node, offset: Vector2) -> Node:
 	var bullet: Node = load("res://scenes/enemybullet.tscn").instantiate()
 	bullet.speed = 0
-	bullet.position = game.player.position + offset
+	bullet.position = game.player.get_node("CollisionShape2D").global_position - game.global_position + offset
 	game.add_child(bullet)
 	for i in range(4): await physics_frame
 	await process_frame
@@ -153,16 +153,16 @@ func run() -> void:
 	game.set_process(false)
 	game.player.set_process(false)
 	var shape: CircleShape2D = game.player.get_node("CollisionShape2D").shape
-	check(shape.radius == 5 and game.player.get_node("CollisionShape2D").position == Vector2.ZERO, "one authoritative damage circle centered at player with radius 5")
+	check(shape.radius == 7 and game.player.get_node("CollisionShape2D").position.is_equal_approx(game.player.get_node("Sprite2D").position), "one authoritative damage circle centered on battle sprite with radius 7")
 	check(game.player.get_children().filter(func(child): return child is CollisionShape2D).size() == 1, "no duplicate player damage shapes")
 	var sprite: Sprite2D = game.player.get_node("Sprite2D")
 	check(sprite.scale.is_equal_approx(Vector2(0.19719388,0.1398545)) and game.player.speed == 450 and game.player.focus_speed == 150, "battle sprite and movement speeds unchanged")
 	var near: Node = await bullet_probe(game, Vector2(30,0))
 	check(game.player.health == 3 and is_instance_valid(near), "real enemy bullet at distance 30 misses new hitbox (old hitbox would overlap)")
-	check(is_equal_approx(near.get_node("CollisionShape2D").shape.radius,20.22375), "enemy bullet radius untouched")
+	check(is_equal_approx(near.get_node("CollisionShape2D").shape.radius,6.5), "enemy bullet collider matches its visible core")
 	near.queue_free()
 	await process_frame
-	await bullet_probe(game, Vector2(22,0))
+	await bullet_probe(game, Vector2(10,0))
 	check(game.player.health == 2 and game.player.invulnerability_timer > 0, "real intersecting projectile deals one damage and sets invulnerability")
 	await bullet_probe(game, Vector2.ZERO)
 	check(game.player.health == 2, "additional collision during invulnerability does not damage")
@@ -176,7 +176,7 @@ func run() -> void:
 	var second: Node = load("res://scenes/player.tscn").instantiate()
 	game.add_child(second)
 	second.set_process(false)
-	check(second.get_node("CollisionShape2D").shape.radius == 5 and second.get_node("CollisionShape2D").shape != shape, "hitbox tuning does not mutate other player instances")
+	check(second.get_node("CollisionShape2D").shape.radius == 7 and second.get_node("CollisionShape2D").shape != shape, "hitbox tuning does not mutate other player instances")
 	second.queue_free()
 	await process_frame
 	await bullet_probe(game, Vector2.ZERO)

@@ -134,6 +134,7 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 	close_pause()
 	get_tree().paused = false
 	battle_entry_pending = white_wipe
+	Music.prepare_transition(scene_path, battle_wipe_duration if white_wipe else transition_duration * 0.5)
 	curtain.color = Color.WHITE if white_wipe else Color.BLACK
 	curtain.show()
 	curtain.modulate.a = 1.0 if white_wipe else 0.0
@@ -152,6 +153,7 @@ func transition_to(scene_path: String, white_wipe: bool = false) -> bool:
 		error = get_tree().change_scene_to_file(scene_path)
 	if error != OK:
 		last_save_message = "Transition could not load " + scene_path
+		Music.sync_scene()
 	else:
 		await get_tree().scene_changed
 	fade = create_tween()

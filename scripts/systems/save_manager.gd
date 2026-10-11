@@ -1,7 +1,7 @@
 extends RefCounted
 
 const VERSION := 1
-const AREA_SIZES := {"entrance": Vector2(1600, 900), "deep_forest": Vector2(1920, 1080), "bart_area": Vector2(1600, 900)}
+const AREA_SIZES := {"entrance": Vector2(1600, 900), "deep_forest": Vector2(2560, 1440), "bart_area": Vector2(1600, 900)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
 

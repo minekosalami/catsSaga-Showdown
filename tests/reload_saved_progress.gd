@@ -40,4 +40,7 @@ func run() -> void:
 	current_scene.queue_free()
 	await create_timer(0.25).timeout
 	print("RELOAD VALIDATION: ", failures, " failures")
+	# Allow the audio server to retire looping playback before test shutdown.
+	root.get_node("Music").play_theme("")
+	await create_timer(0.2).timeout
 	quit(0 if failures == 0 else 1)

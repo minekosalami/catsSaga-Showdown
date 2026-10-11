@@ -1,6 +1,8 @@
 # Forest overhaul and tree size variation
 
-All three areas now have editable, painted `Paths` TileMapLayers with winding approaches, varying widths and optional clearings. Forest Entrance introduces an inspection spur and a southern clearing. Deep Forest has denser clusters and two secluded branches around its existing NPC. Bart's approach leads into an open encounter clearing with an additional southern pocket. Existing entry markers, portals, NPC coordinates and dialogue are retained.
+This guide describes the reusable editor workflow. For the latest layouts, audio and collision changes, see [the music/hitbox/restructure review](music-hitbox-restructure-review.md).
+
+All three areas now have editable, painted `Paths` TileMapLayers with winding approaches, varying widths and optional clearings. Forest Entrance introduces an inspection spur and a southern clearing. Deep Forest has dense interior clusters, a broad southern basin and four exploration spurs around its existing NPC. Bart's approach leads into an open encounter clearing with an additional southern pocket. NPC coordinates and dialogue are retained; Forest Entrance’s return marker and Deep Forest’s Bart exit/arrival were moved onto the new trails. Deep Forest is now 2560×1440.
 
 Only existing artwork is used: `assets/enironment/tree.png` and the 16×16 atlas `assets/enironment/grass-tileset.png`. Grass and flowers retain their existing atlas arrangements; paths use the atlas's single-cell soil tiles in column 6. No PNG bytes were changed. The existing Deep Forest NPC remains an editable placeholder because no dedicated NPC artwork is available. Its dialogue is unchanged.
 
@@ -10,9 +12,9 @@ Trees are stored as individual reusable `scenes/world/tree.tscn` instances, rath
 
 | Area | Small | Medium | Large |
 | --- | ---: | ---: | ---: |
-| Forest Entrance | 10 | 21 | 3 |
-| Deep Forest | 19 | 38 | 5 |
-| Bart's Area | 9 | 20 | 3 |
+| Forest Entrance | 17 | 44 | 3 |
+| Deep Forest | 48 | 142 | 10 |
+| Bart's Area | 12 | 31 | 3 |
 
 The inspectable tree is an additional fixed 0.85× instance. Larger trees frame boundaries, while smaller and medium trees mix inside clusters. Full canopy rectangles leave paths unobstructed. Tree roots remain at trunk bases for Y-sorting, and each instance owns a capsule collider that scales with its trunk. Trees and characters share Y-sorting through the map; the overworld player also participates.
 
@@ -32,13 +34,13 @@ Open `forest_entrance.tscn`, `deep_forest.tscn` or `bart_area.tscn`. Select **Gr
 
 Use the ordinary grass cells for ground, flowers and tufts for sparse details, and column 6 soil cells for paths. The atlas's connected 3×3 cutout is available as a complete pattern; avoid scattering its component cells. Ground, path and decorative layers do not create collisions. Tree capsules and the four retained outer boundary bodies provide collision. The old internal rectangular test obstacles and their colored visuals have been removed.
 
-Entries and Portals remain organized separately. Move an exit together with its arrival marker in the destination map if you later redesign transitions. Camera limits still follow each map's original dimensions. If a restored save position intersects new solid geometry, the player moves to an existing entry marker without resetting progression; valid save positions remain exact.
+Entries and Portals remain organized separately. Move an exit together with its arrival marker in the destination map if you later redesign transitions. Camera limits follow each map's declared dimensions, including the expanded Deep Forest. If you resize a map, also update its four boundary shapes and `AREA_SIZES` in `scripts/systems/save_manager.gd`. If a restored save position intersects new solid geometry, the player moves to an existing entry marker without resetting progression; valid save positions remain exact.
 
-The X menu-back event was corrected from input device 16 to the standard keyboard device 0, preserving the existing key. No battle scripts, dialogue, player artwork or resolution settings changed.
+The X menu-back event was corrected from input device 16 to the standard keyboard device 0, preserving the existing key. Dialogue, player artwork and viewport resolutions are retained; the subsequent hitbox update is documented in the companion review.
 
 ## Validation
 
-Godot 4.6.3 headless import passed. **546 automated checks passed**: 36 new forest-overhaul checks, 460 existing headless checks and 50 graphical checks under Xvfb/software OpenGL. Coverage includes all three scenes, connected paths, collision-free path interiors, entry/exit access, canopy clearance, stable tree sizes, independent trunk colliders, Inspector overrides, blocked and valid saves, actual movement and area transitions, NPC interaction, Bart encounter/victory/return, controls, shooting, SATURATE, BEAM, CATA and music timeline state.
+Godot 4.6.3 headless import passed. **591 automated checks passed**: 41 forest-overhaul checks, 37 music/hitbox checks, 460 existing headless checks and 53 graphical checks under Xvfb/software OpenGL. Coverage includes all three scenes, connected paths, collision-free path interiors, entry/exit access, canopy clearance, stable tree sizes, independent trunk colliders, Inspector overrides, blocked and valid saves, actual movement and area transitions, NPC interaction, Bart encounter/victory/return, controls, shooting, SATURATE, BEAM, CATA and music timeline state.
 
 Run the focused validation with:
 
