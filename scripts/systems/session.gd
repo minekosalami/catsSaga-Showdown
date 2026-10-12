@@ -21,6 +21,9 @@ var story_flags: Dictionary = {}
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
 var unrestricted_region_access := false # Debug only; deliberately absent from saves.
+var show_coordinates := false # Session-only visualization; never saved.
+var reveal_all_locations := false
+var coordinate_overlay: Label
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
 var developer_menu: CanvasLayer
@@ -50,6 +53,9 @@ func _ready() -> void:
 	developer_menu = preload("res://scripts/ui/developer_menu.gd").new()
 	developer_menu.name = "DeveloperMenu"
 	add_child(developer_menu)
+	coordinate_overlay = preload("res://scripts/ui/coordinate_overlay.gd").new()
+	coordinate_overlay.name = "CoordinateOverlay"
+	add_child(coordinate_overlay)
 
 func _input(event: InputEvent) -> void:
 	if developer_menu.handle_input(event):

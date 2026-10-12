@@ -69,12 +69,15 @@ func run() -> void:
 	var point: Vector2 = world.player.global_position
 	var local_point: Vector2 = world.player.position
 	await type_code("mycoordinates")
-	check(session.get_node("DebugNotification").text == "X: %s | Y: %s" % [str(point.x),str(point.y)], "coordinates show actual global X/Y with a translated parent")
+	check(session.show_coordinates and session.coordinate_overlay.text == "X: %.1f | Y: %.1f" % [point.x,point.y], "coordinates show actual global X/Y with a translated parent")
 	check(world.player.global_position == point and world.player.position == local_point, "coordinate code leaves player position unchanged")
 	world.player.position += Vector2(32,16)
 	point = world.player.global_position
+	await process_frame
+	await process_frame
+	check(session.coordinate_overlay.text == "X: %.1f | Y: %.1f" % [point.x,point.y], "coordinate overlay samples updated global position live")
 	await type_code("mycoordinates")
-	check(session.get_node("DebugNotification").text == "X: %s | Y: %s" % [str(point.x),str(point.y)] and world.player.global_position == point, "repeated coordinate code samples updated global position without moving player")
+	check(not session.show_coordinates and not session.coordinate_overlay.visible and world.player.global_position == point, "repeated coordinate code hides overlay without moving player")
 	world.position = Vector2.ZERO
 	if world.map_ui.opened: await press(KEY_M)
 	var movement_start: Vector2 = world.player.position

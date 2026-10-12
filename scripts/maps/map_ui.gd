@@ -23,6 +23,7 @@ var sequence_time := 0.0
 var last_reveal_cell := Vector2i(-1000,-1000)
 var last_area := ""
 var boss_locations: Dictionary = {}
+var cave_entrance: Variant = null
 
 func setup(host: Node2D) -> void:
 	world = host
@@ -30,6 +31,13 @@ func setup(host: Node2D) -> void:
 	layer = 30
 	var terrain: Texture2D = load("res://resources/maps/underground_terrain.res" if Session.area_id == "underground_cave" else "res://resources/maps/world_terrain.res")
 	boss_locations = terrain.get_meta("boss_locations", {})
+	if Layout.same_map(Session.area_id,"flooded_forest"):
+		var state: SceneState = world.MAPS["flooded_forest"].get_state()
+		for index in state.get_node_count():
+			if state.get_node_path(index) != NodePath("./Characters/CaveHole"): continue
+			for property in state.get_node_property_count(index):
+				if state.get_node_property_name(index,property) == "position": cave_entrance = state.get_node_property_value(index,property)
+			break
 	fog_image = Session.exploration.visibility_image(Session.area_id)
 	fog_texture = ImageTexture.create_from_image(fog_image)
 	minimap = Control.new()
@@ -45,6 +53,7 @@ func setup(host: Node2D) -> void:
 	add_child(map_frame)
 	map_frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map_frame.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	map_frame.theme.set_stylebox("panel","TooltipPanel",preload("res://scripts/ui/sketch_theme.gd").box(Color("#18181b"),Color("#999890")))
 	var paper := ColorRect.new()
 	paper.color = Color("#101410")
 	map_frame.add_child(paper)
@@ -234,6 +243,7 @@ func _handle_debug_code(event: InputEventKey) -> bool:
 		debug_sequence = ""
 		debug_completion_key = event.keycode
 		Session.developer_cheats.activate(candidate)
+		if candidate == "mycoordinates" and opened: close_modals()
 		return true
 	return candidate != "m"
 
@@ -267,6 +277,8 @@ func _refresh() -> void:
 	var markers := visible_boss_markers()
 	minimap.boss_markers = markers
 	full_map.boss_markers = markers
+	minimap.region_markers = visible_region_markers()
+	full_map.region_markers = minimap.region_markers
 	minimap.visible = normal_exploration() and not modal_open()
 	if minimap.visible: minimap.refresh(Session.map_reveal_cheat)
 	if opened: full_map.refresh(Session.map_reveal_cheat)
@@ -276,16 +288,22 @@ func visible_boss_markers() -> Array:
 	for id in boss_locations:
 		var boss: Dictionary = boss_locations[id]
 		var cell := Vector2i(boss.local_position / Layout.TILE_PIXELS) / Session.exploration.CELL_TILES
-		if not Session.map_reveal_cheat and not Session.exploration.visited(boss.area, cell): continue
-		markers.append({"id":id, "point":Layout.world_point(boss.area, boss.local_position), "defeated":Session.evil_bart_defeated if id == "bart" else Session.story_flags.get("boss2_defeated", false)})
-	if Layout.same_map(Session.area_id, "flooded_forest") and Session.story_flags.get("underground_cave_discovered", false):
-		# Read the authored entrance position without instantiating the forest or duplicating coordinates.
-		var state: SceneState = world.MAPS["flooded_forest"].get_state()
-		for index in state.get_node_count():
-			if state.get_node_path(index) != NodePath("./Characters/CaveHole"): continue
-			for property in state.get_node_property_count(index):
-				if state.get_node_property_name(index, property) == "position":
-					var point: Vector2 = state.get_node_property_value(index, property)
-					markers.append({"id":"underground_cave", "point":Layout.world_point("flooded_forest", point), "defeated":false, "color":Color("#D9DED2"), "label":"Underground Cave"})
-			break
+		var defeated: bool = Session.evil_bart_defeated if id == "bart" else Session.story_flags.get("boss2_defeated",false)
+		var discovered: bool = defeated or Session.exploration.visited(boss.area,cell)
+		if not discovered and not Session.reveal_all_locations: continue
+		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":"Evil Bart" if id == "bart" else "Boss 2","color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
+	var cave_discovered: bool = Session.story_flags.get("underground_cave_discovered",false) or Session.exploration.region_discovered("underground_cave")
+	if cave_entrance != null and (cave_discovered or Session.reveal_all_locations):
+		markers.append({"id":"underground_cave","area":"flooded_forest","local_position":cave_entrance,"point":Layout.world_point("flooded_forest",cave_entrance),"defeated":false,"discovered":cave_discovered,"color":Color("#D9DED2") if cave_discovered else Color("#E4B765"),"label":"Underground Cave"})
+	return markers
+
+func visible_region_markers() -> Array:
+	var markers := []
+	for area in Layout.visible_regions(Session.area_id):
+		var discovered: bool = area == Session.area_id or Session.exploration.region_discovered(area)
+		if area == "bart_area": discovered = discovered or Session.evil_bart_defeated
+		if area == "flooded_forest": discovered = discovered or Session.story_flags.get("flooded_forest_unlocked",false) or Session.story_flags.get("boss2_defeated",false)
+		if not discovered and not Session.reveal_all_locations: continue
+		var point := Vector2(Layout.region(area).size)*Layout.TILE_PIXELS*.5
+		markers.append({"id":area,"area":area,"local_position":point,"point":Layout.world_point(area,point),"label":Layout.region(area).name,"discovered":discovered})
 	return markers
