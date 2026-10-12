@@ -1,8 +1,8 @@
 extends RefCounted
 
-const CODES := ["CATA", "BEAM", "thefogisleaving", "mycoordinates", "anywhereiwant", "hitbox"]
-const LABELS := {"CATA":"CATA", "BEAM":"BEAM", "thefogisleaving":"thefogisleaving", "mycoordinates":"mycoordinates", "anywhereiwant":"anywhereiwant", "hitbox":"Hitbox debug · F3"}
-const DESCRIPTIONS := {"CATA":"Invincibility for the current combat player.", "BEAM":"Unlimited SATURATE. Survival fights still disable attacks.", "thefogisleaving":"Reveal the current map without saving revealed terrain.", "mycoordinates":"Display the overworld player's global X and Y.", "anywhereiwant":"Bypass region locks for this play session.", "hitbox":"Show the combat hitbox (debug builds only)."}
+const CODES := ["CATA", "BEAM", "thefogisleaving", "mycoordinates", "anywhereiwant", "hitbox", "reveal_locations"]
+const LABELS := {"CATA":"CATA", "BEAM":"BEAM", "thefogisleaving":"thefogisleaving", "mycoordinates":"Show Coordinates", "anywhereiwant":"anywhereiwant", "hitbox":"Hitbox debug · F3", "reveal_locations":"Reveal All Locations"}
+const DESCRIPTIONS := {"CATA":"Invincibility for the current combat player.", "BEAM":"Unlimited SATURATE. Survival fights still disable attacks.", "thefogisleaving":"Reveal terrain without discovering locations or saving fog.", "mycoordinates":"Live global X/Y overlay · typed shortcut: mycoordinates.", "anywhereiwant":"Bypass region locks for this play session.", "hitbox":"Show the combat hitbox (debug builds only).", "reveal_locations":"Temporary markers only. Gold [?] means undiscovered; hover on the full map for coordinates."}
 
 func context() -> Dictionary:
 	var scene := Session.get_tree().current_scene
@@ -30,7 +30,12 @@ func state(code: String) -> Dictionary:
 		"thefogisleaving":
 			available = world_ready
 			active = Session.map_reveal_cheat
-		"mycoordinates": available = world_ready
+		"mycoordinates":
+			available = world_ready
+			active = Session.show_coordinates
+		"reveal_locations":
+			available = world_ready
+			active = Session.reveal_all_locations
 		"anywhereiwant":
 			available = world_ready
 			active = Session.unrestricted_region_access
@@ -49,8 +54,8 @@ func activate(code: String) -> String:
 		"hitbox": target.player.toggle_debug_hitbox()
 		"thefogisleaving": Session.map_reveal_cheat = not Session.map_reveal_cheat
 		"mycoordinates":
-			var point: Vector2 = target.player.global_position
-			message = "X: %s | Y: %s" % [str(point.x),str(point.y)]
+			Session.show_coordinates = not Session.show_coordinates
+		"reveal_locations": Session.reveal_all_locations = not Session.reveal_all_locations
 		"anywhereiwant":
 			Session.unrestricted_region_access = not Session.unrestricted_region_access
 			message = "Unrestricted region access: " + ("enabled" if Session.unrestricted_region_access else "disabled")

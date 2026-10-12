@@ -27,6 +27,11 @@ func visited(area: String, cell: Vector2i) -> bool:
 	var index := cell.y*grid.x+cell.x
 	return (regions[area][index/8] & (1 << (index%8))) != 0
 
+func region_discovered(area: String) -> bool:
+	for byte in regions.get(area,PackedByteArray()):
+		if byte != 0: return true
+	return false
+
 func reveal(area: String, position: Vector2) -> Array[Rect2i]:
 	var changed: Array[Rect2i] = []
 	if not Layout.all_regions().has(area): return changed

@@ -41,8 +41,12 @@ func _ready() -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation",10)
 	scroll.add_child(list)
-	for code in Session.developer_cheats.CODES:
-		_add_entry(list,code,Session.developer_cheats.LABELS[code],Session.developer_cheats.DESCRIPTIONS[code],code != "mycoordinates")
+	var groups := {"Player":["CATA","BEAM","mycoordinates","hitbox"],"World / Map":["thefogisleaving","reveal_locations","anywhereiwant"]}
+	for group in groups:
+		_add_heading(list,group)
+		for code in groups[group]:
+			_add_entry(list,code,Session.developer_cheats.LABELS[code],Session.developer_cheats.DESCRIPTIONS[code],true)
+	_add_heading(list,"Other · debug previews")
 	var cue = preload("res://scripts/blankkitten/timeline.gd")
 	for index in cue.STARTS.size():
 		_add_entry(list,"seek:"+str(index),"BlankKitten · "+cue.NAMES[index],"Ctrl+Shift+%d · %.2fs · debug preview" % [index+1,cue.STARTS[index]],false)
@@ -72,6 +76,12 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	overlay.hide()
+
+func _add_heading(list: VBoxContainer, title: String) -> void:
+	var heading := Label.new()
+	heading.text = title
+	heading.add_theme_font_size_override("font_size",18)
+	list.add_child(heading)
 
 func _add_entry(list: VBoxContainer, code: String, title: String, description: String, toggle: bool) -> void:
 	var button: Button = CheckButton.new() if toggle else Button.new()

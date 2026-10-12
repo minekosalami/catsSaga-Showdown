@@ -11,6 +11,7 @@ var circular := false
 var shader: ShaderMaterial
 var last_state: Array = []
 var boss_markers: Array = []
+var region_markers: Array = []
 
 func configure(terrain: Texture2D, fog: Texture2D, circle: bool, area: String = "entrance") -> void:
 	map_area = area
@@ -25,13 +26,13 @@ func configure(terrain: Texture2D, fog: Texture2D, circle: bool, area: String = 
 	# Overlay strokes need their own unshaded canvas item, outside the terrain shader.
 	var ink := Control.new()
 	ink.name = "Ink"
-	ink.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ink.mouse_filter = Control.MOUSE_FILTER_IGNORE if circle else Control.MOUSE_FILTER_PASS
 	ink.set_script(preload("res://scripts/maps/map_ink.gd"))
 	add_child(ink)
 	ink.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func refresh(reveal: bool) -> void:
-	var state := [center_world,player_world,facing,zoom,size,reveal,boss_markers.duplicate(true)]
+	var state := [center_world,player_world,facing,zoom,size,reveal,boss_markers.duplicate(true),region_markers.duplicate(true)]
 	if state == last_state: return
 	last_state = state
 	shader.set_shader_parameter("center_world",center_world)
