@@ -78,8 +78,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event.keycode == KEY_F3 and OS.is_debug_build():
-		debug_hitbox_enabled = not debug_hitbox_enabled
-		$HitboxDebug.visible = debug_hitbox_enabled or Input.is_key_pressed(KEY_SHIFT)
+		toggle_debug_hitbox()
 		return
 
 	# Press X to activate SATURATE.
@@ -101,9 +100,8 @@ func _input(event: InputEvent) -> void:
 	else:
 		beam_cheat_progress = 1 if key_text == "B" else 0
 	if beam_cheat_progress >= BEAM_CHEAT_CODE.length():
-		unlimited_saturate = not unlimited_saturate
+		toggle_unlimited_saturate()
 		beam_cheat_progress = 0
-		print("BEAM cheat: Unlimited SATURATE ", "ON" if unlimited_saturate else "OFF")
 
 	var expected_letter := CHEAT_CODE.substr(cheat_progress, 1)
 
@@ -116,13 +114,20 @@ func _input(event: InputEvent) -> void:
 			cheat_progress = 0
 
 	if cheat_progress >= CHEAT_CODE.length():
-		invincible = not invincible
+		toggle_invincibility()
 		cheat_progress = 0
 
-		if invincible:
-			print("CATA cheat activated: Invincibility ON")
-		else:
-			print("CATA cheat deactivated: Invincibility OFF")
+func toggle_invincibility() -> void:
+	invincible = not invincible
+	print("CATA cheat activated: Invincibility ON" if invincible else "CATA cheat deactivated: Invincibility OFF")
+
+func toggle_unlimited_saturate() -> void:
+	unlimited_saturate = not unlimited_saturate
+	print("BEAM cheat: Unlimited SATURATE ", "ON" if unlimited_saturate else "OFF")
+
+func toggle_debug_hitbox() -> void:
+	debug_hitbox_enabled = not debug_hitbox_enabled
+	$HitboxDebug.visible = debug_hitbox_enabled or Input.is_key_pressed(KEY_SHIFT)
 
 
 func _process(delta: float) -> void:

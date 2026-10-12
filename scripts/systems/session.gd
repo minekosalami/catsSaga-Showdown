@@ -23,6 +23,8 @@ var map_reveal_cheat := false
 var unrestricted_region_access := false # Debug only; deliberately absent from saves.
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
+var developer_menu: CanvasLayer
+var developer_cheats := preload("res://scripts/systems/developer_cheats.gd").new()
 var options_dialog: AcceptDialog
 var confirmation: ConfirmationDialog
 var suspended_modes: Dictionary = {}
@@ -45,8 +47,15 @@ func _ready() -> void:
 	pause_menu = CanvasLayer.new()
 	pause_menu.set_script(preload("res://scripts/ui/pause_menu.gd"))
 	add_child(pause_menu)
+	developer_menu = preload("res://scripts/ui/developer_menu.gd").new()
+	developer_menu.name = "DeveloperMenu"
+	add_child(developer_menu)
 
 func _input(event: InputEvent) -> void:
+	if developer_menu.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
+	if developer_menu.opened: return
 	if event.is_action_pressed("menu_back") and not event.is_echo() and back_outside_battle():
 		get_viewport().set_input_as_handled()
 		return
@@ -198,6 +207,7 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	if busy:
 		return false
 	busy = true
+	developer_menu.close_menu()
 	close_pause()
 	get_tree().paused = false
 	battle_entry_pending = white_wipe
@@ -315,7 +325,7 @@ func load_game() -> bool:
 func world_menu_open() -> bool:
 	var world := get_tree().current_scene
 	var map_modal: bool = world != null and world.has_method("map_modal_open") and world.map_modal_open()
-	return map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
+	return developer_menu.opened or map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
 
 func can_pause() -> bool:
 	var scene := get_tree().current_scene

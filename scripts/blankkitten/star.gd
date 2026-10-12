@@ -40,15 +40,18 @@ func _input(event: InputEvent) -> void:
 		else:
 			cheat_progress = cheat_progress+1 if letter == CHEAT_CODE.substr(cheat_progress,1) else (1 if letter == "C" else 0)
 			if cheat_progress == CHEAT_CODE.length():
-				invincible = not invincible
+				toggle_invincibility()
 				cheat_progress = 0
-				print("CATA cheat: Invincibility ","ON" if invincible else "OFF")
 	if event is InputEventKey and event.keycode == KEY_Z and not event.echo:
 		jump_held = event.pressed
 		if event.pressed and not movement_locked:
 			jump_requested = true
 		elif not event.pressed:
 			jump_released = true
+
+func toggle_invincibility() -> void:
+	invincible = not invincible
+	print("CATA cheat: Invincibility ","ON" if invincible else "OFF")
 
 func step(delta: float, direction: Vector2) -> void:
 	previous_position = position

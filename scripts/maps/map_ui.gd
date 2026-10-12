@@ -191,7 +191,7 @@ func handle_input(event: InputEvent) -> bool:
 				world.player.velocity = Vector2.ZERO
 				world.player.movement_locked = true
 				if sequence == CODE:
-					Session.map_reveal_cheat = not Session.map_reveal_cheat
+					Session.developer_cheats.activate(CODE)
 					sequence = ""
 				_refresh()
 				return true
@@ -233,12 +233,7 @@ func _handle_debug_code(event: InputEventKey) -> bool:
 	if candidate in DEBUG_CODES:
 		debug_sequence = ""
 		debug_completion_key = event.keycode
-		if candidate == "mycoordinates":
-			var point: Vector2 = world.player.global_position
-			Session.show_notification("X: %s | Y: %s" % [str(point.x), str(point.y)])
-		else:
-			Session.unrestricted_region_access = not Session.unrestricted_region_access
-			Session.show_notification("Unrestricted region access: " + ("enabled" if Session.unrestricted_region_access else "disabled"))
+		Session.developer_cheats.activate(candidate)
 		return true
 	return candidate != "m"
 
