@@ -27,7 +27,13 @@ func _draw() -> void:
 		if not Rect2(Vector2.ZERO,size).grow(-6).has_point(position): continue
 		if canvas.circular and position.distance_to(size/2) > size.x/2-8: continue
 		draw_circle(position,5.5,Color("#101410"))
-		draw_circle(position,3.5,Color("#5DEA87") if marker.defeated else Color("#FF5166"))
+		draw_circle(position,3.5,marker.get("color",Color("#5DEA87") if marker.defeated else Color("#FF5166")))
+		if not canvas.circular and marker.has("label"):
+			var text: String = marker.label
+			var width := FONT.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
+			var origin := Vector2(clampf(position.x+10,8,size.x-width-8),clampf(position.y+5,20,size.y-8))
+			draw_style_box(label_style,Rect2(origin-Vector2(4,16),Vector2(width+8,22)))
+			draw_string(FONT,origin,text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#D9DED2"))
 	var point: Vector2 = canvas.screen_point(canvas.player_world)
 	if not Rect2(Vector2.ZERO,size).grow(-10).has_point(point): return
 	var angle: float = canvas.facing.angle()+PI/2

@@ -5,7 +5,7 @@ extends "res://scripts/world/portal.gd"
 @export var route_label := "FOREST"
 
 func can_travel() -> bool:
-	return Session.evil_bart_defeated and Session.story_flags.get("flooded_forest_key_obtained", false) and Session.story_flags.get(required_story_flag, false)
+	return Session.region_access_allowed(Session.evil_bart_defeated and Session.story_flags.get("flooded_forest_key_obtained", false) and Session.story_flags.get(required_story_flag, false))
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)

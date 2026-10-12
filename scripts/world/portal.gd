@@ -6,7 +6,7 @@ signal travel_requested(destination: String, entry: String)
 @export var required_flag: String = ""
 
 func can_travel() -> bool:
-	return required_flag.is_empty() or (Session.evil_bart_defeated and Session.story_flags.get(required_flag, false))
+	return Session.region_access_allowed(required_flag.is_empty() or (Session.evil_bart_defeated and Session.story_flags.get(required_flag, false)))
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)

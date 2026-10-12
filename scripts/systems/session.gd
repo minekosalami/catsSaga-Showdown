@@ -20,8 +20,11 @@ var battle_entry_pending: bool = false
 var story_flags: Dictionary = {}
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
+var unrestricted_region_access := false # Debug only; deliberately absent from saves.
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
+var developer_menu: CanvasLayer
+var developer_cheats := preload("res://scripts/systems/developer_cheats.gd").new()
 var options_dialog: AcceptDialog
 var confirmation: ConfirmationDialog
 var suspended_modes: Dictionary = {}
@@ -44,8 +47,15 @@ func _ready() -> void:
 	pause_menu = CanvasLayer.new()
 	pause_menu.set_script(preload("res://scripts/ui/pause_menu.gd"))
 	add_child(pause_menu)
+	developer_menu = preload("res://scripts/ui/developer_menu.gd").new()
+	developer_menu.name = "DeveloperMenu"
+	add_child(developer_menu)
 
 func _input(event: InputEvent) -> void:
+	if developer_menu.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
+	if developer_menu.opened: return
 	if event.is_action_pressed("menu_back") and not event.is_echo() and back_outside_battle():
 		get_viewport().set_input_as_handled()
 		return
@@ -117,7 +127,12 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 	entry_marker = marker
 	restore_position = false
 	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
+		if destination == "underground_cave":
+			story_flags["underground_cave_discovered"] = true
 		save_current()
+
+func region_access_allowed(normal_access: bool) -> bool:
+	return unrestricted_region_access or normal_access
 
 func begin_battle(position_before_battle: Vector2) -> void:
 	if busy or evil_bart_defeated:
@@ -192,6 +207,7 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	if busy:
 		return false
 	busy = true
+	developer_menu.close_menu()
 	close_pause()
 	get_tree().paused = false
 	battle_entry_pending = white_wipe
@@ -309,7 +325,7 @@ func load_game() -> bool:
 func world_menu_open() -> bool:
 	var world := get_tree().current_scene
 	var map_modal: bool = world != null and world.has_method("map_modal_open") and world.map_modal_open()
-	return map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
+	return developer_menu.opened or map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
 
 func can_pause() -> bool:
 	var scene := get_tree().current_scene
@@ -395,18 +411,25 @@ func _show_key_notification() -> void:
 	if not key_notification_pending:
 		return
 	key_notification_pending = false
+	show_notification("Obtained: Flooded Forest Key", "KeyRewardNotification")
+
+func show_notification(message: String, notification_name := "DebugNotification") -> void:
+	var previous := get_node_or_null(NodePath(notification_name))
+	if previous != null:
+		remove_child(previous)
+		previous.queue_free()
 	var label := Label.new()
-	label.name = "KeyRewardNotification"
+	label.name = notification_name
 	add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	label.offset_top = 76
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.text = "Obtained: Flooded Forest Key"
+	label.text = message
 	label.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono.ttf"))
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 6)
-	var fade := create_tween()
+	var fade := label.create_tween()
 	fade.tween_interval(3.0)
 	fade.tween_property(label,"modulate:a",0.0,0.5)
 	fade.tween_callback(label.queue_free)
