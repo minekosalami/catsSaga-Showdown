@@ -35,7 +35,7 @@ func type_code(word: String) -> void:
 	for letter in word.to_upper(): await press(letter.unicode_at(0))
 
 func toggle() -> void:
-	await press(KEY_QUOTELEFT,KEY_QUOTELEFT)
+	await press(KEY_MINUS,KEY_MINUS)
 	await process_frame
 
 func settle() -> void:
@@ -70,13 +70,16 @@ func run() -> void:
 	await settle()
 	menu = session.developer_menu
 	var menu_id: int = menu.get_instance_id()
-	check(InputMap.has_action("toggle_developer_menu") and InputMap.action_get_events("toggle_developer_menu")[0].physical_keycode == KEY_QUOTELEFT,"action binds physical backtick without Shift")
+	check(InputMap.has_action("toggle_developer_menu") and InputMap.action_get_events("toggle_developer_menu").size() == 1 and InputMap.action_get_events("toggle_developer_menu")[0].physical_keycode == KEY_MINUS,"action binds only regular physical minus without Shift")
+	await press(KEY_QUOTELEFT,KEY_QUOTELEFT)
+	await press(KEY_ASCIITILDE,KEY_QUOTELEFT,true)
+	check(not menu.opened and not paused,"old backtick and tilde shortcuts no longer open menu")
 	check(menu.controls.size() == 15,"all five typed cheats, F3, eight stage seeks, and launch timestamp preview are listed")
 	for code in session.developer_cheats.CODES: check(menu.controls.has(code),code+" appears in menu")
 	await toggle()
-	check(menu.opened and paused,"physical backtick opens menu and pauses exploration")
-	key(KEY_QUOTELEFT,true,KEY_QUOTELEFT,false,false,true)
-	key(KEY_QUOTELEFT,false,KEY_QUOTELEFT)
+	check(menu.opened and paused,"physical minus opens menu and pauses exploration")
+	key(KEY_MINUS,true,KEY_MINUS,false,false,true)
+	key(KEY_MINUS,false,KEY_MINUS)
 	check(menu.opened,"key echo does not toggle menu")
 	var point: Vector2 = current_scene.player.global_position
 	key(KEY_D)
@@ -97,8 +100,11 @@ func run() -> void:
 	check(session.unrestricted_region_access and menu.controls.anywhereiwant.button_pressed and session.story_flags == flags,"region toggle uses existing session override without story rewards")
 	await type_code("anywhereiwant")
 	check(session.unrestricted_region_access,"typing a code while menu is open cannot change toggles")
+	await press(KEY_QUOTELEFT,KEY_QUOTELEFT)
 	await press(KEY_ASCIITILDE,KEY_QUOTELEFT,true)
-	check(not menu.opened and not paused,"Shift/backtick also closes and resumes")
+	check(menu.opened and paused,"old backtick and tilde shortcuts no longer close menu")
+	await press(KEY_MINUS,KEY_MINUS)
+	check(not menu.opened and not paused,"minus closes and resumes without Shift")
 	await type_code("anywhereiwant")
 	await type_code("thefogisleaving")
 	await toggle()

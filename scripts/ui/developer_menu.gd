@@ -66,7 +66,7 @@ func _ready() -> void:
 	column.add_child(status)
 	var close := Button.new()
 	close.name = "Close"
-	close.text = "Close  [ ` / Esc ]"
+	close.text = "Close  [ - / Esc ]"
 	close.pressed.connect(close_menu)
 	column.add_child(close)
 	get_viewport().size_changed.connect(_layout)

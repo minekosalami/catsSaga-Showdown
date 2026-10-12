@@ -29,7 +29,7 @@ window/stretch/mode="canvas_items"
 
 toggle_developer_menu={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":96)]
+"events": [Object(InputEventKey,"physical_keycode":45)]
 }
 ui_accept={
 "deadzone": 0.5,
