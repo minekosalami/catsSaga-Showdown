@@ -42,7 +42,8 @@ func _ready() -> void:
 	background_material.shader = preload("res://shaders/boss2_background.gdshader")
 	$Background.material = background_material
 	background_material.set_shader_parameter("brightness",0.77)
-	music_player.play(0.0)
+	if not Session.battle_entry_pending:
+		music_player.play(0.0)
 	timeline.advance(0.0)
 	ui.update(0.0)
 

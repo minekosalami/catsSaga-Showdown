@@ -213,10 +213,10 @@ func run() -> void:
 	acknowledge(world.dialogue)
 	check(world.dialogue.active and not session.busy,"first line does not prematurely enter battle")
 	acknowledge(world.dialogue)
-	check(session.busy and session.encounter_id == "blankkitten" and session.battle_walls.visible,"second line starts universal black walls")
+	check(session.busy and session.encounter_id == "blankkitten" and session.battle_transition.visible,"second line starts universal cat-star entry")
 	var old_position: Vector2 = world.player.position
 	press(KEY_RIGHT,true)
-	await create_timer(0.4).timeout
+	await create_timer(0.15).timeout
 	press(KEY_RIGHT,false)
 	check(world.player.position == old_position,"entry blocks overworld movement")
 	press(KEY_Z,true)
@@ -224,7 +224,7 @@ func run() -> void:
 	check(session.encounter_id == "blankkitten","repeated Z cannot enter twice")
 	while current_scene == null or current_scene == world: await process_frame
 	var game: Node = current_scene.battle
-	check(session.curtain.modulate.a > 0 and game.elapsed_time == 0 and game.state == game.State.ENTERING and not game.music_player.playing and game.process_mode == Node.PROCESS_MODE_DISABLED,"new battle initializes behind black with no audio/gameplay clock")
+	check(session.battle_transition.background.modulate.a == 1 and game.elapsed_time == 0 and game.state == game.State.ENTERING and not game.music_player.playing and game.process_mode == Node.PROCESS_MODE_DISABLED,"new battle initializes behind black with no audio/gameplay clock")
 	while session.busy: await process_frame
 	check(game.music_player.playing and game.elapsed_time < 0.1 and game.player.health == 5,"reveal starts music at zero and exactly five HP")
 	check(current_scene.arena.size == Vector2i(540,900),"original portrait internal resolution preserved")

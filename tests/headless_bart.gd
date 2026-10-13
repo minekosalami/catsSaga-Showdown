@@ -133,8 +133,8 @@ func run() -> void:
 	await reveal_advance(d)
 	check(d.node_id == "BART_005", "Maybe converges on same final warning")
 	await reveal_advance(d)
-	check(session.busy and session.battle_walls.visible and session.curtain.color == Color.BLACK, "final warning starts universal black walls")
-	check(session.battle_walls.size.is_equal_approx(Vector2(1280, 720)), "black walls cover full window and side areas")
+	check(session.busy and session.battle_transition.visible, "final warning starts universal cat-star entry")
+	check(session.battle_transition.size.is_equal_approx(Vector2(1280, 720)), "encounter overlay covers full window and side areas")
 	check(world.player.movement_locked, "movement locked during wipe")
 	await press(KEY_Z)
 	await press(KEY_X)
@@ -142,12 +142,12 @@ func run() -> void:
 	var host: Node = current_scene
 	var game: Node = host.battle
 	check(host.name == "CombatHost" and host.arena.size == Vector2i(540, 900), "wipe initializes original portrait battle")
-	check(session.curtain.position.y == 0 and session.curtain.modulate.a > 0.95, "scene changes while entire window is black")
+	check(session.battle_transition.background.modulate.a == 1, "scene changes while entire window is black")
 	check(game.process_mode == Node.PROCESS_MODE_DISABLED and not game.music_player.playing, "combat timing and music disabled during reveal")
 	await press(KEY_Z)
 	await press(KEY_X)
 	check(not game.player.saturate_used and game.get_children().filter(func(child): return child.scene_file_path == "res://scenes/bullet.tscn").is_empty(), "combat firing and SATURATE ignored during reveal")
-	await create_timer(0.4).timeout
+	while session.busy: await process_frame
 	check(not session.busy and game.music_player.playing and game.elapsed_time < 0.3 and not game.boss_spawned, "music and combat start from zero after reveal")
 	game.player.invincible = true
 	game.music_player.seek(7)

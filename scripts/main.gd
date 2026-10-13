@@ -46,7 +46,7 @@ func _ready() -> void:
 	_connect_player_signals()
 	_connect_restart_button()
 
-	if music_player != null:
+	if music_player != null and not Session.battle_entry_pending:
 		music_player.play()
 
 

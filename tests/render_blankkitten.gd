@@ -39,16 +39,11 @@ func run() -> void:
 	await capture("hate-color-dialogue")
 	world.dialogue.active = false
 	world.dialogue.panel.hide()
-	for value in [0.0,0.35,0.7,0.82,1.0]:
-		session.battle_walls.show()
-		session.battle_walls.update_progress(value)
-		var image: Image = await capture("entry-"+str(value))
-		if value == 1:
-			var black := true
-			for point in [Vector2i(0,0),Vector2i(image.get_width()/2,image.get_height()/2),image.get_size()-Vector2i.ONE]:
-				black = black and image.get_pixelv(point).r < 0.01
-			check(black,"settled walls cover corners and center seam completely")
-	session.battle_walls.hide()
+	session.battle_transition.capture(world)
+	await session.battle_transition.blackout()
+	var entry: Image = await capture("entry-star")
+	check(entry.get_pixel(0,0).r < 0.01 and entry.get_pixelv(entry.get_size()-Vector2i.ONE).r < 0.01,"star entry covers both window corners")
+	session.battle_transition.clear(true)
 	await session.begin_blankkitten_battle(world.player.position)
 	var battle: Node = current_scene.battle
 	battle.set_physics_process(false)
@@ -92,11 +87,11 @@ func run() -> void:
 	check(battle.presentation.background_viewport.size == Vector2i(135,225) and current_scene.arena.size == Vector2i(540,900),"Reduced FX changes atmosphere resolution only")
 	battle.ui.effects_toggle.button_pressed = false
 	check(current_scene.arena_container.scale.is_equal_approx(Vector2.ONE) and current_scene.arena_container.position.is_equal_approx(Vector2.ZERO),"portrait window aligns the 540×900 arena exactly")
-	session.battle_walls.show()
-	session.battle_walls.update_progress(1)
+	session.battle_transition.capture(current_scene)
+	await session.battle_transition.blackout()
 	var portrait_black: Image = await capture("portrait-entry-black")
-	check(portrait_black.get_pixel(270,450).r < 0.01 and session.battle_walls.size == Vector2(540,900),"black walls resize and seal in portrait orientation")
-	session.battle_walls.hide()
+	check(portrait_black.get_pixel(0,0).r < 0.01 and session.battle_transition.size == Vector2(540,900),"encounter overlay covers portrait orientation")
+	session.battle_transition.clear(true)
 	root.content_scale_size = Vector2i(1280,720)
 	root.size = Vector2i(1280,720)
 	await process_frame

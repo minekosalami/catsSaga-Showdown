@@ -14,8 +14,8 @@ func retry() -> void:
 
 func finish_entry() -> void:
 	if battle.game_over:
-		battle.process_mode = Node.PROCESS_MODE_PAUSABLE
 		Session.restore_suspended_modes()
+		battle.process_mode = Node.PROCESS_MODE_PAUSABLE
 		return
 	super.finish_entry()
 	battle.state = battle.State.INTRODUCTION
