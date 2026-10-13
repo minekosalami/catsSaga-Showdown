@@ -10,9 +10,10 @@ var drone: AudioStreamPlayer
 var gray := 0.0
 var boss: Sprite2D
 var host: Node
+var services: CanvasLayer
 func is_walkable_position(point: Vector2) -> bool:
 	var cell: Vector2i = $CaveFloor.local_to_map(point/$CaveFloor.scale)
-	return $CaveFloor.get_cell_source_id(cell) >= 0 and cell_room(cell).x != 10
+	return $CaveFloor.get_cell_source_id(cell) >= 0 and $CaveWater.get_cell_source_id(cell) < 0 and cell_room(cell).x != 10
 func cell_room(cell: Vector2i) -> Vector2i:
 	if room_image == null: room_image = load("res://resources/cave/room_ids.res").get_image()
 	if cell.x < 0 or cell.y < 0 or cell.x >= room_image.get_width() or cell.y >= room_image.get_height(): return Vector2i.ZERO
@@ -37,10 +38,15 @@ func _ready():
 	room_mask = panel(1,preload("res://shaders/cave_room_mask.gdshader"))
 	room_mask.set_shader_parameter("rooms",load("res://resources/cave/room_ids.res"))
 	room_mask.set_shader_parameter("map_size",map_size)
+	room_mask.set_shader_parameter("rock",load(preload("res://scripts/world/cave_assets.gd").PACK+"tiles/wall-tiles-32x32.png"))
 	room_mask.set_shader_parameter("window_rect",Vector4(Blueprint.WINDOW.position.x,Blueprint.WINDOW.position.y,Blueprint.WINDOW.size.x,Blueprint.WINDOW.size.y))
 	RenderingServer.frame_pre_draw.connect(_update_mask)
 	screen_filter = panel(128,preload("res://shaders/cave_desaturation.gdshader"))
 	Session.story_flags["cave_redesign_layout_v2"] = true
+	Session.story_flags["cave_settlement_layout_v3"] = true
+	services = CanvasLayer.new()
+	services.set_script(preload("res://scripts/world/cave_services.gd"))
+	add_child(services)
 	drone = AudioStreamPlayer.new()
 	drone.stream = $UndergroundAtmosphere.sound("bed")
 	drone.pitch_scale = .45
@@ -52,7 +58,7 @@ func _ready():
 	boss.texture = load("res://assets/player/player.png.png")
 	boss.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	boss.scale = Vector2.ONE*100/boss.texture.get_height()
-	boss.position = Vector2(198,157)*32
+	boss.position = Blueprint.center(8)
 	add_child(boss)
 	var label := Label.new()
 	label.text = "BOSS 4 · TEMPORARY"
@@ -67,11 +73,12 @@ func _process(delta: float):
 	if ids.x != 0:
 		if ids.y == 0: current_room = ids.x
 		elif current_room not in [ids.x,ids.y]: current_room = ids.x
-	var gray_target := 1.0 if current_room == 7 else 0.0
-	gray = move_toward(gray,gray_target,delta) if current_room == 7 else 0.0
+	var in_quiet_room: bool = ids == Vector2i(7,0) and $CaveFloor.get_cell_source_id(Vector2i(point/32)) >= 0
+	var gray_target := 1.0 if in_quiet_room else 0.0
+	gray = move_toward(gray,gray_target,delta) if in_quiet_room else 0.0
 	screen_filter.set_shader_parameter("amount",gray)
 	screen_layer.visible = gray > 0
-	if current_room == 7:
+	if in_quiet_room:
 		if not drone.playing: drone.play()
 		drone.volume_db = lerpf(-60,-27,gray)
 	else:
@@ -92,6 +99,7 @@ func _update_mask():
 	room_mask.set_shader_parameter("axis_y",inverse.basis_xform(Vector2(0,size.y)))
 	room_mask.set_shader_parameter("player_position",to_local(host.player.global_position))
 	room_mask.set_shader_parameter("active_room",float(current_room))
+	room_mask.set_shader_parameter("clock",$UndergroundAtmosphere.clock)
 func use_shortcut(to_junction: bool):
 	Session.cave_event_active = true
 	host.player.velocity = Vector2.ZERO
@@ -119,9 +127,9 @@ func begin_intro():
 	var camera: Camera2D = host.player.get_node("Camera2D")
 	var view: Vector2 = host.get_viewport_rect().size/camera.zoom
 	var before: Vector2 = host.player.position
-	boss.position = Vector2(maxf(before.x+view.x*1.25,Blueprint.room(9).rect.position.x*32+view.x*1.4),before.y)
+	boss.position = Vector2(before.x+view.x*.82,before.y)
 	$Boss4Label.position = boss.position+Vector2(-88,-85)
-	var target := Vector2(boss.position.x-view.x*.4,before.y)
+	var target := (before+boss.position)*.5
 	camera.position_smoothing_enabled = false
 	camera.limit_enabled = false
 	var move := create_tween()
@@ -135,6 +143,7 @@ func begin_intro():
 	Session.encounter_id = "boss4_placeholder"
 	Session.encounter_active = true
 	await Session.transition_to("res://scenes/cave/boss4_placeholder_host.tscn",true)
+func modal_open() -> bool: return services != null and services.opened
 func _exit_tree():
 	Session.cave_event_active = false
 	if RenderingServer.frame_pre_draw.is_connected(_update_mask): RenderingServer.frame_pre_draw.disconnect(_update_mask)

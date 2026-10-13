@@ -1,7 +1,7 @@
 extends RefCounted
 
 const VERSION := 1
-const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(6656, 5888)}
+const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(preload("res://scripts/world/cave_layout.gd").SIZE*32)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
 
@@ -43,6 +43,24 @@ func validate(value: Variant) -> Dictionary:
 			point = preload("res://scripts/world/cave_layout.gd").ENTRY
 			flags["underground_cave_discovered"] = true
 		flags["cave_redesign_layout_v2"] = true
+	# The settlement replaces the previous cave geometry, never unrelated progress.
+	if not flags.get("cave_settlement_layout_v3",false):
+		var previous: Variant = fog.get("underground_cave","")
+		if not previous is String: return {}
+		if previous.length() == 1596:
+			var encoding := RegEx.new()
+			encoding.compile("^[A-Za-z0-9+/]*={0,2}$")
+			if encoding.search(previous) == null: return {}
+			var decoded := Marshalls.base64_to_raw(previous)
+			if decoded.size() != 1196: return {}
+			for byte in decoded:
+				if byte != 0: flags["underground_cave_discovered"] = true
+			fog.erase("underground_cave")
+		if area == "underground_cave":
+			if point.x < 44 or point.y < 44 or point.x > 6612 or point.y > 5844: return {}
+			point = preload("res://scripts/world/cave_layout.gd").ENTRY
+			flags["underground_cave_discovered"] = true
+		flags["cave_settlement_layout_v3"] = true
 	var bounds: Vector2 = AREA_SIZES[area]
 	if point.x < 44 or point.y < 44 or point.x > bounds.x - 44 or point.y > bounds.y - 44: return {}
 	# Version-one saves retain every unrelated flag; old Bart victories earn the key.

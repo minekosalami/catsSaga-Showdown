@@ -76,29 +76,40 @@ func run():
 	await settle()
 	var world: Node = current_scene
 	var cave: Node = world.map
-	check(cave.get_meta("chamber_count") == 10 and Plan.ROOMS.size() == 10,"exactly ten numbered areas")
+	check(cave.get_meta("chamber_count") == 16 and Plan.ROOMS.size() == 16,"sixteen chambers retain original special area IDs")
 	check(cave.map_size == Vector2(Plan.SIZE*32),"compact map bounds match blueprint")
 	check(world.player.position == Plan.ENTRY and not collision(world,Plan.ENTRY),"safe entrance and default player sprite preserved")
 	check(world.player.sprite.texture.resource_path == "res://assets/player/player.png.png" and world.player.speed == 260,"player artwork and movement unchanged")
 	for name in ["CaveFloor","HubFloor","ColoredFloor","CaveWalls"]:
 		var layer: TileMapLayer = cave.get_node(name)
 		var source: TileSetAtlasSource = layer.tile_set.get_source(0)
-		check(source.texture.resource_path.contains("sbs_-_top_down_dungeon_pack") and layer.scale == Vector2(.5,.5),name+" uses new source throughout at 32px display")
-		check(source.texture_region_size == Vector2i(64,64) and source.has_tile(Vector2i(7,5)) == (name != "CaveWalls"),name+" uses correct native regions and actual floor/wall transparency masks")
-		check(layer.tile_set.get_terrain_set_mode(0) == TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES,name+" has editable corner/side terrain transitions")
+		check(source.texture.resource_path.contains("basic caves and dungeons") and layer.scale == Vector2.ONE,name+" uses new source throughout at 32px display")
+		check(source.texture_region_size == Vector2i(32,32) and source.texture.get_image().has_mipmaps() == false,name+" preserves native 32px regions without resampling")
+		check(layer.tile_set.get_terrain_set_mode(0) == (TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES if name in ["CaveFloor","ColoredFloor"] else TileSet.TERRAIN_MODE_MATCH_SIDES),name+" has editable corner/side terrain transitions")
+	var slots := {}
+	for room in Plan.ROOMS: slots[room.slot] = true
+	check(slots.size() == 16,"all sixteen organizational slots have distinct varied chambers")
+	check(cave.get_node("Decorations").get_child_count() > 400,"dense props and lighting replace sparse blank floors")
+	var water: TileMapLayer = cave.get_node("CaveWater")
+	check(water.get_used_cells().size() > 300 and water.collision_enabled,"four pools have solid native water tiles")
+	var blocked_water := true
+	for cell in water.get_used_cells():
+		var point := Vector2(cell*32)+Vector2(16,16)
+		if not collision(world,point) or cave.is_walkable_position(point): blocked_water = false
+	check(blocked_water,"every placed water cell blocks actual player collision and restored spawns")
 	var closed := reachable(world)
-	for id in range(1,6): check(room_reachable(closed,id),"Area %d reachable before red unlock"%id)
-	for id in range(6,11): check(not room_reachable(closed,id),"Area %d blocked before red unlock"%id)
+	for id in [1,2,3,4,5,11,12,13]: check(room_reachable(closed,id),"Area %d reachable before red unlock"%id)
+	for id in [6,7,8,9,10,14,15,16]: check(not room_reachable(closed,id),"Area %d blocked before red unlock"%id)
 	var actors: Node = cave.get_node("Characters")
 	var riddle: Node = actors.get_node("RiddleCat")
 	await place(riddle.position+Vector2(0,96))
 	await press(KEY_Z)
 	check(world.dialogue.lines[0].text == riddle.RIDDLE.nodes.riddle.lines[0],"riddle starts with exact first box through Z")
 	await choices()
-	check(world.dialogue.lines[world.dialogue.line_index].text == "How many letters are in the word 'Cat?'" and world.dialogue.choices[1].text == "14","second box and arithmetic distractor are correct")
+	check(world.dialogue.lines[world.dialogue.line_index].text == "How many letters are in the word \"Cat?\"" and world.dialogue.choices[1].text == "14","second box and arithmetic distractor are correct")
 	await press(KEY_DOWN)
 	await press(KEY_Z)
-	check(world.dialogue.lines[0].text == "Try again when you're smart enough, peasant!","wrong answer gives exact response")
+	check(world.dialogue.lines[0].text == "Try again when you’re smart enough, peasant!","wrong answer gives exact response")
 	await finish()
 	check(not session.story_flags.get("cave_red_key_obtained",false) and not session.story_flags.get("cave_riddle_completed",false),"wrong answer awards nothing")
 	var before_override: Dictionary = session.story_flags.duplicate()
@@ -106,7 +117,7 @@ func run():
 	await physics_frame
 	await physics_frame
 	check(actors.get_node("RedBarrier").body.get_child(0).disabled and not actors.get_node("HubShortcut").blocker.visible,"existing region bypass also opens cave progression gates temporarily")
-	check(session.story_flags == before_override and collision(world,Vector2(41,119)*32),"bypass grants no cave progress and cannot enter future green-key room")
+	check(session.story_flags == before_override and collision(world,actors.get_node("SealedWindow").position),"bypass grants no cave progress and cannot enter future green-key room")
 	session.developer_cheats.activate("anywhereiwant")
 	await physics_frame
 	await physics_frame
@@ -134,7 +145,28 @@ func run():
 	check(session.story_flags.get("cave_red_barrier_unlocked",false),"red barrier unlock requires explicit Z with key")
 	check(actors.get_node("RedBarrier").body.get_child(0).disabled and not actors.get_node("HubShortcut").blocker.visible and not actors.get_node("JunctionShortcut").blocker.visible,"unlock removes barrier and both shortcut boulders")
 	var open := reachable(world)
-	for id in range(1,10): check(room_reachable(open,id),"Area %d reachable after unlock"%id)
+	for id in range(1,17):
+		if id != 10: check(room_reachable(open,id),"Area %d reachable after unlock"%id)
+	for actor in actors.get_children():
+		var nearby := false
+		for cell in open:
+			if (Vector2(cell*32)+Vector2(16,16)).distance_to(actor.position) <= actor.interaction_radius:
+				nearby = true
+				break
+		check(nearby,"reachable interaction approach: "+actor.name)
+	await place(actors.get_node("Merchant").position+Vector2(0,96))
+	var shop_scene_id: int = world.get_instance_id()
+	await press(KEY_Z)
+	check(cave.services.opened and world.map_modal_open() and world.get_instance_id() == shop_scene_id,"Z opens existing-world shop placeholder without internal scene loading")
+	await press(KEY_MINUS)
+	await press(KEY_SPACE)
+	check(not session.developer_menu.opened and not world.map_ui.inventory_opened,"shop modal blocks conflicting debug/inventory overlays")
+	await press(KEY_ESCAPE)
+	check(not cave.services.opened and not paused and not world.map_modal_open(),"shop closes with Escape and restores navigation")
+	await place(actors.get_node("RestPoint").position+Vector2(0,96))
+	await press(KEY_Z)
+	check(world.dialogue.active and world.dialogue.lines[0].text.begins_with("Rested."),"hub has a physical rest point using existing dialogue")
+	await finish()
 	check(not room_reachable(open,10),"Area 10 stays physically unreachable after red unlock")
 	check(not cave.is_walkable_position(Plan.center(9)),"hidden room cannot be a restored player position")
 	await place(actors.get_node("SavePoint").position+Vector2(0,100))
@@ -165,6 +197,11 @@ func run():
 	await press(KEY_SPACE)
 	check(world.map_ui.inventory_opened and cave.screen_layer.visible,"grayscale remains active with inventory")
 	await press(KEY_SPACE)
+	for cell in cave.get_node("CaveFloor").get_used_cells():
+		if cave.cell_room(cell) == Vector2i(7,8):
+			await place(Vector2(cell*32)+Vector2(16,16))
+			break
+	check(cave.gray == 0 and not cave.drone.playing,"grayscale and drone stop at the room boundary, before shared hallway")
 	await place(Plan.center(7)+Vector2(0,64))
 	check(cave.current_room == 8 and cave.gray == 0 and not cave.drone.playing,"Area 8 immediately restores colors and stops drone")
 	await place(Plan.center(6)+Vector2(0,64))
@@ -182,7 +219,7 @@ func run():
 	check(session.show_coordinates != previous,"Enter activates focused toggle once through original handler")
 	await press(KEY_MINUS)
 	check(not paused and not session.developer_menu.opened,"minus closes menu and restores controls")
-	await place(Vector2(106,157)*32)
+	await place(Plan.ROUTES.filter(func(route): return route.b == 9)[0].points[-1]*32)
 	check(session.cave_event_active,"Area 9 starts introduction automatically")
 	var camera: Camera2D = world.player.get_node("Camera2D")
 	var view: Vector2 = world.get_viewport_rect().size/camera.zoom
@@ -194,7 +231,7 @@ func run():
 	check(current_scene == world and not is_instance_valid(session.confirmation),"HUD Main Menu cannot skip the introduction")
 	while not world.dialogue.active: await process_frame
 	var center: Vector2 = camera.get_screen_center_position()
-	check(world.player.position.x+32 < center.x-view.x*.5,"final camera framing puts player offscreen")
+	check(world.player.position.x-32 > center.x-view.x*.5 and world.player.position.x < center.x-view.x*.25,"final camera frames player near opposite edge")
 	check(cave.boss.position.x > center.x+view.x*.25 and cave.boss.position.x < center.x+view.x*.5,"boss is near far edge, not centered")
 	check(camera.zoom == Vector2.ONE and world.dialogue.lines[0].text == "Welcome to the underground.","camera preserves zoom and exact boss greeting")
 	await finish()
@@ -205,7 +242,7 @@ func run():
 	check(session.story_flags == flags and not flags.has("boss4_defeated"),"placeholder cannot grant victory or progression")
 	current_scene.retry()
 	await settle()
-	check(current_scene.map.current_room == 8 and not session.cave_event_active,"retry returns to safe Area 8 for replay, not healed/rewarded completion")
+	check(current_scene.map.current_room == 8 and not current_scene.map.intro_started and not session.cave_event_active,"retry returns to safe Area 8 for replay, not healed/rewarded completion")
 	var old_fog: Dictionary = session.exploration.snapshot()
 	var legacy_bytes := PackedByteArray()
 	legacy_bytes.resize(10240)
@@ -215,6 +252,14 @@ func run():
 	var legacy: Dictionary = session.saves.validate({"version":1,"area":"underground_cave","position":[19000,15000],"story_flags":{"unrelated_flag":true},"exploration":old_fog})
 	check(not legacy.is_empty() and legacy.position == [Plan.ENTRY.x,Plan.ENTRY.y] and legacy.story_flags.unrelated_flag,"old cave save relocates safely without losing unrelated flags")
 	check(legacy.story_flags.underground_cave_discovered and legacy.exploration.entrance == old_fog.entrance,"migration retains cave discovery and other-region fog")
+	var v2_bytes := PackedByteArray()
+	v2_bytes.resize(1196)
+	v2_bytes.fill(0)
+	v2_bytes[20] = 1
+	var v2_fog: Dictionary = old_fog.duplicate()
+	v2_fog.underground_cave = Marshalls.raw_to_base64(v2_bytes)
+	var v2_save: Dictionary = session.saves.validate({"version":1,"area":"underground_cave","position":[6200,5000],"exploration":v2_fog,"story_flags":{"cave_redesign_layout_v2":true,"cave_red_key_obtained":true,"cave_red_barrier_unlocked":true}})
+	check(not v2_save.is_empty() and v2_save.position == [Plan.ENTRY.x,Plan.ENTRY.y] and v2_save.story_flags.cave_red_key_obtained and v2_save.story_flags.cave_red_barrier_unlocked,"previous ten-room save migrates with key and barrier progress intact")
 	check(session.saves.write_save(legacy) and await session.load_game(),"migrated save can actually be loaded")
 	await settle()
 	check(current_scene.player.position == Plan.ENTRY and not collision(current_scene,Plan.ENTRY),"legacy load restores valid entrance position")
