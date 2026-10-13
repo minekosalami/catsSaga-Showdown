@@ -9,6 +9,8 @@ var status: Label
 var seek_time: SpinBox
 var was_paused := false
 var opening_scene: Node
+var close_button: Button
+var previous_focus: WeakRef
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -17,6 +19,12 @@ func _ready() -> void:
 	add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	var style = preload("res://scripts/ui/sketch_theme.gd")
+	for type in ["Button","CheckButton"]:
+		for state in ["normal","hover","pressed","focus","disabled"]:
+			var fill := Color("#202128") if state in ["normal","disabled"] else Color("#2d3039")
+			var edge := Color("#c8c7be") if state == "focus" else Color("#40434d")
+			overlay.theme.set_stylebox(state,type,style.box(fill,edge))
 	var dim := ColorRect.new()
 	dim.color = Color(0,0,0,.8)
 	overlay.add_child(dim)
@@ -34,6 +42,11 @@ func _ready() -> void:
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	heading.add_theme_font_size_override("font_size",24)
 	column.add_child(heading)
+	var help := Label.new()
+	help.text = "↑ / ↓ / Tab  Navigate   ·   Enter  Activate"
+	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	help.add_theme_font_size_override("font_size",12)
+	column.add_child(help)
 	scroll = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
@@ -54,9 +67,13 @@ func _ready() -> void:
 	seek_time.max_value = cue.END-.01
 	seek_time.step = .01
 	seek_time.suffix = "seconds"
+	seek_time.custom_minimum_size.y = 44
 	list.add_child(seek_time)
+	seek_time.get_line_edit().focus_entered.connect(func(): scroll.ensure_control_visible(seek_time))
 	var seek_button := Button.new()
 	seek_button.text = "BlankKitten · Preview timestamp"
+	seek_button.custom_minimum_size.y = 44
+	seek_button.focus_entered.connect(func(): scroll.ensure_control_visible(seek_button))
 	seek_button.pressed.connect(func():
 		status.text = Session.developer_cheats.seek(seek_time.value)
 		_suspend_preview()
@@ -64,12 +81,14 @@ func _ready() -> void:
 	list.add_child(seek_button)
 	controls["seek:custom"] = seek_button
 	status = Label.new()
-	status.custom_minimum_size.y = 38
+	status.custom_minimum_size.y = 48
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.add_theme_font_size_override("font_size",14)
 	column.add_child(status)
 	var close := Button.new()
 	close.name = "Close"
+	close_button = close
+	close.custom_minimum_size.y = 44
 	close.text = "Close  [ - / Esc ]"
 	close.pressed.connect(close_menu)
 	column.add_child(close)
@@ -87,8 +106,9 @@ func _add_entry(list: VBoxContainer, code: String, title: String, description: S
 	var button: Button = CheckButton.new() if toggle else Button.new()
 	button.text = title
 	button.name = code.replace(":","_")
-	button.custom_minimum_size.y = 38
+	button.custom_minimum_size.y = 44
 	button.set_meta("title",title)
+	button.focus_entered.connect(func(): scroll.ensure_control_visible(button))
 	button.pressed.connect(func():
 		status.text = Session.developer_cheats.activate(code)
 		_suspend_preview()
@@ -101,6 +121,7 @@ func _add_entry(list: VBoxContainer, code: String, title: String, description: S
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size",12)
 	list.add_child(hint)
+	button.set_meta("hint",hint)
 
 func _suspend_preview() -> void:
 	var battle: Node = Session.developer_cheats.context().battle
@@ -112,10 +133,10 @@ func _suspend_preview() -> void:
 func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	panel.custom_minimum_size.x = minf(460,viewport_size.x-40)
-	scroll.custom_minimum_size.y = clampf(viewport_size.y-190,80,380)
+	scroll.custom_minimum_size.y = clampf(viewport_size.y-240,80,350)
 
 func can_open() -> bool:
-	if Session.busy or is_instance_valid(Session.confirmation) or (is_instance_valid(Session.options_dialog) and Session.options_dialog.visible): return false
+	if Session.busy or Session.cave_event_active or is_instance_valid(Session.confirmation) or (is_instance_valid(Session.options_dialog) and Session.options_dialog.visible): return false
 	var target := Session.developer_cheats.context()
 	if target.world != null:
 		return not target.world.checking_spawn and not target.world.dialogue.active and not target.world.awaiting_victory_dialogue and not target.world.map_modal_open()
@@ -124,6 +145,8 @@ func can_open() -> bool:
 func show_menu() -> void:
 	if opened or not can_open(): return
 	opening_scene = get_tree().current_scene
+	var focus := get_viewport().gui_get_focus_owner()
+	previous_focus = weakref(focus) if focus != null else null
 	was_paused = get_tree().paused
 	var battle: Node = Session.developer_cheats.context().battle
 	if not was_paused and battle != null: Session._suspend_always(battle)
@@ -132,6 +155,11 @@ func show_menu() -> void:
 	status.text = "Gameplay paused. Unavailable cheats are disabled."
 	_sync()
 	overlay.show()
+	close_button.grab_focus()
+	for button in controls.values():
+		if not button.disabled:
+			button.grab_focus()
+			break
 
 func close_menu() -> void:
 	if not opened: return
@@ -140,6 +168,10 @@ func close_menu() -> void:
 	if not was_paused: Session.restore_suspended_modes()
 	get_tree().paused = was_paused
 	opening_scene = null
+	if previous_focus != null:
+		var focus = previous_focus.get_ref()
+		if is_instance_valid(focus) and focus.is_visible_in_tree(): focus.grab_focus()
+	previous_focus = null
 
 func handle_input(event: InputEvent) -> bool:
 	if event.is_action_pressed("toggle_developer_menu") and not event.is_echo():
@@ -149,6 +181,19 @@ func handle_input(event: InputEvent) -> bool:
 	if not opened: return false
 	if event is InputEventKey:
 		if event.pressed and not event.echo and event.keycode == KEY_ESCAPE: close_menu()
+		var focus := get_viewport().gui_get_focus_owner()
+		if event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_KP_ENTER] and focus is Button:
+			if not focus.disabled: focus.pressed.emit()
+			return true
+		if event.pressed and not event.echo and event.keycode in [KEY_UP,KEY_DOWN] and focus is Button:
+			var buttons: Array = controls.values()+[close_button]
+			var index := buttons.find(focus)
+			for step in range(1,buttons.size()+1):
+				var candidate: Button = buttons[posmod(index+step*(-1 if event.keycode == KEY_UP else 1),buttons.size())]
+				if not candidate.disabled:
+					candidate.grab_focus()
+					break
+			return true
 		# Letter/space shortcuts cannot type cheats or activate focused buttons while paused.
 		return (event.keycode >= KEY_A and event.keycode <= KEY_Z) or event.keycode in [KEY_SPACE,KEY_ESCAPE]
 	return false
@@ -158,6 +203,8 @@ func _sync() -> void:
 		var state: Dictionary = Session.developer_cheats.state(code)
 		var button: Button = controls[code]
 		button.disabled = not state.available
+		button.tooltip_text = "Unavailable in this scene." if button.disabled else ""
+		if button.has_meta("hint"): button.get_meta("hint").modulate.a = .55 if button.disabled else 1.0
 		if button is CheckButton:
 			button.set_pressed_no_signal(state.active)
 			button.text = str(button.get_meta("title")) + ("  [ON]" if state.active else "  [OFF]")

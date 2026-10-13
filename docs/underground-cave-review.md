@@ -1,146 +1,106 @@
-# Underground Cave review
+# Underground Cave redesign and developer menu review
 
-A single continuous exploration region connects to Flooded Forest through a
-Z-operated shaft. Original forest terrain, trees, paths, NPCs, boss mechanics,
-player artwork/controls, inventory, dialogue and progression remain intact.
-No Boss 4, combat, SATURATE, puzzles, secrets or difficulty settings were added.
+The ten-area cave follows the supplied mockup: **1–2, 1–3–4–5–6–7–8–9**,
+with a two-way **4–8** hole shortcut and a sealed **6→10** viewing window.
+The Flooded Forest entrance remains at **(1696, 1008)**; interact with Z.
+The rebuilt cave is **6656×5888 world pixels**, using **32px displayed cells**.
+This is larger than the flexible 90×75 guideline to support the long camera room;
+it replaces the previous 20480×16384 cave. First-time 5–7-minute pacing remains
+an acceptance target for human playtesting, not a measured result.
 
-## Entering and returning
+## Terrain and editing
 
-The opening is at **Flooded Forest (1696, 1008)** on existing reachable ground.
-Approach and press **Z**; the existing interaction HUD says **Z DESCEND**.
-The player moves toward the opening, falls/shrinks/fades for 0.28 seconds, then
-the existing regional fade loads the entrance chamber behind black. Travel
-locks input immediately and ignores repeat/echo input.
+All floors and walls use the newly committed Screaming Brain Studios dungeon
+pack (`assets/enironment/sbs_-_top_down_dungeon_pack`), whose included license is
+**CC0/public domain, with no restrictions**. The actual PNG/TSX atlases have
+**64×64 native cells**; TileMapLayers use uniform 0.5 scale and nearest filtering
+for a 32px world grid. No PNGs were altered, split, copied, or generated.
+The authored Wang corners/sides define editable Godot terrain transitions.
+Floor cell 47 is the seamless floor; only the wall atlas uses cell 47 as a
+magenta placeholder, which is excluded. Walls have scaled, solid collision;
+floors and rubble have none. Suitable existing GFX supply counters, chairs,
+tables, storage chests, rubble, the boulder and a replaceable save-point chest.
+The existing brown exit ladder is the only retained old cave-atlas visual.
 
-The entrance chamber contains a rocky shaft and visible wooden rungs. Approach
-and press **Z CLIMB** to return. The forest arrival is **(1696, 864)**, clear of
-collision and outside the hole's interaction radius. All door artwork comes
-from the original cave atlas, with uniform display scaling and nearest filtering.
+Open `scenes/world/underground_cave.tscn`, select a TileMapLayer, then use the
+TileMap painting/terrain toolbar. TileSets live in `resources/cave/dungeon_*.tres`.
+Keep painting inside the authored room footprints: the room-ID visibility map
+must agree with floor geometry. Change `scripts/world/cave_layout.gd` and rebuild
+when altering room outlines/connections. A full bake replaces manual scene edits:
 
-## Layout and appearance
+```sh
+godot --headless --path . --script tools/import_dungeon_terrain.gd
+godot --headless --path . --script tools/bake_underground_cave.gd
+```
 
-The cave occupies **20480×16384 world pixels**. The original atlas's **16×16**
-cells are displayed at **2×**, giving **32×32 world-pixel cells**. Its fourteen
-irregular chambers connect through seventeen winding passages and loops.
-Narrow tunnels open into wider galleries, with stillwater pools, rocky ridges,
-large/small boulders, pebble deposits and complete ancient stone-column sprites.
-The deepest cavern at **(18096, 10896)** is accessible and intentionally empty
-for a future boss. It contains no encounter node or combat logic.
-
-The authored passage centerlines total **124877 px**. At the unchanged normal
-speed of **260 px/s**, traversing each passage once takes about **8.0 minutes**.
-This is a layout estimate, not a measured human completion time: shortcuts,
-backtracking, time spent in chambers and sprinting change exploration duration.
-
-TileMapLayers hold floor variants, natural rocky boundary/corner tiles, solid
-water, rocks, complete ripple features and non-solid rubble. Larger atlas
-features remain intact; original PNGs are neither split nor edited. Baked
-terrain uses approximately **60,521 floor cells** and **10,665 boundary cells**.
-Physics polygons cover walls/water and the visible bases of large decorations;
-central routes remain clear. Y-sorting lets the player pass naturally in front
-of or behind stone formations.
-
-A dim cool ambient treatment and one soft following light keep paths readable.
-One lightweight haze material and 26 small dust motes provide restrained motion.
-The forest song fades out underground. Quiet native procedural rumble, dripping
-water and occasional echoes provide ambience; the repository contains no suitable
-standalone cave ambience recordings, so no missing-file references were added.
-These sounds use the existing Overworld audio bus and pause with the game.
-The overlay stops rendering under the opaque map. There are no per-tile lights
-or particle nodes.
-
-## Map, saves and editing
-
-**M** opens **UNDERGROUND_MAP()**, using its own **1280×1024** cached terrain and
-fog textures. Player coordinates still use the existing 16-world-pixels-per-map-
-pixel convention; cave tiles cover two map pixels. The forest retains its
-original **520×372** atlas and coordinates. Unexplored cave terrain is concealed
-under uniform fog; the cache does not expose an unexplored cave silhouette.
-
-Cave discovery uses the same bitset reveal radius/cell size as the forest, but
-its own region key. Both sets persist independently through saving, loading,
-leaving and re-entering. Existing version-one saves remain supported and acquire
-an empty cave bitset without losing old flags or discovery. Saving underground
-restores the cave and exact valid position. A saved position inside rock/void
-falls back to the entrance. Save format/version and backup behavior are unchanged.
-
-Open `scenes/world/underground_cave.tscn` in Godot to paint its TileMapLayers.
-The editable TileSets are in `resources/cave/`; their atlas references the
-original `assets/enironment/gfx/cave.png`. Keep wall/water/rock collision polygons
-aligned when changing terrain. After manual painting, refresh **only the map
-cache**, preserving the edited scene:
+Refresh the map cache from a manually painted scene without replacing it:
 
 ```sh
 godot --headless --path . --script tools/bake_underground_cave.gd -- --cache-only
 ```
 
-The authored layout is in `scripts/world/cave_layout.gd`. To rebuild its scene
-and resources deterministically after changing that layout, run:
+## Progression and presentation
 
-```sh
-godot --headless --path . --script tools/bake_underground_cave.gd
-```
+Area 2 uses the exact two-box riddle and responses, numeric choices including
+3 and 14, repeatable failed attempts and one saved red-key reward. The existing
+inventory lists that key. Obtaining it does not open the red barrier: Z unlocks
+the barrier permanently and exposes both shortcut holes. Area 4 has populated
+future shop space, the warning cat, and one Z save point reporting `Game saved!`.
+Area 10 stays physically sealed even with the existing region debug override.
+There is no green key, actual merchant, healing station, Boss 4 combat or reward.
 
-**A full bake replaces manual terrain edits.** Forest cartography is refreshed
-with the existing `tools/bake_world_map.gd`; this change only updates its source
-metadata, and its cached forest pixel data was verified unchanged.
+Normal camera following and zoom are unchanged. A separate world-space room
+mask hides other interiors, with a ray-clipped aperture for Area 10 only. It
+sits below the HUD and does not replace map fog. Area 7 fades the entire screen,
+including map/inventory/dialogue/developer UI, to grayscale over one second;
+local ambience fades into a pitched-down drone. Leaving restores color/audio
+immediately, without global rendering/audio changes.
 
-## Files
+Area 9 automatically locks movement, smoothly pans at the existing zoom from
+an offscreen temporary boss to the far-edge framing, then uses the existing
+character dialogue for `Welcome to the underground.` Advancing opens the existing
+540×900 combat host with a clearly labeled placeholder. Both return/retry paths
+restore a safe Area 8 position; entering Area 9 replays the introduction.
+Menus cannot interrupt/skip it. Existing real fights and fresh-fight health
+initialization are unchanged.
 
-| Files | Changes |
-|---|---|
-| `scenes/world/{underground_cave,cave_hole,cave_return}.tscn` | New terrain and reusable descent/return objects |
-| `scenes/world/flooded_forest.tscn` | Hole instance and safe arrival marker only |
-| `scripts/world/{cave,cave_layout,cave_connection,cave_atmosphere}.gd` | Region validity, authored layout, existing interaction contract, atmosphere |
-| `resources/cave/*.tres`, `resources/maps/underground_terrain.res`, `shaders/cave_haze.gdshader` | Editable original-art atlas layers, independent map cache and subtle haze |
-| `scripts/world/overworld.gd` | Register cave, contextual interaction hint, validate cave save position |
-| `scripts/systems/{session,music,save_manager}.gd` | Optional cave travel animation, cave ambience routing, accepted save bounds |
-| `scripts/maps/{world_layout,exploration,map_canvas,map_ink,map_ui}.gd` | Separate map domain and saved fog using existing UI/reveal behavior |
-| `resources/maps/world_terrain.res` | Forest cache source metadata refresh; terrain pixels unchanged |
-| `tools/bake_underground_cave.gd` | Deterministic editable terrain/cache bake and cache-only mode |
-| `tests/{headless_cave,render_cave}.gd`, `check_cave_preservation.py` | Physics reachability, integration, rendering and preservation checks |
-| `tests/headless_cartography.gd` | Existing four-forest bitset-size assertion now explicitly measures the four forest regions |
+The minus-key developer menu retains every cheat/category and adds consistent
+44px controls, focus/hover states, disabled explanations, automatic focus
+scrolling, arrow/Tab/Enter navigation and previous-focus restoration. The current
+project's accidental keyboard device-16 binding is corrected to device 0.
 
-## Validation and remaining manual checks
+## Save compatibility
 
-Godot **4.6.3** headless import completed with exit 0. All six affected scenes
-loaded and instantiated. **56 cave integration checks passed**, including actual
-player-sized physics searches to every chamber, reachable forest entrance,
-descent/climb guards, keyboard movement, pause, separate fog/maps, save/load,
-legacy save compatibility and invalid-position recovery.
+Save version, backups, unrelated flags, forest exploration and cave discovery
+remain compatible. Legacy cave saves relocate to the redesigned entrance, and
+**only the obsolete cave exploration bitset resets** because its geometry changed.
+New cave saves retain valid position, puzzle/key, barrier/shortcut and exploration.
+Invalid/hidden-room positions use the existing safe-spawn validation.
 
-The four focused existing suites also passed: **cartography 77**, **overworld 59**,
-**quality-of-life 81**, and **region/progression 145** checks. A preservation check
-protects **557 existing files/functions**, including all original artwork, player
-controls, boss mechanics and dialogue; original flooded geometry is unchanged.
-Forest map cached pixels were also compared exactly against `8dbfc2d`.
+## Validation
 
-**35 graphical checks passed**, rendering all fourteen chambers, winding tunnels,
-rock boundaries, map restoration and the entrance. Representative chambers,
-tunnels, boundaries, pools and the entrance were visually inspected.
-The Mesa llvmpipe software profile measured **35.126 ms median / 50.24 ms p95**
-frames in the pool chamber, with **100 nodes**. This does not establish target-
-hardware frame rate. The software driver's unsupported V-Sync warning is expected.
-
-Reproduce focused validation with:
+Godot 4.6.3 headless import and affected-scene instantiation pass. Automated
+checks: **cave 81**, **developer menu 60**, **map/debug 38**, **cartography 77**,
+**overworld 59**, **location discovery 40**, and **rendering 68**. Rendering checks
+use actual framebuffer probes for chamber isolation, aperture clipping, complete
+UI grayscale and color restoration; camera framing is tested at 1280×720/zoom1
+and 1920×1080/zoom0.75. Reachability uses the actual player collision shape.
+The preservation script compares against `9280508`, protecting existing forest
+scenes, artwork, player controls, battle scripts/timelines and original dialogue.
 
 ```sh
 godot --headless --path . --editor --import
 godot --headless --path . --script tests/headless_cave.gd
+godot --headless --path . --script tests/headless_developer_menu.gd
 python tests/check_cave_preservation.py
 godot --path . --rendering-method gl_compatibility --script tests/render_cave.gd
 ```
 
-Manually play a full exploration circuit to judge pacing/wayfinding, audition
-the ambience on real speakers, and check darkness and frame pacing on target
-hardware. Automated reachability and rendered screenshots do not establish
-those subjective qualities. No known functional failures remain.
+Rendering was verified with Mesa llvmpipe. Its unsupported V-Sync warning is
+expected; some test shutdowns emit an ObjectDB leak warning. No functional
+validation failures remain. Manually judge first-time pacing/wayfinding, furniture
+composition, audio levels/drone, and frame pacing on target hardware.
 
-![Flooded Forest entrance](review/cave/entrance.png)
-![Return shaft](review/cave/return-shaft.png)
-![Winding passage](review/cave/tunnel.png)
-![Echo pool](review/cave/echo-pool.png)
-![Stone landmarks](review/cave/stone-landmarks.png)
-![Empty reserved cavern](review/cave/reserved-cavern.png)
-![Separate underground map](review/cave/map.png)
+![Hub and future shop space](review/cave-redesign/hub.png)
+![Sealed viewing aperture](review/cave-redesign/window.png)
+![Temporary boss introduction](review/cave-redesign/introduction.png)

@@ -1,7 +1,7 @@
 extends RefCounted
 
 const VERSION := 1
-const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(20480, 16384)}
+const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(6656, 5888)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
 
@@ -16,9 +16,6 @@ func validate(value: Variant) -> Dictionary:
 		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)):
 			return {}
 	var point := Vector2(position[0], position[1])
-	var bounds: Vector2 = AREA_SIZES[area]
-	if point.x < 44 or point.y < 44 or point.x > bounds.x - 44 or point.y > bounds.y - 44:
-		return {}
 	var defeated: Variant = value.get("evil_bart_defeated", false)
 	var flags: Variant = value.get("story_flags", {})
 	var legacy_bart: Variant = value.get("bart_defeated",false)
@@ -28,6 +25,26 @@ func validate(value: Variant) -> Dictionary:
 		if not flag is String or not flags[flag] is bool:
 			return {}
 	flags = flags.duplicate()
+	var fog: Dictionary = value.get("exploration", {}).duplicate() if value.get("exploration",{}) is Dictionary else {}
+	if not flags.get("cave_redesign_layout_v2",false):
+		var old_cave: Variant = fog.get("underground_cave","")
+		if not old_cave is String: return {}
+		if old_cave.length() == 13656:
+			var encoding := RegEx.new()
+			encoding.compile("^[A-Za-z0-9+/]*={0,2}$")
+			if encoding.search(old_cave) == null: return {}
+			var decoded := Marshalls.base64_to_raw(old_cave)
+			if decoded.size() != 10240: return {}
+			for byte in decoded:
+				if byte != 0: flags["underground_cave_discovered"] = true
+			fog.erase("underground_cave")
+		if area == "underground_cave":
+			if point.x < 44 or point.y < 44 or point.x > 20436 or point.y > 16340: return {}
+			point = preload("res://scripts/world/cave_layout.gd").ENTRY
+			flags["underground_cave_discovered"] = true
+		flags["cave_redesign_layout_v2"] = true
+	var bounds: Vector2 = AREA_SIZES[area]
+	if point.x < 44 or point.y < 44 or point.x > bounds.x - 44 or point.y > bounds.y - 44: return {}
 	# Version-one saves retain every unrelated flag; old Bart victories earn the key.
 	defeated = defeated or legacy_bart or flags.get("bart_defeated", false)
 	flags["bart_defeated"] = defeated
@@ -36,7 +53,7 @@ func validate(value: Variant) -> Dictionary:
 		if not flags.has(flag):
 			flags[flag] = false
 	var exploration := preload("res://scripts/maps/exploration.gd").new()
-	if not exploration.restore(value.get("exploration", {})):
+	if not value.get("exploration",{}) is Dictionary or not exploration.restore(fog):
 		return {}
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true

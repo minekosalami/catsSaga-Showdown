@@ -23,6 +23,7 @@ var map_reveal_cheat := false
 var unrestricted_region_access := false # Debug only; deliberately absent from saves.
 var show_coordinates := false # Session-only visualization; never saved.
 var reveal_all_locations := false
+var cave_event_active := false
 var coordinate_overlay: Label
 var saves := preload("res://scripts/systems/save_manager.gd").new()
 var pause_menu: CanvasLayer
@@ -280,6 +281,14 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	transition_finished.emit.call_deferred()
 	return error == OK
 
+func return_cave_placeholder() -> void:
+	if busy: return
+	encounter_active = false
+	area_id = "underground_cave"
+	restore_position = true
+	cave_event_active = false
+	await transition_to("res://scenes/world/overworld.tscn")
+
 func snapshot(area: String, point: Vector2) -> Dictionary:
 	return saves.validate({"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "exploration": exploration.snapshot()})
 
@@ -331,11 +340,11 @@ func load_game() -> bool:
 func world_menu_open() -> bool:
 	var world := get_tree().current_scene
 	var map_modal: bool = world != null and world.has_method("map_modal_open") and world.map_modal_open()
-	return developer_menu.opened or map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
+	return cave_event_active or developer_menu.opened or map_modal or (is_instance_valid(confirmation) and confirmation.visible) or (is_instance_valid(options_dialog) and options_dialog.visible) or pause_menu.opened
 
 func can_pause() -> bool:
 	var scene := get_tree().current_scene
-	if busy or scene == null or get_tree().paused:
+	if busy or cave_event_active or scene == null or get_tree().paused:
 		return false
 	if scene.name == "Overworld":
 		return not scene.dialogue.active and not scene.map_modal_open()
@@ -408,6 +417,7 @@ func confirm_action(message: String, action: Callable) -> void:
 	dialog.popup_centered(Vector2i(440, 180))
 
 func request_main_menu() -> void:
+	if cave_event_active: return
 	if has_unsaved_progress():
 		confirm_action("Return to the main menu and discard unsaved progress?", main_menu)
 	else:
