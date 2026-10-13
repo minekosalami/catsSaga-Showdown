@@ -14,15 +14,14 @@ func _ready() -> void:
 	resized.connect(_layout_arena)
 	_layout_arena()
 	battle = battle_scene.instantiate()
-	battle.process_mode = Node.PROCESS_MODE_PAUSABLE
+	battle.process_mode = Node.PROCESS_MODE_DISABLED if Session.battle_entry_pending else Node.PROCESS_MODE_PAUSABLE
 	arena.add_child(battle)
 	if Session.battle_entry_pending:
-		# Initialize behind the black walls without advancing music or gameplay.
+		# Initialize behind the encounter overlay without advancing music/gameplay.
 		battle.music_player.stop()
 		battle.set_process_input(false)
 		battle.player.set_process_input(false)
-		Session._suspend_always(battle)
-		battle.process_mode = Node.PROCESS_MODE_DISABLED
+		Session._freeze_entry_tree(battle)
 
 func _layout_arena() -> void:
 	# Transform the container only; its viewport never stretches or resizes.
@@ -48,8 +47,8 @@ func main_menu() -> void:
 	Session.main_menu()
 
 func finish_entry() -> void:
+	Session.restore_suspended_modes()
 	battle.process_mode = Node.PROCESS_MODE_PAUSABLE
 	battle.set_process_input(true)
 	battle.player.set_process_input(true)
-	Session.restore_suspended_modes()
 	battle.music_player.play(0.0)

@@ -13,8 +13,6 @@ var encounter_id := "bart"
 var key_notification_pending := false
 var busy: bool = false
 var battle_entry_pending: bool = false
-@export var battle_wipe_duration: float = 1.2
-@export var battle_reveal_duration: float = 0.3
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 @export var region_fade_duration: float = 0.3
 var story_flags: Dictionary = {}
@@ -34,7 +32,7 @@ var confirmation: ConfirmationDialog
 var suspended_modes: Dictionary = {}
 var last_save_message: String = ""
 var curtain: ColorRect
-var battle_walls: Control
+var battle_transition: Control
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -44,10 +42,11 @@ func _ready() -> void:
 	add_child(curtain)
 	curtain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	curtain.hide()
-	battle_walls = Control.new()
-	battle_walls.name = "BattleWalls"
-	battle_walls.set_script(preload("res://scripts/ui/black_wall_entry.gd"))
-	add_child(battle_walls)
+	var entry_layer := CanvasLayer.new()
+	entry_layer.layer = 200 # Above cave desaturation, HUD and developer overlays.
+	add_child(entry_layer)
+	battle_transition = preload("res://scripts/ui/battle_entry.gd").new()
+	entry_layer.add_child(battle_transition)
 	pause_menu = CanvasLayer.new()
 	pause_menu.set_script(preload("res://scripts/ui/pause_menu.gd"))
 	add_child(pause_menu)
@@ -59,6 +58,9 @@ func _ready() -> void:
 	add_child(coordinate_overlay)
 
 func _input(event: InputEvent) -> void:
+	if busy and battle_entry_pending:
+		get_viewport().set_input_as_handled()
+		return
 	if developer_menu.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return
@@ -218,10 +220,10 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	close_pause()
 	get_tree().paused = false
 	battle_entry_pending = white_wipe
+	if white_wipe:
+		return await _battle_entry(scene_path)
 	var fade_duration := region_fade_duration if region_travel else transition_duration * 0.5
-	Music.prepare_transition(scene_path, battle_wipe_duration if white_wipe else fade_duration)
-	# white_wipe is retained as the existing call-site compatibility flag.
-	# All boss hosts now enter through the same black-wall presentation.
+	Music.prepare_transition(scene_path, fade_duration)
 	curtain.color = Color.BLACK
 	curtain.position = Vector2.ZERO
 	var fade: Tween
@@ -238,18 +240,11 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 		motion.tween_property(sprite,"scale",sprite.scale*.55,.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		motion.tween_property(sprite,"modulate:a",0.0,.28)
 		await motion.finished
-	if white_wipe:
-		battle_walls.duration = battle_wipe_duration
-		await battle_walls.close_walls()
-		curtain.modulate.a = 1.0
-		curtain.show()
-		battle_walls.hide()
-	else:
-		curtain.modulate.a = 0.0
-		curtain.show()
-		fade = create_tween()
-		fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
-		await fade.finished
+	curtain.modulate.a = 0.0
+	curtain.show()
+	fade = create_tween()
+	fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
+	await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
 		audio.stop()
@@ -269,17 +264,56 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 			camera.reset_smoothing()
 			camera.force_update_scroll()
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 0.0, battle_reveal_duration if white_wipe else fade_duration)
+	fade.tween_property(curtain, "modulate:a", 0.0, fade_duration)
 	await fade.finished
 	curtain.hide()
 	curtain.position.y = 0.0
 	curtain.color = Color.BLACK
-	if white_wipe and error == OK:
-		get_tree().current_scene.finish_entry()
 	battle_entry_pending = false
 	busy = false
 	transition_finished.emit.call_deferred()
 	return error == OK
+
+func _battle_entry(scene_path: String) -> bool:
+	var previous := get_tree().current_scene
+	if previous != null:
+		_freeze_entry_tree(previous)
+	Music.prepare_transition(scene_path, 0.20)
+	battle_transition.capture(previous)
+	await battle_transition.blackout()
+	for audio in get_tree().get_nodes_in_group("combat_music"): audio.stop()
+	var error := ERR_FILE_NOT_FOUND
+	if ResourceLoader.exists(scene_path): error = get_tree().change_scene_to_file(scene_path)
+	var host: Node
+	if error == OK:
+		await get_tree().scene_changed
+		host = get_tree().current_scene
+		if is_instance_valid(host) and host.has_method("finish_entry"):
+			await battle_transition.arrive(host)
+		else:
+			error = ERR_INVALID_DATA
+	# Also recover from a scene being replaced externally while the overlay runs.
+	var success := error == OK and is_instance_valid(host) and host == get_tree().current_scene
+	battle_transition.clear(not success)
+	battle_entry_pending = false
+	busy = false
+	if success:
+		host.finish_entry()
+	else:
+		restore_suspended_modes()
+		encounter_active = false
+		last_save_message = "Transition could not enter " + scene_path
+		Music.sync_scene()
+	transition_finished.emit.call_deferred()
+	return success
+
+func _freeze_entry_tree(node: Node, root_node: bool = true) -> void:
+	# Explicit ALWAYS/PAUSABLE children can override a disabled parent.
+	# Inheriting children freeze with their parent; retain their original modes.
+	if root_node or node.process_mode != Node.PROCESS_MODE_INHERIT:
+		suspended_modes[node] = node.process_mode
+		node.process_mode = Node.PROCESS_MODE_DISABLED
+	for child in node.get_children(): _freeze_entry_tree(child, false)
 
 func return_cave_placeholder() -> void:
 	if busy: return
@@ -379,7 +413,8 @@ func close_pause() -> void:
 
 func restore_suspended_modes() -> void:
 	for node in suspended_modes:
-		if is_instance_valid(node):
+		# A replaced host may still be alive while detached and awaiting deletion.
+		if is_instance_valid(node) and node.is_inside_tree():
 			node.process_mode = suspended_modes[node]
 	suspended_modes.clear()
 
