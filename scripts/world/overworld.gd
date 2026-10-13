@@ -90,6 +90,7 @@ func _validate_saved_position() -> void:
 
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
+	layer.layer = 5
 	add_child(layer)
 	var root := Control.new()
 	layer.add_child(root)

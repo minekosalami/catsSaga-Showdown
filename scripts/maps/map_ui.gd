@@ -185,7 +185,10 @@ func handle_input(event: InputEvent) -> bool:
 		if event.keycode == KEY_SPACE:
 			sequence = ""
 			inventory_opened = true
-			inventory_contents.text = "Flooded Forest Key" if Session.story_flags.get("flooded_forest_key_obtained",false) else "No items collected."
+			var items: Array[String] = []
+			if Session.story_flags.get("flooded_forest_key_obtained",false): items.append("Flooded Forest Key")
+			if Session.story_flags.get("cave_red_key_obtained",false): items.append("Red Key")
+			inventory_contents.text = "\n".join(items) if not items.is_empty() else "No items collected."
 			inventory.show()
 			world.player.velocity = Vector2.ZERO
 			world.player.movement_locked = true

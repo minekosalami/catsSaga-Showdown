@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/world/boss4_placeholder_host.gd" id="script"]
+[ext_resource type="PackedScene" path="res://scenes/cave/boss4_placeholder.tscn" id="battle"]
+[node name="Boss4PlaceholderHost" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("script")
+battle_scene = ExtResource("battle")
+[node name="ArenaContainer" type="SubViewportContainer" parent="."]
+mouse_filter = 2
+[node name="Arena" type="SubViewport" parent="ArenaContainer"]
+size = Vector2i(540, 900)
+render_target_update_mode = 4

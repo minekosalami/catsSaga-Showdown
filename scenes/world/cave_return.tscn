@@ -1,23 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 [ext_resource type="Script" path="res://scripts/world/cave_connection.gd" id="connection"]
 [ext_resource type="Texture2D" path="res://assets/enironment/gfx/cave.png" id="atlas"]
 [sub_resource type="AtlasTexture" id="ladder"]
 atlas = ExtResource("atlas")
 region = Rect2(96, 0, 16, 24)
-[sub_resource type="AtlasTexture" id="shaft"]
-atlas = ExtResource("atlas")
-region = Rect2(176, 64, 64, 48)
 [node name="ClimbToForest" type="Node2D"]
 script = ExtResource("connection")
 interaction_radius = 110.0
 metadata/interaction_label = "Z  CLIMB"
 destination = "flooded_forest"
 entry = "FromCave"
-[node name="Shaft" type="Sprite2D" parent="."]
-texture_filter = 1
-texture = SubResource("shaft")
-scale = Vector2(2, 2)
-position = Vector2(0, -55)
 [node name="Ladder" type="Sprite2D" parent="."]
 texture_filter = 1
 texture = SubResource("ladder")
