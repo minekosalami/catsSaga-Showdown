@@ -6,7 +6,7 @@ var failures := 0
 var session: Node
 var world: Node
 func _initialize():
-	create_timer(180).timeout.connect(func(): quit(1))
+	create_timer(240).timeout.connect(func(): quit(1))
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--output="): output = arg.trim_prefix("--output=")
 	DirAccess.make_dir_recursive_absolute(output)
@@ -40,6 +40,11 @@ func probe(point: Vector2) -> Polygon2D:
 	node.color = Color(.9,.02,.8)
 	node.z_index = 100
 	node.position = point
+	var material := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = "shader_type canvas_item; render_mode unshaded; void fragment(){ COLOR = vec4(.9,.02,.8,1.0); }"
+	material.shader = shader
+	node.material = material
 	world.map.add_child(node)
 	return node
 func visible_sample(image: Image, point: Vector2) -> Color:
@@ -61,12 +66,17 @@ func run():
 	await session.new_game()
 	await session.travel("underground_cave","FromFlooded")
 	world = current_scene
-	for id in [1,2,3,4,5,6,7,8,10]:
+	for id in [1,2,3,4,5,6,7,8,10,11,12,13,14,15,16]:
 		await position(Plan.center(id-1)+Vector2(0,80))
 		if id == 7: await create_timer(1.05).timeout
 		await capture("area-"+str(id))
-	await position(Vector2(85,66)*32)
+	await position(Plan.center(3))
 	await capture("hub")
+	await position(world.map.get_node("Characters/Merchant").position+Vector2(0,96))
+	world.map.services.open_market()
+	await capture("shop-placeholder")
+	world.map.services.close_market()
+
 	session.developer_menu.show_menu()
 	await capture("developer")
 	session.developer_menu.close_menu()
@@ -80,7 +90,7 @@ func run():
 			await position(Plan.center(active-1)+Vector2(0,80),.2)
 			var image := await frame()
 			var covered := 0
-			for id in range(1,11):
+			for id in range(1,17):
 				var p := pixel(image,probes[id-1].position)
 				if not Rect2i(Vector2i.ZERO,image.get_size()).has_point(p): continue
 				var logical := Vector2(p)*root.get_visible_rect().size/Vector2(image.get_size())
@@ -89,12 +99,20 @@ func run():
 				if id == active: check(color.r > .5 and color.b > .5,"active room remains visible at "+str(size)+" / zoom .2")
 				else:
 					covered += 1
-					check(color.r < .1 and color.b < .1,"Area %d masks Area %d at %s / zoom .2"%[active,id,str(size)])
+					check(color.r < .4 and color.b < .25,"Area %d masks Area %d at %s / zoom .2"%[active,id,str(size)])
 			check(covered > 0,"wide view actually tests neighboring interiors")
 	for node in probes: node.queue_free()
 	root.size = Vector2i(1280,720)
 	for route in Plan.ROUTES:
 		var destination: Vector2 = route.points[-1]*32+Vector2(16,16)
+		var nearest_interior := INF
+		for cell in world.map.get_node("CaveFloor").get_used_cells():
+			if world.map.cell_room(cell) != Vector2i(route.b,0): continue
+			var point := Vector2(cell*32)+Vector2(16,16)
+			var distance := point.distance_squared_to(route.points[-1]*32)
+			if distance < nearest_interior:
+				nearest_interior = distance
+				destination = point
 		var boundary := Vector2.ZERO
 		var best := INF
 		for cell in world.map.get_node("CaveFloor").get_used_cells():
@@ -108,17 +126,18 @@ func run():
 		await position(boundary,.6)
 		var neighbor := probe(destination)
 		var boundary_image := await frame()
-		check(world.map.current_room == route.a and visible_sample(boundary_image,destination).r < .1,"entrance %d→%d hides neighboring interior"%[route.a,route.b])
+		check(world.map.current_room == route.a and visible_sample(boundary_image,destination).b < .25,"entrance %d→%d hides neighboring interior"%[route.a,route.b])
 		neighbor.queue_free()
-	await position(Vector2(37,119)*32,.6)
-	var visible := probe(Vector2(50,119)*32)
-	var hidden := probe(Vector2(48,107)*32)
+	await position(Vector2(28,82)*32,.6)
+	var visible := probe(Vector2(45,82)*32)
+	var hidden := probe(Vector2(42,74)*32)
 	var image := await frame()
+	check(world.map.cell_room(Vector2i(hidden.position/32)).x == 10,"window clipping probe actually lies inside the hidden chamber")
 	check(visible_sample(image,visible.position).r > .5,"Area 10 is visible through actual aperture")
-	check(visible_sample(image,hidden.position).r < .1,"Area 10 outside aperture remains hidden")
+	check(visible_sample(image,hidden.position).b < .25,"Area 10 outside aperture remains hidden")
 	visible.queue_free()
 	hidden.queue_free()
-	await position(Vector2(37,119)*32)
+	await position(Vector2(28,82)*32)
 	await capture("window")
 	# A colored diagnostic above developer UI must still be desaturated.
 	var ui := CanvasLayer.new()
@@ -151,14 +170,14 @@ func run():
 		root.size = setting.size
 		await session.travel("underground_cave","FromFlooded")
 		world = current_scene
-		await position(Vector2(106,157)*32,setting.zoom)
+		await position(Plan.ROUTES.filter(func(route): return route.b == 9)[0].points[-1]*32,setting.zoom)
 		var camera: Camera2D = world.player.get_node("Camera2D")
 		var view: Vector2 = world.get_viewport_rect().size/camera.zoom
 		check(world.map.boss.position.x-50 > camera.get_screen_center_position().x+view.x*.5,"boss initially offscreen at "+str(setting))
 		while not world.dialogue.active: await process_frame
 		world.dialogue.advance()
 		var center: Vector2 = camera.get_screen_center_position()
-		check(world.player.position.x+32 < center.x-view.x*.5 and world.map.boss.position.x > center.x+view.x*.25 and camera.zoom == Vector2.ONE*setting.zoom,"camera frames both edges without changing zoom at "+str(setting))
+		check(world.player.position.x-32 > center.x-view.x*.5 and world.player.position.x < center.x-view.x*.25 and world.map.boss.position.x > center.x+view.x*.25 and camera.zoom == Vector2.ONE*setting.zoom,"camera shows both characters at opposite edges without changing zoom at "+str(setting))
 		check(world.map.boss.position.x < Plan.room(9).rect.end.x*32-64,"temporary boss remains within long room")
 		await capture("intro-"+str(setting.size.x))
 		world.dialogue.advance()

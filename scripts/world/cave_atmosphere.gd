@@ -46,7 +46,7 @@ func sound(kind: String) -> AudioStreamWAV:
 func _ready() -> void:
 	var darkness := CanvasModulate.new()
 	darkness.name = "UndergroundAmbientLight"
-	darkness.color = Color(.68,.69,.79)
+	darkness.color = Color(.39,.34,.43)
 	add_child(darkness)
 	var gradient := Gradient.new()
 	gradient.colors = PackedColorArray([Color(1,1,1,.75),Color(1,1,1,.15),Color(1,1,1,0)])
@@ -61,7 +61,7 @@ func _ready() -> void:
 	lamp = PointLight2D.new()
 	lamp.texture = texture
 	lamp.texture_scale = 4.0
-	lamp.energy = .6
+	lamp.energy = .8
 	lamp.color = Color(.84,.91,1)
 	lamp.shadow_enabled = false
 	add_child(lamp)

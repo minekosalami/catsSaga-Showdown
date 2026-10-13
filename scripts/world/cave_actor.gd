@@ -1,14 +1,17 @@
 extends "res://scripts/world/npc.gd"
 const Plan = preload("res://scripts/world/cave_layout.gd")
+const Art = preload("res://scripts/world/cave_assets.gd")
 @export var role := "social"
 @export var area := 4
+@export var notes := PackedStringArray()
+@export var display_kind := ""
 var body: StaticBody2D
 var blocker: Sprite2D
 var visuals: Array[CanvasItem] = []
 const RIDDLE := {"start":"riddle","nodes":{
-	"riddle":{"speaker":"Cat","lines":["If you have one cat, and you add another, then you subtract four, then multiply that number by three, then add twenty…","How many letters are in the word 'Cat?'"],"choices":[{"text":"3","next":"correct"},{"text":"14","next":"wrong"},{"text":"6","next":"wrong"}]},
-	"wrong":{"speaker":"Cat","lines":["Try again when you're smart enough, peasant!"],"end":"cave_wrong"},
-	"correct":{"speaker":"Cat","lines":["How did you know that?? Fine, I've got something for you. I'm feeling generous today, and I just cannot find what this unlocks. Hopefully it'll be better in the hands of a smart person, like you."],"end":"cave_red_key"}}}
+	"riddle":{"speaker":"Cat","lines":["If you have one cat, and you add another, then you subtract four, then multiply that number by three, then add twenty…","How many letters are in the word \"Cat?\""],"choices":[{"text":"3","next":"correct"},{"text":"14","next":"wrong"},{"text":"6","next":"wrong"}]},
+	"wrong":{"speaker":"Cat","lines":["Try again when you’re smart enough, peasant!"],"end":"cave_wrong"},
+	"correct":{"speaker":"Cat","lines":["How did you know that?? Fine, I’ve got something for you. I’m feeling generous today, and I just cannot find what this unlocks. Hopefully it’ll be better in the hands of a smart person, like you."],"end":"cave_red_key"}}}
 func image(texture: Texture2D, height: float, offset := Vector2.ZERO) -> Sprite2D:
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
@@ -42,20 +45,17 @@ func _ready():
 			var count := 9 if vertical else 6
 			for i in count:
 				var offset := Vector2(0,(i-(count-1)*.5)*32) if vertical else Vector2((i-(count-1)*.5)*32,0)
-				var sprite := image(atlas("res://assets/enironment/sbs_-_top_down_dungeon_pack/Tiles/Walls/Wall-Stone_02-64x64.png",Rect2(384,128,64,64)),32,offset)
+				var sprite := image(atlas(Art.PACK+"tiles/wall-tiles-32x32.png",Rect2(32,96,32,32)),32,offset)
 				sprite.modulate = Color(0.35,1,.65,.65) if vertical else Color(1,.25,.25)
 			solid(Vector2(32,9*32) if vertical else Vector2(6*32,32))
 			set_meta("interaction_label","Z  INSPECT WINDOW" if vertical else "Z  UNLOCK RED BARRIER")
 		"shortcut_hub","shortcut_junction":
-			# A native stone ring surrounds the hole; the only borrowed GFX is the boulder.
-			for i in 8:
-				var angle := TAU*i/8
-				image(atlas("res://assets/enironment/sbs_-_top_down_dungeon_pack/Tiles/Walls/Wall-Stone_02-64x64.png",Rect2(384,128,64,64)),16,Vector2.from_angle(angle)*23)
-			blocker = image(atlas("res://assets/enironment/gfx/objects.png",Rect2(320,0,32,32)),64,Vector2(0,-14))
+			image(Art.texture("hole"),48,Vector2(0,-8))
+			blocker = image(Art.texture("boulder"),64,Vector2(0,-24))
 			solid(Vector2(42,28))
 			set_meta("interaction_label","Z  SHORTCUT")
 		"save":
-			image(atlas("res://assets/enironment/gfx/objects.png",Rect2(176,0,32,16)),32,Vector2(0,-12))
+			image(Art.texture("save_chest"),30,Vector2(0,-15))
 			solid(Vector2(24,18))
 			var label := Label.new()
 			label.text = "SAVE()"
@@ -63,7 +63,17 @@ func _ready():
 			label.add_theme_font_size_override("font_size",12)
 			add_child(label)
 			set_meta("interaction_label","Z  SAVE")
+		"rest":
+			image(Art.texture("bed"),64,Vector2(0,-32))
+			solid(Vector2(26,18))
+			set_meta("interaction_label","Z  REST")
+		"inspect":
+			var height: float = Art.REGIONS[display_kind].size.y
+			image(Art.texture(display_kind),height,Vector2(0,-height*.5))
+			solid(Vector2(22,14))
+			set_meta("interaction_label","Z  INSPECT")
 		_:
+			if role == "merchant": set_meta("interaction_label","Z  SHOP")
 			image(load("res://assets/player/player.png.png"),54,Vector2(0,-20))
 			solid(Vector2(22,16))
 	_process(0)
@@ -97,7 +107,12 @@ func handle_interaction(world: Node) -> bool:
 				,CONNECT_ONE_SHOT)
 				world.dialogue.start_graph(RIDDLE)
 		"warning": world.dialogue.start_lines([{"speaker":"Cat","text":"I wouldn't recommend going any deeper..."}])
-		"social": world.dialogue.start_lines([{"speaker":"Cat","text":"The counters aren't open yet."}])
+		"social","inspect":
+			var content: Array = []
+			for text in notes: content.append({"speaker":"Cat" if role == "social" else "","text":text})
+			world.dialogue.start_lines(content)
+		"merchant": cave().services.open_market()
+		"rest": world.dialogue.start_lines([{"speaker":"","text":"Rested. Your strength will be restored before the next fight."}])
 		"save":
 			var ok := Session.save_current()
 			world.dialogue.start_lines([{"speaker":"","text":"Game saved!" if ok else Session.saves.last_error}])

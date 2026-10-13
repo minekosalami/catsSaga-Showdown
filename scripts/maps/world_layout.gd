@@ -15,7 +15,7 @@ static func world_point(area: String, local_point: Vector2) -> Vector2:
 	return Vector2(region(area).offset)+local_point/TILE_PIXELS
 
 # Underground terrain has its own atlas; the existing forest atlas stays intact.
-const UNDERGROUND := {"underground_cave":{"scene":"underground_cave","name":"Underground Cave","offset":Vector2i.ZERO,"size":Vector2i(416,368)}}
+const UNDERGROUND := {"underground_cave":{"scene":"underground_cave","name":"Underground Cave","offset":Vector2i.ZERO,"size":preload("res://scripts/world/cave_layout.gd").SIZE*2}}
 static func all_regions() -> Dictionary:
 	var result := REGIONS.duplicate()
 	result.merge(UNDERGROUND)

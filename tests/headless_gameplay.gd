@@ -76,7 +76,7 @@ func run() -> void:
 	for grid in menu.controls_grids:
 		check(grid.get_child(2).position.y - grid.get_child(0).position.y >= 50, "control rows do not overlap")
 	menu.info_container.get_node("CreditsButton").pressed.emit()
-	check(menu.info_content.visible and not menu.controls_panel.visible and menu.info_content.text == "LLiosette — Creator", "Credits shows only LLiosette — Creator")
+	check(menu.info_content.visible and not menu.controls_panel.visible and menu.info_content.text.contains("LLiosette — Creator") and menu.info_content.text.contains("Basic Caves & Dungeons — schwarnhild"), "Credits preserves LLiosette and credits the documented cave pack creator")
 	menu.info_container.get_node("BackButton").pressed.emit()
 	check(menu.menu_container.visible and not menu.info_container.visible, "Info Back returns to primary menu")
 	menu._show_info()

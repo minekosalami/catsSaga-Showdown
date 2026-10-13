@@ -105,7 +105,7 @@ func _show_credits() -> void:
 	controls_panel.hide()
 	info_content.show()
 	info_content.add_theme_font_size_override("font_size", 20)
-	info_content.text = "LLiosette — Creator"
+	info_content.text = "LLiosette — Creator\n\nBasic Caves & Dungeons — schwarnhild\nschwarnhild.itch.io"
 
 func _back_to_menu() -> void:
 	info_container.hide()

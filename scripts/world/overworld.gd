@@ -198,7 +198,7 @@ func hide_interaction() -> void:
 	if map_ui != null: map_ui.minimap.hide()
 
 func map_modal_open() -> bool:
-	return map_ui != null and map_ui.modal_open()
+	return (map_ui != null and map_ui.modal_open()) or (map != null and map.has_method("modal_open") and map.modal_open())
 
 func update_map_exploration() -> void:
 	if map_ui != null: map_ui.update_exploration()
