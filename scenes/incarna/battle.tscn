@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/incarna/battle.gd" id="battle"]
+[ext_resource type="AudioStream" path="res://assets/soundtrack/Malware - 006.mp3" id="music"]
+[node name="IncarnaBattle" type="Node2D"]
+script = ExtResource("battle")
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("music")
+volume_db = -12.0

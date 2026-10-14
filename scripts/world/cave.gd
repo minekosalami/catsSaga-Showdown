@@ -8,7 +8,7 @@ var screen_layer: CanvasLayer
 var intro_started := false
 var drone: AudioStreamPlayer
 var gray := 0.0
-var boss: Sprite2D
+var boss: Node2D
 var host: Node
 var services: CanvasLayer
 func is_walkable_position(point: Vector2) -> bool:
@@ -53,19 +53,21 @@ func _ready():
 	drone.volume_db = -60
 	drone.bus = "Overworld"
 	add_child(drone)
-	boss = Sprite2D.new()
-	boss.name = "TemporaryBoss4"
-	boss.texture = load("res://assets/player/player.png.png")
-	boss.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	boss.scale = Vector2.ONE*100/boss.texture.get_height()
+	boss = preload("res://scripts/incarna/rig.gd").new()
+	boss.name = "Incarna"
+	boss.preview_mode = true
+	boss.scale = Vector2.ONE*.12
 	boss.position = Blueprint.center(8)
 	add_child(boss)
 	var label := Label.new()
-	label.text = "BOSS 4 · TEMPORARY"
+	label.text = "INCARNA()"
 	label.name = "Boss4Label"
 	label.position = boss.position+Vector2(-88,-85)
 	label.add_theme_font_size_override("font_size",14)
 	add_child(label)
+	if Session.story_flags.get("incarna_defeated",false):
+		boss.hide()
+		label.hide()
 func _process(delta: float):
 	if not is_instance_valid(host) or host.get_node_or_null("Explorer") == null: return
 	var point: Vector2 = host.player.position
@@ -88,7 +90,7 @@ func _process(delta: float):
 		ambience.bed.volume_db = -28-28*gray
 		ambience.drip.volume_db = -28-28*gray
 		ambience.echo.volume_db = -32-28*gray
-	if current_room == 9 and not intro_started and not Session.busy and not host.checking_spawn and not Session.cave_event_active:
+	if current_room == 9 and not intro_started and not Session.story_flags.get("incarna_defeated",false) and not Session.busy and not host.checking_spawn and not Session.cave_event_active:
 		begin_intro()
 func _update_mask():
 	if not is_instance_valid(host) or host.get_node_or_null("Explorer") == null: return
@@ -136,13 +138,13 @@ func begin_intro():
 	move.tween_property(camera,"global_position",target,1.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	await move.finished
 	camera.force_update_scroll()
-	host.dialogue.start_lines([{"speaker":"Boss 4","text":"Welcome to the underground."}])
+	host.dialogue.start_lines([{"speaker":"Incarna","text":"Welcome to the underground."}])
 	await host.dialogue.finished
 	Session.cave_event_active = false
 	Session.return_position = Blueprint.SHORTCUT_JUNCTION+Vector2(0,160)
-	Session.encounter_id = "boss4_placeholder"
+	Session.encounter_id = "incarna"
 	Session.encounter_active = true
-	await Session.transition_to("res://scenes/cave/boss4_placeholder_host.tscn",true)
+	await Session.transition_to("res://scenes/incarna/combat_host.tscn",true)
 func modal_open() -> bool: return services != null and services.opened
 func _exit_tree():
 	Session.cave_event_active = false

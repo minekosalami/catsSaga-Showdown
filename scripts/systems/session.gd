@@ -315,7 +315,7 @@ func _freeze_entry_tree(node: Node, root_node: bool = true) -> void:
 		node.process_mode = Node.PROCESS_MODE_DISABLED
 	for child in node.get_children(): _freeze_entry_tree(child, false)
 
-func return_cave_placeholder() -> void:
+func return_to_cave() -> void:
 	if busy: return
 	encounter_active = false
 	area_id = "underground_cave"

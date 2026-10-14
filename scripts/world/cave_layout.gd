@@ -11,7 +11,7 @@ const ROOMS := [
 	{"id":6,"name":"Window grotto","slot":Vector2i(0,2),"rect":Rect2i(5,70,25,23),"shape":"lobe"},
 	{"id":7,"name":"Quiet hollow","slot":Vector2i(0,3),"rect":Rect2i(6,101,25,22),"shape":"split"},
 	{"id":8,"name":"Lower junction","slot":Vector2i(1,3),"rect":Rect2i(42,102,28,23),"shape":"shelter"},
-	{"id":9,"name":"Boss 4 approach","slot":Vector2i(3,3),"rect":Rect2i(117,100,67,25),"shape":"long"},
+	{"id":9,"name":"Incarna approach","slot":Vector2i(3,3),"rect":Rect2i(117,100,67,25),"shape":"long"},
 	{"id":10,"name":"Sealed colored chamber","slot":Vector2i(1,2),"rect":Rect2i(38,72,32,22),"shape":"lobe"},
 	{"id":11,"name":"Supply cache","slot":Vector2i(3,0),"rect":Rect2i(115,5,26,22),"shape":"split"},
 	{"id":12,"name":"Lantern market","slot":Vector2i(2,1),"rect":Rect2i(83,37,26,23),"shape":"shelter"},
