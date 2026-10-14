@@ -140,7 +140,7 @@ func run() -> void:
 	await probe("res://scenes/boss2/combat_host.tscn", "boss2")
 	await probe("res://scenes/blankkitten/combat_host.tscn", "blankkitten")
 	await probe("res://scenes/blankkitten/combat_host.tscn", "blankkitten", false)
-	await probe("res://scenes/cave/boss4_placeholder_host.tscn", "boss4_placeholder")
+	await probe("res://scenes/incarna/combat_host.tscn", "incarna")
 	await session.new_game()
 	var previous: Node = current_scene
 	var sprite: Sprite2D = previous.player.sprite
