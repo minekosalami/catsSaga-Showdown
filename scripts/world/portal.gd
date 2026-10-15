@@ -1,7 +1,8 @@
 extends Area2D
 
 signal travel_requested(destination: String, entry: String)
-@export_enum("entrance", "deep_forest", "bart_area", "flooded_forest") var destination: String = "entrance"
+# Region IDs also support Wonderland's baked scenes without a stale editor enum.
+@export var destination: String = "entrance"
 @export var entry: String = "FromDeep"
 @export var required_flag: String = ""
 

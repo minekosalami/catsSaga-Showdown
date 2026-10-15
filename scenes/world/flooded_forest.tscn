@@ -1,5 +1,7 @@
 [gd_scene format=4]
 
+[ext_resource type="Script" path="res://scripts/wonderland/flooded_entrance.gd" id="wonderland_entrance"]
+
 [ext_resource type="Script" path="res://scripts/world/area.gd" id="1_0hkon"]
 [ext_resource type="TileSet" path="res://resources/world/gfx_terrain.tres" id="2_h7hee"]
 [ext_resource type="TileSet" path="res://resources/world/forest_grass.tres" id="2_y1enp"]
@@ -857,3 +859,6 @@ metadata/facing_direction = Vector2(0, 1)
 
 [node name="CaveHole" parent="Characters" instance=ExtResource("cave_hole")]
 position = Vector2(1696, 1008)
+
+[node name="WonderlandEntrance" type="Node2D" parent="."]
+script = ExtResource("wonderland_entrance")

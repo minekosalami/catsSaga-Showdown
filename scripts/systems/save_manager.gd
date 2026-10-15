@@ -10,7 +10,10 @@ func validate(value: Variant) -> Dictionary:
 		return {}
 	var area: Variant = value.get("area")
 	var position: Variant = value.get("position")
-	if not area is String or not AREA_SIZES.has(area) or not position is Array or position.size() != 2:
+	var area_sizes := AREA_SIZES.duplicate()
+	var extra_areas: Dictionary = preload("res://scripts/wonderland/layout.gd").regions()
+	for id in extra_areas: area_sizes[id] = Vector2(extra_areas[id].size)*16
+	if not area is String or not area_sizes.has(area) or not position is Array or position.size() != 2:
 		return {}
 	for coordinate in position:
 		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)):
@@ -61,7 +64,7 @@ func validate(value: Variant) -> Dictionary:
 			point = preload("res://scripts/world/cave_layout.gd").ENTRY
 			flags["underground_cave_discovered"] = true
 		flags["cave_settlement_layout_v3"] = true
-	var bounds: Vector2 = AREA_SIZES[area]
+	var bounds: Vector2 = area_sizes[area]
 	if point.x < 44 or point.y < 44 or point.x > bounds.x - 44 or point.y > bounds.y - 44: return {}
 	# Version-one saves retain every unrelated flag; old Bart victories earn the key.
 	defeated = defeated or legacy_bart or flags.get("bart_defeated", false)

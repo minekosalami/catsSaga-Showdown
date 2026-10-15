@@ -5,7 +5,25 @@ const MAPS := {
 	"deep_forest": preload("res://scenes/world/deep_forest.tscn"),
 	"bart_area": preload("res://scenes/world/bart_area.tscn"),
 	"flooded_forest": preload("res://scenes/world/flooded_forest.tscn"),
-	"underground_cave": preload("res://scenes/world/underground_cave.tscn")
+	"underground_cave": preload("res://scenes/world/underground_cave.tscn"),
+	"wonderland_forest": preload("res://scenes/wonderland/wonderland_forest.tscn"),
+	"tea_gardens": preload("res://scenes/wonderland/tea_gardens.tscn"),
+	"mushroom_thicket": preload("res://scenes/wonderland/mushroom_thicket.tscn"),
+	"royal_woods": preload("res://scenes/wonderland/royal_woods.tscn"),
+	"wonderland_village": preload("res://scenes/wonderland/wonderland_village.tscn"),
+	"queens_castle": preload("res://scenes/wonderland/queens_castle.tscn"),
+	"castle_hall": preload("res://scenes/wonderland/castle_hall.tscn"),
+	"royal_library": preload("res://scenes/wonderland/royal_library.tscn"),
+	"banquet_hall": preload("res://scenes/wonderland/banquet_hall.tscn"),
+	"throne_room": preload("res://scenes/wonderland/throne_room.tscn"),
+	"mushroom_cottage": preload("res://scenes/wonderland/mushroom_cottage.tscn"),
+	"teapot_house": preload("res://scenes/wonderland/teapot_house.tscn"),
+	"flower_shop": preload("res://scenes/wonderland/flower_shop.tscn"),
+	"clockmakers_house": preload("res://scenes/wonderland/clockmakers_house.tscn"),
+	"bakery": preload("res://scenes/wonderland/bakery.tscn"),
+	"royal_gift_shop": preload("res://scenes/wonderland/royal_gift_shop.tscn"),
+	"storytellers_cottage": preload("res://scenes/wonderland/storytellers_cottage.tscn"),
+	"tiny_pink_house": preload("res://scenes/wonderland/tiny_pink_house.tscn")
 }
 var map: Node2D
 var player: CharacterBody2D
@@ -35,6 +53,13 @@ func _ready() -> void:
 	camera.limit_top = 0
 	camera.limit_right = int(map.map_size.x)
 	camera.limit_bottom = int(map.map_size.y)
+	if map.has_meta("camera_focus"): camera.position = map.get_meta("camera_focus")
+	if map.has_meta("camera_bounds"):
+		var bounds: Rect2 = map.get_meta("camera_bounds")
+		camera.limit_left = int(bounds.position.x)
+		camera.limit_top = int(bounds.position.y)
+		camera.limit_right = int(bounds.end.x)
+		camera.limit_bottom = int(bounds.end.y)
 	camera.reset_smoothing()
 	camera.make_current()
 	dialogue = preload("res://scenes/world/dialogue.tscn").instantiate()
@@ -97,6 +122,9 @@ func _build_hud() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	if preload("res://scripts/wonderland/layout.gd").regions().has(Session.area_id):
+		root.theme.set_color("font_outline_color","Label",Color("#283340"))
+		root.theme.set_constant("outline_size","Label",4)
 	var margin := MarginContainer.new()
 	root.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
