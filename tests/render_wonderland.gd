@@ -40,7 +40,7 @@ func run() -> void:
 		await session.travel(id,marker)
 		var point: Vector2 = {"wonderland_forest":Vector2(1280,1120),"tea_gardens":Vector2(1280,1000),"mushroom_thicket":Vector2(1320,1000),"royal_woods":Vector2(3070,650),"wonderland_village":Vector2(1920,1220),"queens_castle":Vector2(1280,920)}[id]
 		await capture(id,point)
-		if id == "wonderland_forest": await capture("great-tree",Vector2(1100,880))
+		if id == "wonderland_forest": await capture("great-tree",Vector2(1100,760))
 		if id == "tea_gardens":
 			await capture("giant-teapot",Vector2(760,1500))
 			await capture("giant-teacup",Vector2(1720,1550))

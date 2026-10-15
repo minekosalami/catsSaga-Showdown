@@ -61,63 +61,70 @@ bounds are 1280×960 with framed room walls, furnishings and working passages.
 
 ## Art and editing
 
-The supplied **Fan-tasy free trial** provides the matching 16px grass/path atlas,
-trees, bushes, houses and animated flower clusters. `mushroom_houses.png` provides
-the mushroom cottage. Existing GFX trees frame the Flooded Forest passage, and
-the cave's existing closed/open chest textures are reused. Original pixel-grid
-ornaments provide tea settings, giant crockery, twisting landmark tree, castle,
-furniture and the pink key. All source PNGs and soundtracks are unchanged.
+Wonderland now uses only the credited **Kenney Roguelike RPG, Indoor, Cave &
+Dungeons and 1-Bit** source sheets. All previous AI-authored ornament drawing,
+embedded grass/floor pixels, decorative polygons and bespoke roof/foliage shaders
+are removed. The source PNGs are unchanged. Original user-supplied packs remain
+in the repository but are no longer referenced by Wonderland's art, entrance or
+reward chest. See [the before-edit audit](wonderland-art-audit.md) and
+[artist credits, license notices and provenance evidence](wonderland-asset-credits.md).
 
-The art uses nearest filtering, shared foliage palettes, selective roof palettes,
-trunk collision, foot shadows, layered canopies and native atlas arrangements.
-One ambience controller updates visible flowers, clocks, mushrooms and fountains;
-it also draws butterflies, steam and chimney smoke. Leaves sway in a shared shader.
-No restricted TopDownFantasy-Forest assets are referenced. The supplied isometric
-library and Halloween sheets were left unused because their perspective/mood does
-not fit. Bundled guides were inspected; no AI-use restriction was found in these
-used assets. Usage relies on the user's supplied assets and license confirmation.
+The compatible 16px human atlas artwork supplies grass, connected sand paths,
+foliage, mushrooms, flowers, masonry, roofs, complete door arches, furniture,
+crockery, chest/rocks and key. Ordinary level composition repeats human wall and
+table tiles; it does not draw replacement pixels. Shared nearest filtering and
+integer display scales keep edges crisp. Landmark teapot, cup and tree magnify
+native human art and intentionally have larger pixels. Human plants sway gently;
+fountain artwork receives a subtle tint animation. The previous drawn butterflies
+and steam have been removed rather than replaced with generated effects.
 
-Edit `scenes/wonderland/*.tscn` directly in Godot. Ground and GardenPaths are
+Edit `scenes/wonderland/*.tscn` directly in Godot. Ground and GardenPaths remain
 editable TileMapLayers, with shared TileSets in `resources/wonderland/`. Select
-GardenPaths → Terrain → Garden path for connected edge/corner painting. Original
-ornaments preview in the editor; their kind, accent, variation and transform are
-editable in the Inspector. Move complete sprites rather than splitting atlas art.
+GardenPaths → Terrain → Garden path for edge painting. `ornament.gd` previews
+human atlas compositions in the editor; kind, variation, footprint, accent and
+transform remain editable. Keep complete native sprite arrangements intact.
 
-`scripts/wonderland/layout.gd` owns region dimensions, seams and progress names;
-`builder.gd` records deterministic authoring. `tools/bake_wonderland.gd` refuses to
-overwrite existing scenes unless explicitly run with `-- --rebuild`. That command
-replaces authored Wonderland scenes: preserve manual scene edits before using it.
-It also rebuilds Wonderland/interior cartography. Run `tools/bake_world_map.gd`
-after changing the Flooded Forest entrance or legacy forest geometry.
-After manually editing Wonderland scenes, refresh their map textures safely with
-`godot --headless --path . --script tools/bake_wonderland.gd -- --maps-only`;
-this mode reads the edited scenes and leaves them untouched. Ground source 1
-contains the four opaque grass variants; paint atlas transition/decorative grass
-on an additional layer above that base.
+`scripts/wonderland/layout.gd` still owns dimensions, seams and progression names.
+The initial authoring tool remains available, with human-only visuals, but this
+replacement did **not** run its world generator. `tools/replace_wonderland_art.gd`
+is a guarded visual migration, not a map rebuilding tool. Do not use `--rebuild`
+after hand-editing scenes: it intentionally replaces authored scene layouts.
+
+Cartography now captures actual scene artwork into the existing atlas bounds,
+replacing the earlier painted background/prop symbols. Refresh it with a graphical
+Godot invocation, for example on this environment's display:
+
+```sh
+DISPLAY=:102 LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --audio-driver Dummy --script tools/bake_wonderland.gd -- --maps-only
+```
+
+This mode reads existing scenes and leaves them untouched. A headless dummy
+renderer cannot capture images; the tool reports that limitation without writing
+replacement maps. Existing fog coordinates, region grouping and save data are
+unchanged.
 
 ## Verification
 
-Godot 4.6.3 headless import and the focused Wonderland suite pass. The suite checks
-real collision/route connectivity, physically driven doorway crossings in both
-directions, valid Incarna completion without an automatic key, chest acquisition,
-physical cave backtracking, the boundary door, eight building returns, interior
-position/fog save-load round trips, outdoor fog persistence, inventory/map/pause,
-default castle collision/lock, debug access and the future persistent unlock API.
+The human-art replacement passed Godot 4.6.3 import and **163 focused gameplay
+checks**. These exercise actual doorway crossing, all outdoor links both ways,
+all eight building returns, normal castle locking/debug access, chest/key
+progression, cave backtracking, inventory/map/pause, and position/fog save-load.
 
-Existing gameplay, Boss 2, BlankKitten, Incarna, cave, save/UI, forest and cartography
-regressions pass. Earlier boss/player scripts, music, dialogue and cave geometry
-were compared against the starting revision and remain unchanged.
+**87 art and structure checks** verify unchanged collision shapes/transforms,
+spawn markers, portal destinations, map dimensions and occupied floor/path cells
+against the pre-replacement `c5e8815` snapshot for all 18 scenes. They also verify
+all source/licensing file hashes and reject the former generated pixel routines
+or embedded floor images. No gameplay/progression, region, boss, player, save or
+fog scripts were changed by the art replacement.
 
-Rendered verification uses the actual project with Xorg and Mesa software OpenGL,
-not mockups. Every outdoor map, eight building exteriors, twelve interiors, both
-pink-door states, the in-game map and the cave chest were captured and inspected.
-Iterations corrected transparent grass-base misuse, roof palette artifacts,
-castle framing, overly empty planting, room walls/furnishing and chest appearance.
-The geographic review map temporarily uses the existing terrain reveal mode;
-normal fog persistence and isolation are verified separately. Short stationary
-samples of four outdoor maps ran approximately 59–60 FPS with a 60 FPS cap under
-software rendering after native flower batching. This is not a hardware benchmark
-or a guarantee for every camera position.
+Existing gameplay, Incarna, cave, save/UI, forest and cartography regression suites
+pass. Rendered verification uses Xorg/Mesa software OpenGL and dummy audio. All
+six outdoor maps, eight building exteriors, twelve interiors, both entrance states,
+the chest and geographic map are captured with `tests/render_wonderland.gd`.
+Actual rendered inspection corrected atlas offsets, path seams, roof gaps,
+truncated arches, table/bed arrangements, overlapping facade windows and flag
+placement. The review overview temporarily uses the existing reveal mode; normal
+fog and its persistence are checked independently.
 
 - [Outdoor environments and map](review/wonderland/outdoors.png)
 - [All eight building exteriors](review/wonderland/houses.png)
@@ -128,11 +135,13 @@ or a guarantee for every camera position.
 - [Landmark tree](review/wonderland/great-tree.png)
 - [Giant teapot](review/wonderland/giant-teapot.png) and [teacup](review/wonderland/giant-teacup.png)
 
-Run `godot --headless --path . --script tests/headless_wonderland.gd` for functional
-checks. `tests/render_wonderland.gd` requires a graphical display and stores captures
-outside the repository. Tests use separate validation saves, never the normal slot.
+Run `godot --headless --path . --script tests/headless_wonderland.gd` for gameplay
+checks, and `tests/headless_wonderland_art.gd` for the provenance/structure checks.
+`tests/render_wonderland.gd` requires a graphical display and writes captures
+outside the repository. Tests use isolated validation saves.
+
 Some existing suites retain ObjectDB shutdown warnings; software rendering reports
-unsupported VSync. Human review is still needed for artistic preference, extended
-free exploration, animation feel, alternate hardware and controller/display setups.
-The overworld retains Shift sprint; its existing controller has no separate focus
-binding. Existing battle focus behavior and the 540×900 earlier arenas are unchanged.
+unsupported VSync. Human review remains necessary for artistic preference, longer
+free exploration, animation feel and other hardware/display setups. Giant props
+use enlarged low-resolution human sprites rather than newly illustrated high-detail
+art. The overworld retains its existing controls and battle resolutions.
