@@ -20,13 +20,13 @@ func _ready() -> void:
 			tree.queue_free()
 	var path := TileMapLayer.new()
 	path.name = "WonderlandSpur"
-	path.tile_set = load("res://resources/world/gfx_terrain.tres")
+	path.tile_set = load("res://resources/wonderland/road.tres")
 	path.z_index = -3
 	add_child(path)
 	for y in range(1,40):
 		for x in range(105,200):
 			if distance_to_route(Vector2(x*16+8,y*16+8)) < 42:
-				path.set_cell(Vector2i(x,y),0,Vector2i(1,30))
+				path.set_cell(Vector2i(x,y),0,Vector2i(8,22))
 	var builder := preload("res://scripts/wonderland/builder.gd").new()
 	# Pink plants announce the destination; the arch joins the actual northern border.
 	for offset in [Vector2(-135,30),Vector2(135,30),Vector2(-85,180),Vector2(90,180)]:
@@ -40,27 +40,19 @@ func _ready() -> void:
 		var root := Node2D.new()
 		root.position = Plan.FLOODED_DOOR+Vector2(side*145,0)
 		add_child(root)
-		var sprite := Sprite2D.new()
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		sprite.texture = load("res://assets/enironment/gfx/objects.png")
-		# Existing complete leafy tree frame; preserve its 32×32 atlas arrangement.
-		var texture := AtlasTexture.new()
-		texture.atlas = sprite.texture
-		texture.region = Rect2(192,192,32,32)
-		sprite.texture = texture
-		sprite.scale = Vector2.ONE*4
-		sprite.position.y = -54
+		var sprite := preload("res://scripts/wonderland/ornament.gd").new()
+		sprite.kind = "grove"
+		sprite.scale = Vector2.ONE*2
 		root.add_child(sprite)
 		builder.solid(root,Vector2(48,34),Vector2(0,-8))
 		# A continuous thicket connects the doorway to the actual northern boundary.
 		# The transition lies at the edge beyond the arch, never in the open clearing.
 		builder.solid(self,Vector2(56,248),Vector2(Plan.FLOODED_DOOR.x+side*98,124))
 		for y in [64,128]:
-			var canopy := Sprite2D.new()
-			canopy.texture = sprite.texture
-			canopy.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			canopy.scale = Vector2.ONE*4
-			canopy.position = Vector2(Plan.FLOODED_DOOR.x+side*145,y-54)
+			var canopy := preload("res://scripts/wonderland/ornament.gd").new()
+			canopy.kind = "grove"
+			canopy.scale = Vector2.ONE*2
+			canopy.position = Vector2(Plan.FLOODED_DOOR.x+side*145,y)
 			add_child(canopy)
 	var marker := Marker2D.new()
 	marker.name = "FromWonderland"

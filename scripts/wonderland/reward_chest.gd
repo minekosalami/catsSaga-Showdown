@@ -1,6 +1,6 @@
 extends "res://scripts/world/npc.gd"
 const Plan = preload("res://scripts/wonderland/layout.gd")
-const Art = preload("res://scripts/world/cave_assets.gd")
+const Art = preload("res://scripts/wonderland/asset_catalog.gd")
 var picture: Sprite2D
 var key: Node2D
 var barrier: Node2D
@@ -11,11 +11,11 @@ func _ready() -> void:
 	interaction_radius = 100
 	set_meta("interaction_label","Z  OPEN CHEST")
 	picture = Sprite2D.new()
-	closed_texture = Art.texture("save_chest")
-	open_texture = Art.texture("chest")
+	closed_texture = Art.texture("chest_closed")
+	open_texture = Art.texture("chest_open")
 	picture.texture = closed_texture
 	picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	picture.scale = Vector2.ONE*2
+	picture.scale = Vector2.ONE*4
 	picture.position.y = -24
 	picture.modulate = Color("#efabd0")
 	add_child(picture)
@@ -33,9 +33,9 @@ func _ready() -> void:
 	builder.solid(barrier,Vector2(32,960))
 	for i in range(-7,8):
 		var stone := Sprite2D.new()
-		stone.texture = Art.texture("boulder")
+		stone.texture = Art.texture("rock")
 		stone.position.y = i*64
-		stone.scale = Vector2.ONE*2
+		stone.scale = Vector2.ONE*4
 		barrier.add_child(stone)
 	_process(0)
 func can_interact() -> bool:

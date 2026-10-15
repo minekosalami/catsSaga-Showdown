@@ -1,0 +1,51 @@
+{
+  "archive": "https://github.com/ETdoFresh/kenney.nl",
+  "revision": "45df48c4d45f8716216b1a9e22df0b69cd9f5932",
+  "archive_committed_date": "2020-07-17T00:04:24-05:00",
+  "files": {
+    "rpg/roguelikeSheet_transparent.png": {
+      "sha256": "808c8d734480bc949b284f3bcc252e87e1ee53b24178791a6838cce6a319c439",
+      "source_path": "roguelike-pack/Spritesheet/roguelikeSheet_transparent.png"
+    },
+    "rpg/License.txt": {
+      "sha256": "5bd31fafb2a38f879b5a95eceb52f850c59320b5616f81da028b8d22f47e4d7b",
+      "source_path": "roguelike-pack/License.txt"
+    },
+    "rpg/spritesheetInfo.txt": {
+      "sha256": "74893b8dd6d2aa417f3481caabe0342994dc811019b161c8f4da9b8810aeddec",
+      "source_path": "roguelike-pack/Spritesheet/spritesheetInfo.txt"
+    },
+    "indoor/roguelikeIndoor_transparent.png": {
+      "sha256": "3520e30f00bde8391c9931b6751ec34af8144780b98de98b1068b3e6cbc5867d",
+      "source_path": "roguelikeindoor_updated/Tilesheets/roguelikeIndoor_transparent.png"
+    },
+    "indoor/License.txt": {
+      "sha256": "597285fb5463f1b3ed4c848bbdbcb2c73ebb1e12072efb97cd3b0a1d8c4be230",
+      "source_path": "roguelikeindoor_updated/License.txt"
+    },
+    "indoor/tilesheetInfo.txt": {
+      "sha256": "74893b8dd6d2aa417f3481caabe0342994dc811019b161c8f4da9b8810aeddec",
+      "source_path": "roguelikeindoor_updated/Tilesheets/tilesheetInfo.txt"
+    },
+    "dungeon/roguelikeDungeon_transparent.png": {
+      "sha256": "3abd8d294c523fe78078e2123146a2b9d2c0f2dd3cfbbd60dec8f508c3fe8c2c",
+      "source_path": "roguelike-cave-pack/Spritesheet/roguelikeDungeon_transparent.png"
+    },
+    "dungeon/License.txt": {
+      "sha256": "ecf7885d4f7058589addf03ef952b108a83e7eb1d7a6b07b9ee75d291833e624",
+      "source_path": "roguelike-cave-pack/License.txt"
+    },
+    "dungeon/spritesheetInfo.txt": {
+      "sha256": "74893b8dd6d2aa417f3481caabe0342994dc811019b161c8f4da9b8810aeddec",
+      "source_path": "roguelike-cave-pack/Spritesheet/spritesheetInfo.txt"
+    },
+    "onebit/monochrome_transparent_packed.png": {
+      "sha256": "7ae14f24dc1195d1e9760a9028b63bafeacd6b06b9123d77e05d4f724866d677",
+      "source_path": "1bitpack_kenney_1.1/Tilesheet/monochrome_transparent_packed.png"
+    },
+    "onebit/License.txt": {
+      "sha256": "ecb50277ad7df30022cbea18a22fe485b025f89f2a35dceb29213fdc3306c9a0",
+      "source_path": "1bitpack_kenney_1.1/License.txt"
+    }
+  }
+}

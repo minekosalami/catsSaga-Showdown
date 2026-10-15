@@ -1,8 +1,6 @@
 extends RefCounted
 ## Deterministic authoring tool. Playable maps are baked scenes, not regenerated on entry.
 const Plan = preload("res://scripts/wonderland/layout.gd")
-const PACK := "res://assets/enironment/wonderland/The Fan-tasy Tileset (Free) 1.5.7/The Fan-tasy Tileset (Free)/"
-const ART := PACK+"Art/"
 const Ornament = preload("res://scripts/wonderland/ornament.gd")
 var rng := RandomNumberGenerator.new()
 var map: Node2D
@@ -15,80 +13,9 @@ var ground: TileMapLayer
 var road: TileMapLayer
 
 func setup_tiles() -> void:
+	# Load licensed human-art resources. Never synthesize replacement pixels.
 	for kind in ["grass","road","wood","marble"]:
-		var path: String = "res://resources/wonderland/"+kind+".tres"
-		if ResourceLoader.exists(path):
-			tiles[kind] = load(path)
-			continue
-		var set := TileSet.new()
-		set.tile_size = Vector2i(16,16)
-		var source := TileSetAtlasSource.new()
-		source.texture_region_size = Vector2i(16,16)
-		if kind == "grass":
-			source.texture = load(ART+"Ground Tileset/Tileset_Ground.png")
-			for y in range(4):
-				for x in range(8): source.create_tile(Vector2i(x,y))
-		elif kind == "road":
-			source.texture = load(ART+"Ground Tileset/Tileset_Road.png")
-			set.add_terrain_set()
-			set.set_terrain_set_mode(0,TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES)
-			set.add_terrain(0)
-			set.set_terrain_name(0,0,"Garden path")
-			set.set_terrain_color(0,0,Color("#dec38e"))
-			var xml := XMLParser.new()
-			xml.open(PACK+"Tiled/Tilesets/Tilesets_Road.tsx")
-			var neighbors := [TileSet.CELL_NEIGHBOR_TOP_SIDE,TileSet.CELL_NEIGHBOR_TOP_RIGHT_CORNER,TileSet.CELL_NEIGHBOR_RIGHT_SIDE,TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER,TileSet.CELL_NEIGHBOR_BOTTOM_SIDE,TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_CORNER,TileSet.CELL_NEIGHBOR_LEFT_SIDE,TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER]
-			while xml.read() == OK:
-				if xml.get_node_type() != XMLParser.NODE_ELEMENT or xml.get_node_name() != "wangtile": continue
-				var id := int(xml.get_named_attribute_value("tileid"))
-				var coordinate := Vector2i(id%6,id/6)
-				source.create_tile(coordinate)
-				var data := source.get_tile_data(coordinate,0)
-				data.terrain_set = 0
-				data.terrain = 0
-				var bits := xml.get_named_attribute_value("wangid").split(",")
-				for i in range(8): data.set_terrain_peering_bit(neighbors[i],0 if bits[i] == "1" else -1)
-		else:
-			# Original 16px seamless wood/marble tiles share the environment pixel scale.
-			var image := Image.create(16,16,false,Image.FORMAT_RGBA8)
-			image.fill(Color("#d3a17c") if kind == "wood" else Color("#f3e4d0"))
-			for x in range(16):
-				image.set_pixel(x,15,Color("#ab795f") if kind == "wood" else Color("#d8c5c9"))
-				if kind == "wood": image.set_pixel(x,7,Color("#bd8b6d"))
-			for y in range(16):
-				if kind == "wood":
-					image.set_pixel(0 if y<8 else 8,y,Color("#ab795f"))
-				else:
-					image.set_pixel(15,y,Color("#d8c5c9"))
-					if y%4 == 0: image.set_pixel((y/2+3)%14,y,Color("#e4d4d1"))
-			source.texture = ImageTexture.create_from_image(image)
-			source.create_tile(Vector2i.ZERO)
-		set.add_source(source,0)
-		tiles[kind] = set
-		ResourceSaver.save(set,path)
-	# Full opaque, seamlessly repeating grass details; atlas transition cells are never
-	# used as a base. The original source sheets remain untouched.
-	var grass: TileSet = tiles.grass
-	if not grass.has_source(1):
-		var image := Image.create(64,16,false,Image.FORMAT_RGBA8)
-		image.fill(Color("#95d982"))
-		for v in range(4):
-			for i in range(8):
-				var x := v*16+(i*7+v*3)%14+1
-				var y := (i*11+v*5)%13+1
-				image.set_pixel(x,y,Color("#87cd7d"))
-				image.set_pixel(x+1,y+1,Color("#8fd37e"))
-				if i%3 == 0: image.set_pixel(x,y-1,Color("#b1e296"))
-		var detail := TileSetAtlasSource.new()
-		detail.texture = ImageTexture.create_from_image(image)
-		for x in range(4): detail.create_tile(Vector2i(x,0))
-		grass.add_source(detail,1)
-		ResourceSaver.save(grass,"res://resources/wonderland/grass.tres")
-	for colors in [["#224f58","#3eae83","#b9e9a6"],["#4a3e71","#b775c5","#f2b3df"],["#294d69","#4eb7bf","#abefdb"],["#654774","#dc7aa6","#ffd8c0"]]:
-		var material := ShaderMaterial.new()
-		material.shader = preload("res://shaders/wonderland_foliage.gdshader")
-		for i in range(3): material.set_shader_parameter(["shade","leaf","light_leaf"][i],Color(colors[i]))
-		palette.append(material)
+		tiles[kind] = load("res://resources/wonderland/"+kind+".tres")
 
 func owner_tree(node: Node, root_node: Node) -> void:
 	for child in node.get_children():
@@ -136,32 +63,19 @@ func sprite(kind: String, point: Vector2, tint := 0) -> Node2D:
 	root.position = point
 	root.name = kind.to_pascal_case()+str(map.get_child_count())
 	map.add_child(root)
-	var node := Sprite2D.new()
-	root.add_child(node)
-	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	node.scale = Vector2.ONE*2
-	var file := "Trees and Bushes/Tree_Emerald_"+str(tint%4+1)+".png"
-	if kind == "bush": file = "Trees and Bushes/Bush_Emerald_"+str(tint%3+1)+".png"
+	var art := Ornament.new()
+	art.kind = "house" if kind.begins_with("house") else kind
+	art.scale = Vector2.ONE*2
+	art.variant = tint
+	root.add_child(art)
 	if kind.begins_with("house"):
-		file = "Buildings/House_Hay_"+kind.right(1)+( "_Purple" if kind == "house4" else "")+".png"
-	node.texture = load(ART+file)
-	var height := node.texture.get_height()
-	node.position.y = -height+8
-	var shadow := Polygon2D.new()
-	var ring := PackedVector2Array()
-	for i in range(20): ring.append(Vector2.RIGHT.rotated(i*TAU/20)*Vector2(node.texture.get_width()*.7,10)+Vector2(0,5))
-	shadow.polygon = ring
-	shadow.color = Color(.12,.26,.28,.17)
-	shadow.z_index = -2
-	root.add_child(shadow)
-	if kind.begins_with("house"):
+		var dimensions: Vector2 = {"house1":Vector2(88,103),"house2":Vector2(157,112),"house3":Vector2(180,128),"house4":Vector2(128,128)}[kind]
 		var door_x: float = {"house1":44,"house2":113,"house3":149,"house4":106}[kind]
-		node.position.x = node.texture.get_width()-door_x*2
-		solid(root,Vector2(node.texture.get_width()*1.75,82),Vector2(node.position.x,-49))
-		reserved.append(Rect2(point+Vector2(node.position.x-node.texture.get_width()-40,-height*2-30),Vector2(node.texture.get_width()*2+80,height*2+160)))
-	else:
-		node.material = palette[tint%4]
-		if kind == "tree": solid(root,Vector2(24,20),Vector2(0,-5))
+		art.footprint = dimensions
+		art.visual_offset.x = (dimensions.x-door_x*2)/2
+		solid(root,Vector2(dimensions.x*1.75,82),Vector2(art.visual_offset.x*2,-49))
+		reserved.append(Rect2(point+Vector2(art.visual_offset.x*2-dimensions.x-40,-dimensions.y*2-30),Vector2(dimensions.x*2+80,dimensions.y*2+160)))
+	elif kind == "tree": solid(root,Vector2(24,20),Vector2(0,-5))
 	root.set_meta("map_color",Color("#be89ca") if tint%2 else Color("#61af9c"))
 	return root
 
@@ -336,7 +250,7 @@ func outdoor(id: String) -> void:
 	var path_cells: Array[Vector2i] = []
 	for y in cells.y:
 		for x in cells.x:
-			ground.set_cell(Vector2i(x,y),1,Vector2i(rng.randi_range(0,3),0))
+			ground.set_cell(Vector2i(x,y),0,Vector2i(5,0))
 			if path_distance(Vector2(x*32+16,y*32+16)) < (104 if id == "wonderland_village" else 79): path_cells.append(Vector2i(x,y))
 	road.set_cells_terrain_connect(path_cells,0,0,false)
 	forest(id)
@@ -397,33 +311,20 @@ func boundaries(links: Array[Dictionary]) -> void:
 				var size := Vector2(end-before,32) if side in ["north","south"] else Vector2(32,end-before)
 				var body := solid(map,size,point)
 				if not Plan.OUTDOORS.has(map.region_id):
-					var wall := Polygon2D.new()
-					wall.polygon = PackedVector2Array([-size/2,Vector2(size.x/2,-size.y/2),size/2,Vector2(-size.x/2,size.y/2)])
-					wall.color = Color("#9f789c")
+					var wall := Ornament.new()
+					wall.kind = "wall"
+					wall.footprint = size
+					wall.visual_offset = -size/2
 					body.add_child(wall)
 			before = opening+96
 
 func build_house(building: Dictionary) -> void:
 	var p: Vector2 = building.point
 	if building.kind.begins_with("house"):
-		var house := sprite(building.kind,p)
-		var material := ShaderMaterial.new()
-		material.shader = preload("res://shaders/wonderland_roof.gdshader")
-		material.set_shader_parameter("roof_color",building.color)
-		material.set_shader_parameter("roof_end",.72 if building.kind in ["house1","house3"] else .64)
-		house.get_child(0).material = material
+		sprite(building.kind,p)
 	elif building.kind == "mushroom_house":
-		var node := Node2D.new()
-		node.position = p
-		map.add_child(node)
-		var picture := Sprite2D.new()
-		picture.texture = AtlasTexture.new()
-		picture.texture.atlas = load("res://assets/enironment/wonderland/mushroom_houses.png")
-		picture.texture.region = Rect2(63,0,63,63)
-		picture.scale = Vector2.ONE*2
-		picture.position.y = -57
-		node.add_child(picture)
-		solid(node,Vector2(100,52),Vector2(0,-31))
+		ornament("mushroom_house",p,building.color)
+		solid(map,Vector2(100,52),p+Vector2(0,-31))
 		reserved.append(Rect2(p+Vector2(-100,-150),Vector2(200,280)))
 	else:
 		ornament(building.kind,p,building.color,Vector2(150,64))
@@ -447,9 +348,9 @@ func garden_bed(point: Vector2,color: Color) -> void:
 func interior(id: String) -> void:
 	var castle := Plan.CASTLE_ROOMS.has(id)
 	map.set_meta("camera_bounds",Rect2(0,120,1280,720))
-	var backdrop := Polygon2D.new()
-	backdrop.polygon = PackedVector2Array([Vector2.ZERO,Vector2(1280,0),Vector2(1280,960),Vector2(0,960)])
-	backdrop.color = Color("#554968")
+	var backdrop := Ornament.new()
+	backdrop.kind = "wall_background"
+	backdrop.footprint = Vector2(1280,960)
 	backdrop.z_index = -12
 	map.add_child(backdrop)
 	ground = layer("Ground","marble" if castle else "wood",-8)
@@ -573,15 +474,11 @@ func room_walls(links: Array[Dictionary], accent: Color, castle: bool) -> void:
 				var position := Vector2((before+finish)*.5,224 if side == "north" else 848) if horizontal else Vector2(144 if side == "west" else 1136,(before+finish)*.5)
 				var size := Vector2(finish-before,32) if horizontal else Vector2(32,finish-before)
 				var body := solid(map,size,position)
-				var panel := Polygon2D.new()
+				var panel := Ornament.new()
+				panel.kind = "wall"
 				var visual := Rect2(-size/2,size)
 				if side == "north": visual = Rect2(-size.x/2,-96,size.x,112)
-				panel.polygon = PackedVector2Array([visual.position,Vector2(visual.end.x,visual.position.y),visual.end,Vector2(visual.position.x,visual.end.y)])
-				panel.color = accent.lightened(.3)
+				panel.footprint = visual.size
+				panel.visual_offset = visual.position
 				body.add_child(panel)
-				var trim := Line2D.new()
-				trim.points = PackedVector2Array([Vector2(-size.x/2,-size.y/2),Vector2(size.x/2,-size.y/2)])
-				trim.width = 4
-				trim.default_color = Color("#f9e9c6")
-				body.add_child(trim)
 			before = opening+80
