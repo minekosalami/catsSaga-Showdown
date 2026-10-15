@@ -179,6 +179,7 @@ func run():
 		var center: Vector2 = camera.get_screen_center_position()
 		check(world.player.position.x-32 > center.x-view.x*.5 and world.player.position.x < center.x-view.x*.25 and world.map.boss.position.x > center.x+view.x*.25 and camera.zoom == Vector2.ONE*setting.zoom,"camera shows both characters at opposite edges without changing zoom at "+str(setting))
 		check(world.map.boss.position.x < Plan.room(9).rect.end.x*32-64,"Incarna remains within long room")
+		check(world.map.boss.position.x < preload("res://scripts/wonderland/layout.gd").CHEST.x-100,"reward chest remains physically behind Incarna at "+str(setting))
 		await capture("intro-"+str(setting.size.x))
 		world.dialogue.advance()
 		while session.busy or current_scene == world: await process_frame

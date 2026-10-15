@@ -62,13 +62,16 @@ func run() -> void:
 			var color := average_tile(ground,cell)*ground.modulate*map.modulate
 			atlas.set_pixelv(offset+cell,color)
 		var layers := map.get_children().filter(func(node: Node): return node is TileMapLayer and node != ground)
+		var wonderland := map.get_node_or_null("WonderlandEntrance")
+		if wonderland != null:
+			layers.append_array(wonderland.get_children().filter(func(node: Node): return node is TileMapLayer))
 		layers.sort_custom(func(a: Node, b: Node): return a.z_index < b.z_index)
 		for layer in layers:
 			if layer.name == "GFXForestFloor":
 				for cell in layer.get_used_cells():
 					var current := atlas.get_pixelv(offset+cell)
 					atlas.set_pixelv(offset+cell,current.lerp(average_tile(layer,cell)*map.modulate,layer.modulate.a))
-			elif layer.name.contains("Water") or layer.name in ["Paths","WindingTrails"]:
+			elif layer.name.contains("Water") or layer.name in ["Paths","WindingTrails","WonderlandSpur"]:
 				for cell in layer.get_used_cells():
 					var color := Color("#3785a6") if layer.name.contains("Water") else average_tile(layer,cell)*map.modulate
 					atlas.set_pixelv(offset+cell,color)
@@ -80,7 +83,7 @@ func run() -> void:
 					var color := Color("#344e35") if layer.name.begins_with("GFXTrees") else Color("#847d68")
 					ellipse(layer.map_to_local(cell)*layer.scale/16.0,extent*0.45,offset,color,size)
 		for tree in get_nodes_in_group("world_trees"):
-			if not map.is_ancestor_of(tree): continue
+			if not map.is_ancestor_of(tree) or tree.is_queued_for_deletion(): continue
 			var sprite: Sprite2D = tree.get_node("Sprite2D")
 			var extent := sprite.texture.get_size()*sprite.scale/16.0
 			var center: Vector2 = (tree.global_position+sprite.position)/16.0+extent/2

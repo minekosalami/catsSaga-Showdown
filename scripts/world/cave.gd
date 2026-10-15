@@ -68,6 +68,10 @@ func _ready():
 	if Session.story_flags.get("incarna_defeated",false):
 		boss.hide()
 		label.hide()
+	var chest := preload("res://scripts/wonderland/reward_chest.gd").new()
+	chest.name = "IncarnaWonderlandChest"
+	chest.position = preload("res://scripts/wonderland/layout.gd").CHEST
+	add_child(chest)
 func _process(delta: float):
 	if not is_instance_valid(host) or host.get_node_or_null("Explorer") == null: return
 	var point: Vector2 = host.player.position
@@ -129,7 +133,9 @@ func begin_intro():
 	var camera: Camera2D = host.player.get_node("Camera2D")
 	var view: Vector2 = host.get_viewport_rect().size/camera.zoom
 	var before: Vector2 = host.player.position
-	boss.position = Vector2(before.x+view.x*.82,before.y)
+	# Keep the reward alcove physically beyond the cave apparition at wider views.
+	var reward_x: float = preload("res://scripts/wonderland/layout.gd").CHEST.x
+	boss.position = Vector2(minf(before.x+view.x*.82,reward_x-256),before.y)
 	$Boss4Label.position = boss.position+Vector2(-88,-85)
 	var target := (before+boss.position)*.5
 	camera.position_smoothing_enabled = false
