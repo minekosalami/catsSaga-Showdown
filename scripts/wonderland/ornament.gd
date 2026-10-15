@@ -22,6 +22,12 @@ extends Node2D
  set(value):
   visual_offset = value
   queue_redraw()
+const DETAILS = preload("res://assets/wonderland_human/ninja/details.png")
+const MINT_TREE = preload("res://assets/wonderland_human/ninja/tree_03.png")
+const ROUND_TREE = preload("res://assets/wonderland_human/ninja/tree_04.png")
+const DAISY = preload("res://assets/wonderland_human/ninja/tileset_animated.png")
+const FOREST = preload("res://assets/wonderland_human/ninja/tileset_village_abandoned.png")
+const LEAF = preload("res://assets/wonderland_human/ninja/particle_leaf_pink.png")
 const RPG = preload("res://assets/wonderland_human/rpg/roguelikeSheet_transparent.png")
 const INDOOR = preload("res://assets/wonderland_human/indoor/roguelikeIndoor_transparent.png")
 const DUNGEON = preload("res://assets/wonderland_human/dungeon/roguelikeDungeon_transparent.png")
@@ -30,6 +36,10 @@ var clock := 0.0
 func _ready() -> void:
  texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
  add_to_group("wonderland_ornaments")
+ if kind == "fountain":
+  var blend := ShaderMaterial.new()
+  blend.shader = preload("res://shaders/human_ground_blend.gdshader")
+  material = blend
 func tick(time: float) -> void:
  clock = time
  queue_redraw()
@@ -72,8 +82,12 @@ func house(style := "house") -> void:
  var height := maxi(3,roundi(footprint.y/16)-width/2-1)
  var left := roundf(visual_offset.x-width*8)
  var top := -height*16.0
- masonry(Vector2i(width,height),Vector2(left,top))
+ masonry(Vector2i(width,height),Vector2(left,top),Color("#fff1d9"))
  roof(width/2+1,Vector2(visual_offset.x,top),accent.lightened(.2))
+ for x in range(width):tile(RPG,Vector2i(39,8),Vector2(left+x*16,top+2),1,Color("#e0c2a8"))
+ tile(RPG,Vector2i(27,5),Vector2(left+16,top-32))
+ tile(RPG,Vector2i(41,24),Vector2(left+8,-25))
+ tile(RPG,Vector2i(41,24),Vector2(left+width*16-24,-25))
  for x in [left,left+width*16-32]:
   if absf(x+16)>30:tile(RPG,Vector2i(40,4),Vector2(x,-48),2)
  tile(RPG,Vector2i(32,0),Vector2(-16,-32),2)
@@ -102,25 +116,34 @@ func castle() -> void:
 func _draw() -> void:
  match kind:
   "tree":
-   var zoom := 3.0 if footprint.y>=80 else 2.0
-   patch(RPG,Vector2i(13+absi(variant)%3,10),Vector2i(1,2),Vector2(-8*zoom,-30*zoom),zoom)
+   var zoom := 1.1+float(absi(variant)%3)*.1
+   if absi(variant)%3 == 1:
+    draw_texture_rect(MINT_TREE,Rect2(-26*zoom,-51*zoom,52*zoom,52*zoom),false)
+   elif absi(variant)%3 == 2:
+    draw_texture_rect(ROUND_TREE,Rect2(-25*zoom,-49*zoom,50*zoom,50*zoom),false)
+   else:draw_texture_rect_region(FOREST,Rect2(Vector2(-24,-47)*zoom,Vector2(48,48)*zoom),Rect2(0,96,48,48))
   "grove":
-   patch(RPG,Vector2i(13,10),Vector2i(1,2),Vector2(-24,-64),2)
-   patch(RPG,Vector2i(15,10),Vector2i(1,2),Vector2(-2,-72),2)
-  "bush":tile(RPG,Vector2i(23+absi(variant)%3,9),Vector2(-16,-24),2)
+   for x in [-22,18]:draw_texture_rect_region(FOREST,Rect2(Vector2(x-24,-58),Vector2(58,58)),Rect2(0,144,48,48))
+  "bush":draw_texture_rect_region(FOREST,Rect2(-24,-47,48,48),Rect2(64,144,32,32))
   "house","mushroom_house","teapot_house","clock_house","pink_house":house(kind)
   "flowers":
    var color_index := 41 if accent.b>accent.g else (42 if accent.r>accent.b else 44)
-   for p in [Vector2(-16,-16),Vector2(0,-24),Vector2(12,-10)]:tile(RPG,Vector2i(color_index,24),p)
+   for p in [Vector2(-16,-16),Vector2(0,-24),Vector2(12,-10)]:
+    if variant%3 == 0:draw_texture_rect_region(DAISY,Rect2(p,Vector2.ONE*16),Rect2((int(clock*3)+absi(variant))%4*16,0,16,16))
+    else:tile(RPG,Vector2i(color_index,24),p)
   "roses":
    for p in [Vector2(-16,-16),Vector2(0,-24),Vector2(12,-10)]:tile(RPG,Vector2i(29,9),p)
   "leaf_litter":
-   for p in [Vector2(-28,0),Vector2(8,-8),Vector2(21,5)]:tile(RPG,Vector2i(28,10),p)
+   for p in [Vector2(-28,0),Vector2(8,-8),Vector2(21,5)]:draw_texture_rect_region(LEAF,Rect2(p,Vector2(9,5.25)),Rect2(0,0,12,7))
   "giant_flower":tile(RPG,Vector2i(41+absi(variant)%4,24),Vector2(-16,-48),2)
   "mushroom":
    var zoom: float = [8.0,5.0,3.0][absi(variant)%3]
    tile(RPG,Vector2i(48,3+absi(variant)%3),Vector2(-7.5*zoom,-16*zoom),zoom)
-  "great_tree":patch(RPG,Vector2i(13,10),Vector2i(1,2),Vector2(-64,-256),8)
+  "great_tree":
+   draw_texture_rect_region(FOREST,Rect2(-24,-240,48,240),Rect2(96,96,16,80))
+   for p in [Vector2(-135,-205),Vector2(4,-205),Vector2(-70,-282),Vector2(-64,-195)]:
+    draw_texture_rect_region(FOREST,Rect2(p,Vector2(144,96)),Rect2(0,96,48,32))
+   for x in [-90,90]:tile(RPG,Vector2i(41,24),Vector2(x,-112),2)
   "teapot":tile(RPG,Vector2i(55,15),Vector2(-16,-32),2)
   "grand_teapot":tile(RPG,Vector2i(55,15),Vector2(-64,-128),8)
   "grand_teacup":tile(RPG,Vector2i(56,16),Vector2(-64,-128),8)
@@ -151,7 +174,7 @@ func _draw() -> void:
   "flowerpot":tile(INDOOR,Vector2i(16,0),Vector2(-16,-32),2)
   "window":tile(RPG,Vector2i(40,4),Vector2(-16,-32),2)
   "rug":panel(RPG,Vector2i(10,16),Vector2i(9,4),Vector2(-72,-32))
-  "banner":patch(RPG,Vector2i(50,3),Vector2i(1,3),Vector2(-8,-48))
+  "banner":patch(RPG,Vector2i(50,3),Vector2i(1,3),Vector2(-8,-48),1,accent.lightened(.3))
   "throne":
    tile(INDOOR,Vector2i(0,6),Vector2(-32,-64),4)
   "fountain":
@@ -162,6 +185,12 @@ func _draw() -> void:
   "pink_door","castle_gate","arch","interior_door":
    var zoom := 1.0 if kind == "interior_door" else 1.5
    patch(DUNGEON,Vector2i(21 if kind in ["arch","interior_door"] else 24,10),Vector2i(3,3),Vector2(-24*zoom,-48*zoom),zoom,Color("#f6bada") if kind != "castle_gate" else Color.WHITE)
+  "bridge_rail":tile(RPG,Vector2i(47,24),Vector2(-8,-8))
+  "lantern":
+   tile(RPG,Vector2i(55,9),Vector2(-8,-25))
+   tile(RPG,Vector2i(28,0),Vector2(-8,-10))
+  "grass_tuft":draw_texture_rect_region(DETAILS,Rect2(-8,-12,16,16),Rect2((absi(variant)%4)*64,128,64,64))
+  "stones":tile(RPG,Vector2i(44,10),Vector2(-8,-8))
   "key":tile(ONEBIT,Vector2i(33,11),Vector2(-16,-16),2,Color("#f58fc7"))
   "wall","wall_background":
    var size := Vector2i(ceil(footprint.x/16),ceil(footprint.y/16))

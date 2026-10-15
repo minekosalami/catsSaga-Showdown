@@ -193,7 +193,7 @@ func run():
 	await place(Plan.center(6)+Vector2(0,64))
 	await create_timer(1.15).timeout
 	check(cave.current_room == 7 and cave.gray > .99 and cave.screen_layer.layer == 128,"Area 7 transitions full-screen effect above HUD/dialogue/inventory")
-	check(cave.drone.playing and cave.drone.volume_db > -30 and cave.get_node("UndergroundAtmosphere").bed.volume_db < -50,"Area 7 crossfades ambience to local muffled drone")
+	check(root.get_node("Ambience").quietness > .99,"Area 7 muffles the licensed regional ambience")
 	await press(KEY_SPACE)
 	check(world.map_ui.inventory_opened and cave.screen_layer.visible,"grayscale remains active with inventory")
 	await press(KEY_SPACE)
@@ -201,12 +201,12 @@ func run():
 		if cave.cell_room(cell) == Vector2i(7,8):
 			await place(Vector2(cell*32)+Vector2(16,16))
 			break
-	check(cave.gray == 0 and not cave.drone.playing,"grayscale and drone stop at the room boundary, before shared hallway")
+	check(cave.gray == 0 and root.get_node("Ambience").quietness == 0,"grayscale and audio muffling stop at the room boundary, before shared hallway")
 	await place(Plan.center(7)+Vector2(0,64))
-	check(cave.current_room == 8 and cave.gray == 0 and not cave.drone.playing,"Area 8 immediately restores colors and stops drone")
+	check(cave.current_room == 8 and cave.gray == 0 and root.get_node("Ambience").quietness == 0,"Area 8 immediately restores colors and normal ambience")
 	await place(Plan.center(6)+Vector2(0,64))
 	await create_timer(.3).timeout
-	check(cave.gray > .2 and cave.drone.playing,"Area 7 effects reapply on reentry")
+	check(cave.gray > .2 and root.get_node("Ambience").quietness > .2,"Area 7 effects reapply on reentry")
 	await place(Plan.center(7)+Vector2(0,64))
 	await press(KEY_MINUS)
 	check(session.developer_menu.opened,"regular minus shortcut works with standard keyboard device")
@@ -265,7 +265,7 @@ func run():
 	check(current_scene.player.position == Plan.ENTRY and not collision(current_scene,Plan.ENTRY),"legacy load restores valid entrance position")
 	for voice in root.get_node("Music").get_children():
 		if voice is AudioStreamPlayer: voice.stop()
-	current_scene.map.get_node("UndergroundAtmosphere").bed.stop()
+	root.get_node("Ambience").set_enabled(false)
 	await create_timer(.15).timeout
 	for suffix in ["", ".bak", ".tmp"]: DirAccess.remove_absolute(session.saves.save_path+suffix)
 	print("CAVE REDESIGN: %d checks, %d failures"%[checks,failures])

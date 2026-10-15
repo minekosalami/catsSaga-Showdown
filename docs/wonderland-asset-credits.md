@@ -1,11 +1,11 @@
 # Wonderland artwork credits and provenance
 
-All replacement environment artwork is by **Kenney Vleugels / Kenney**. The
+The retained architecture, props and furniture described below are by **Kenney Vleugels / Kenney**. The latest terrain, foliage, movement icons and ambience are credited in [Wonderland polish credits](wonderland-polish-credits.md). The
 Roguelike RPG pack additionally credits **Lynn Evers**. Thank you to both artists.
 
 | Pack | Original publisher/source | License and attribution | Wonderland use |
 | --- | --- | --- | --- |
-| Roguelike / RPG pack | [Kenney](https://kenney.nl/assets/roguelike-rpg-pack) | CC0 1.0; attribution optional. Original notice names Kenney Vleugels and Lynn Evers. | All outdoor grass and paths, trees, bushes, mushrooms, flowers, large tree, teapot/cup landmarks, village facades, castle masonry/roofs/windows, shelves, table settings, fountain pieces and reward chest/rocks. |
+| Roguelike / RPG pack | [Kenney](https://kenney.nl/assets/roguelike-rpg-pack) | CC0 1.0; attribution optional. Original notice names Kenney Vleugels and Lynn Evers. | Mushrooms, flowers, teapot/cup landmarks, village facades, castle masonry/roofs/windows, shelves, table settings, fountain pieces, reward chest/rocks and physical signs. Earlier Kenney grass, paths and trees have been superseded by the credited Ninja Adventure art. |
 | Roguelike Indoor pack | [Kenney](https://kenney.nl/assets/roguelike-interior-pack) | CC0 1.0; attribution optional. Original notice names Kenney Vleugels. | Human-drawn tables, chairs, beds, plants, kitchen counters, stoves and furniture throughout the eight village and four castle interiors. |
 | Roguelike Cave & Dungeons pack | [Kenney](https://kenney.nl/assets/roguelike-caves-dungeons) | CC0 1.0; attribution optional. Original notice names Kenney Vleugels. | Complete open/closed stone-arch arrangements for the Pink Wonderland Door, castle gate and interior doorways. |
 | 1-Bit Pack 1.1 | [Kenney](https://kenney.nl/assets/1-bit-pack) | CC0 1.0; attribution optional. Original notice identifies Kenney and creation date 2020-05-06. | One existing key glyph displayed in pink and existing clock-face glyphs. |
@@ -15,8 +15,8 @@ pack notices are preserved beside each source PNG in `assets/wonderland_human/`.
 The original sheets are byte-for-byte unchanged. Atlas regions, repeated human
 tiles, nearest-neighbor scaling, optional runtime tint and sprite transforms are
 ordinary level composition; no pixels are painted by the implementation and no
-generative image model or service was used. The large landmark sprites magnify
-the native human-drawn teapot, cup and tree; they are deliberately chunky pixel
+generative image model or service was used. The large tea landmark sprites magnify
+the native human-drawn teapot and cup; they are deliberately chunky pixel
 art rather than newly drawn illustrations.
 
 ## Evidence checked and limitations

@@ -11,6 +11,7 @@ var title_label: Label
 var info_container: VBoxContainer
 var controls_panel: MarginContainer
 var controls_grids: Array[GridContainer] = []
+var asset_credits_dialog: AcceptDialog
 var info_content: Label
 
 func _ready() -> void:
@@ -85,6 +86,10 @@ func _build_info(center: CenterContainer) -> void:
 	info_content.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	info_content.add_theme_font_size_override("font_size", 14)
 	info_container.add_child(info_content)
+	var asset_button := _button(info_container,"ASSET CREDITS","AssetCreditsButton",_open_asset_credits)
+	asset_button.custom_minimum_size.y = 36
+	asset_button.add_theme_font_size_override("font_size",14)
+	asset_button.hide()
 	_build_controls()
 	_button(info_container, "BACK", "BackButton", _back_to_menu)
 	info_container.hide()
@@ -98,14 +103,37 @@ func _show_info() -> void:
 	create_tween().tween_property(info_container, "modulate:a", 1.0, 0.2)
 
 func _show_controls() -> void:
+	info_container.get_node("AssetCreditsButton").hide()
 	info_content.hide()
 	controls_panel.show()
 
 func _show_credits() -> void:
+	info_container.get_node("AssetCreditsButton").show()
 	controls_panel.hide()
 	info_content.show()
 	info_content.add_theme_font_size_override("font_size", 20)
 	info_content.text = "LLiosette — Creator\n\nBasic Caves & Dungeons — schwarnhild\nschwarnhild.itch.io"
+
+func _open_asset_credits() -> void:
+	if is_instance_valid(asset_credits_dialog):
+		asset_credits_dialog.popup_centered()
+		return
+	var viewer := AcceptDialog.new()
+	asset_credits_dialog = viewer
+	viewer.name = "AssetCreditsDialog"
+	viewer.title = "Asset credits and licenses"
+	viewer.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	viewer.size = Vector2i(780,540)
+	var text := RichTextLabel.new()
+	text.name = "AssetNotices"
+	text.custom_minimum_size = Vector2(720,440)
+	text.selection_enabled = true
+	text.add_theme_font_size_override("normal_font_size",14)
+	text.text = preload("res://resources/ui/wonderland_asset_notices.tres").get_meta("text")
+	viewer.add_child(text)
+	add_child(viewer)
+	viewer.close_requested.connect(viewer.hide)
+	viewer.popup_centered()
 
 func _back_to_menu() -> void:
 	info_container.hide()

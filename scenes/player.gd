@@ -57,6 +57,9 @@ func _ready() -> void:
 	($CollisionShape2D.shape as CircleShape2D).radius = damage_hitbox_radius
 	add_to_group("player")
 	$CollisionShape2D.position = $Sprite2D.position
+	var grounding := preload("res://scripts/ui/player_grounding.gd").new()
+	grounding.name = "PlayerGrounding"
+	add_child(grounding)
 	_collect_visual_nodes(self)
 
 

@@ -67,6 +67,7 @@ func _ready() -> void:
 	dialogue.finished.connect(_on_dialogue_finished)
 	for portal in map.get_node("Portals").get_children():
 		portal.travel_requested.connect(_travel)
+	preload("res://scripts/world/destination_sign.gd").install(map)
 	_build_hud()
 	interaction_indicator = Label.new()
 	interaction_indicator.name = "InteractionIndicator"
@@ -157,14 +158,14 @@ func _process(_delta: float) -> void:
 	for npc in get_tree().get_nodes_in_group("interactables"):
 		if not map.is_ancestor_of(npc) or not npc.can_interact():
 			continue
-		var distance: float = player.position.distance_to(npc.position)
+		var distance: float = player.global_position.distance_to(npc.global_position)
 		if distance <= npc.interaction_radius and distance < closest:
 			closest = distance
 			nearest_npc = npc
 	interaction_hint.visible = not checking_spawn and not Session.world_menu_open() and not dialogue.active and not awaiting_victory_dialogue and not Session.busy and not get_tree().paused
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
-		interaction_indicator.position = nearest_npc.position + Vector2(-16, -62)
+		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -62)
 	interaction_hint.text = nearest_npc.get_meta("interaction_label","Z  Interact") if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
 
 func _input(event: InputEvent) -> void:

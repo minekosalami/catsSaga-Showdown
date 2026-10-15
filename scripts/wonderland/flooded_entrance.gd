@@ -26,7 +26,7 @@ func _ready() -> void:
 	for y in range(1,40):
 		for x in range(105,200):
 			if distance_to_route(Vector2(x*16+8,y*16+8)) < 42:
-				path.set_cell(Vector2i(x,y),0,Vector2i(8,22))
+				path.set_cell(Vector2i(x,y),0,Vector2i(12,8))
 	var builder := preload("res://scripts/wonderland/builder.gd").new()
 	# Pink plants announce the destination; the arch joins the actual northern border.
 	for offset in [Vector2(-135,30),Vector2(135,30),Vector2(-85,180),Vector2(90,180)]:
