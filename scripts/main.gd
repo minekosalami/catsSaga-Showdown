@@ -57,6 +57,8 @@ func _find_scene_nodes() -> void:
 		push_warning("main.gd: Player node not found.")
 
 	music_player = _find_audio_player(self)
+	if music_player != null:
+		Music.apply_gain(music_player)
 
 
 func _find_audio_player(node: Node) -> AudioStreamPlayer:

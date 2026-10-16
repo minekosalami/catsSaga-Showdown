@@ -122,7 +122,7 @@ func run() -> void:
 	check(game.music_player.stream.resource_path == "res://assets/fight.v.scale - catsSaga version.mp3", "correct soundtrack remains assigned")
 	var master := AudioServer.get_bus_index("Master")
 	check(master >= 0 and not AudioServer.is_bus_mute(master), "Master audio bus is not muted")
-	check(game.music_player.volume_db == 0.0 and game.music_player.bus == &"Master", "music uses full-volume Master routing")
+	check(is_equal_approx(game.music_player.volume_db, root.get_node("Music").gain_for_path(game.music_player.stream.resource_path)) and game.music_player.bus == &"Master", "music uses measured normalization gain and audible Master routing")
 	var capture := AudioEffectCapture.new()
 	AudioServer.add_bus_effect(master, capture)
 	await create_timer(0.2).timeout

@@ -32,6 +32,7 @@ func _ready() -> void:
 	add_child(player)
 	player.game_over.connect(_defeat)
 	music_player = $Music
+	Music.apply_gain(music_player)
 	music_player.add_to_group("combat_music")
 	timeline = $Boss2Timeline
 	# Scene children and encounter-specific player are now initialized.

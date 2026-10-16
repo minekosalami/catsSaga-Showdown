@@ -1,0 +1,202 @@
+{
+  "method": "FFmpeg loudnorm input statistics, EBU R128, true-peak oversampling; static Godot gain only",
+  "tracks": [
+    {
+      "path": "assets/soundtrack/Malware - 006.mp3",
+      "sha256": "d3584c24f60d97a0766b5400291066e433a1c8f86cb589260ca06d7abeb9908c",
+      "duration_seconds": 113.606531,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -13.12,
+        "true_peak_dbtp": 0.08,
+        "lra_lu": 13.9
+      },
+      "player_gain_db": -2.88,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -2.8,
+        "lra_lu": 14.0
+      },
+      "routed_playback": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -2.8,
+        "lra_lu": 14.0
+      }
+    },
+    {
+      "path": "assets/soundtrack/Menu - 001.wav",
+      "sha256": "96f529684dabbb4978c7504c7536c53a71123b3818245948dfd06fd582d1016b",
+      "duration_seconds": 91.348957,
+      "format": {
+        "codec_name": "pcm_s24le",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -18.37,
+        "true_peak_dbtp": -2.34,
+        "lra_lu": 3.8
+      },
+      "player_gain_db": 1.24,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -17.13,
+        "true_peak_dbtp": -1.1,
+        "lra_lu": 3.8
+      },
+      "routed_playback": {
+        "lufs": -17.13,
+        "true_peak_dbtp": -1.1,
+        "lra_lu": 3.8
+      }
+    },
+    {
+      "path": "assets/soundtrack/NatoKyofu - 005.mp3",
+      "sha256": "39aa7e3cae570cd168213ca2c8d8004bd8dd453818da877ab32f3d7cc704bd87",
+      "duration_seconds": 136.437531,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -13.76,
+        "true_peak_dbtp": -1.18,
+        "lra_lu": 3.3
+      },
+      "player_gain_db": -2.24,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -3.38,
+        "lra_lu": 3.3
+      },
+      "routed_playback": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -3.38,
+        "lra_lu": 3.3
+      }
+    },
+    {
+      "path": "assets/soundtrack/Overworld - 002.mp3",
+      "sha256": "33c15109420bb85241d7224682d99bec4cff637136b12d06a223c2ef92630a69",
+      "duration_seconds": 113.52815,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -20.01,
+        "true_peak_dbtp": -1.76,
+        "lra_lu": 8.1
+      },
+      "player_gain_db": 0.76,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -19.24,
+        "true_peak_dbtp": -1.0,
+        "lra_lu": 8.2
+      },
+      "routed_playback": {
+        "lufs": -19.34,
+        "true_peak_dbtp": -1.1,
+        "lra_lu": 8.8
+      },
+      "route": "Existing Overworld clarity EQ and -1.2 dB bus -> unchanged Master"
+    },
+    {
+      "path": "assets/soundtrack/SyNaPse - 003.mp3",
+      "sha256": "10eef74b6c31274fecbd379b218e3e8ce36c972c8fe8aa9af0d90c3bc321571e",
+      "duration_seconds": 150.25635,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -9.84,
+        "true_peak_dbtp": 0.2,
+        "lra_lu": 4.9
+      },
+      "player_gain_db": -6.16,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -5.96,
+        "lra_lu": 5.0
+      },
+      "routed_playback": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -5.96,
+        "lra_lu": 5.0
+      }
+    },
+    {
+      "path": "assets/soundtrack/catVibes - 004.mp3",
+      "sha256": "a7a6c213749d619adebd831fe4c4c53bff4eade01adb5a48d8553e2db5b0c179",
+      "duration_seconds": 145.86775,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -11.39,
+        "true_peak_dbtp": 0.08,
+        "lra_lu": 3.5
+      },
+      "player_gain_db": -4.61,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -4.53,
+        "lra_lu": 3.5
+      },
+      "routed_playback": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -4.53,
+        "lra_lu": 3.5
+      }
+    },
+    {
+      "path": "assets/fight.v.scale - catsSaga version.mp3",
+      "sha256": "936051ef9ea4de0ed3a2d44227b5b25eeb88769fe36855c1b2bb42b2a42874b9",
+      "duration_seconds": 128.75755,
+      "format": {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2
+      },
+      "source": {
+        "lufs": -6.31,
+        "true_peak_dbtp": 0.5,
+        "lra_lu": 5.0
+      },
+      "player_gain_db": -9.69,
+      "decode_errors": [],
+      "godot_decode_after_player_gain": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -9.19,
+        "lra_lu": 4.9
+      },
+      "routed_playback": {
+        "lufs": -16.0,
+        "true_peak_dbtp": -9.19,
+        "lra_lu": 4.9
+      }
+    }
+  ],
+  "overworld_mixer_capture": {
+    "sample_rate": 44100,
+    "frames": 5017600,
+    "discarded_frames": 0,
+    "route": "ThemePlayer gain +0.76 dB -> existing Overworld EQ -> -1.2 dB bus -> Master 0 dB",
+    "format": "stereo float32 PCM, captured live with AudioEffectCapture; Dummy driver"
+  }
+}
