@@ -54,7 +54,7 @@ func run() -> void:
 	check(music.player.playing and music.player.get_playback_position() < 1, "overworld playback loops across its real end")
 	session.begin_battle(Vector2(1000,520))
 	await create_timer(0.2).timeout
-	check(music.player.volume_db < music.MUSIC_VOLUME_DB, "overworld theme fades during battle entrance")
+	check(music.player.volume_db < music.gain_for_path(music.THEMES.overworld), "overworld theme fades during battle entrance")
 	if session.busy:
 		await session.transition_finished
 	var game: Node = current_scene.battle

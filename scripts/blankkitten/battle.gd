@@ -34,6 +34,7 @@ func _ready() -> void:
 	add_to_group("combat_root")
 	presentation = $CinematicArena
 	music_player = $Music
+	Music.apply_gain(music_player)
 	music_player.add_to_group("combat_music")
 	ui = $UI
 	reduced_effects = bool(Session.get_meta("blankkitten_reduced_effects",false))
@@ -225,7 +226,7 @@ func seek_timestamp(time: float, practice := false) -> bool:
 	development_run = not practice
 	practice_stage = index
 	practice_end = Cue.STARTS[index+1]-Cue.MORPH if practice else Cue.END
-	music_player.volume_db = -12
+	Music.apply_gain(music_player)
 	music_player.play(time)
 	rebuild_clock(time)
 	clock_initialized = false
