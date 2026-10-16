@@ -26,11 +26,21 @@ var jump_requested := false
 var jump_released := false
 var jump_held := false
 var battle: Node
+var ground_shadow: Sprite2D
 
 func _ready() -> void:
 	battle = get_parent()
 	process_physics_priority = -10
 	previous_position = position
+	ground_shadow = Sprite2D.new()
+	ground_shadow.name = "GroundingShadow"
+	ground_shadow.texture = preload("res://assets/wonderland_human/ninja/Shadow.png")
+	ground_shadow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ground_shadow.scale = Vector2(2.2,.7)
+	ground_shadow.modulate.a = .3
+	ground_shadow.z_index = -1
+	ground_shadow.hide()
+	add_child(ground_shadow)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and not battle.game_over and not battle.victory_started:
@@ -111,7 +121,13 @@ func player_tint(time: float) -> Color:
 	return Color.from_hsv(fposmod(resolved_clock*.65,1),.8,1)
 
 func _draw() -> void:
+	ground_shadow.visible = health>0 and gravity_mode
 	if health <= 0: return
+	# In gravity sections the shadow stays on the actual floor during a jump.
+	if gravity_mode and "arena_rect" in battle:
+		ground_shadow.position = Vector2(0,battle.arena_rect.end.y-position.y-3)
+	var bob := sin(clock*9)*.4 if velocity.length()>15 and not gravity_mode else 0.0
+	draw_set_transform(Vector2(0,bob))
 	var tint := player_tint(clock)
 	var points := PackedVector2Array()
 	for i in range(10):

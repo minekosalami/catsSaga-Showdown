@@ -1,0 +1,137 @@
+{
+  "note": "Unchanged human source bytes. Licensing/provenance evidence and per-file audio attribution: docs/wonderland-polish-credits.md. No generative assets.",
+  "files": {
+    "assets/wonderland_human/ninja/tileset_floor.png": {
+      "sha256": "e111065065edf806e7e893330086e68efc8755175d92f14d087b42d40a331e16",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/map/tileset_floor.png"
+    },
+    "assets/wonderland_human/ninja/tileset_interior_floor.png": {
+      "sha256": "e281598e2d90f43b31fd557b94c2d2abb00d307758a053b7df301575bf535e3a",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/map/tileset_interior_floor.png"
+    },
+    "assets/wonderland_human/ninja/tileset_village_abandoned.png": {
+      "sha256": "6787c6e22a4d44ceee4f158309b2519707bdb70c59aca00b3d49006cadcca06e",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/map/tileset_village_abandoned.png"
+    },
+    "assets/wonderland_human/ninja/tileset_animated.png": {
+      "sha256": "54e1e433fe9471db3660b14de3fa6ec6860a1be4ddbe835b3c6cad9f73045aca",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/map/tileset_animated.png"
+    },
+    "assets/wonderland_human/ninja/Shadow.png": {
+      "sha256": "b0ba84bf6132d1f2b361fb87a62a8362f9e04639f7a649431c6b297ceec46ec2",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/character/Shadow.png"
+    },
+    "assets/wonderland_human/ninja/particle_leaf_pink.png": {
+      "sha256": "183bff25f633d8964fd433646a86c165539881c81c08c11c4a5c5a258fc1e871",
+      "repository": "https://github.com/pixel-boy/NinjaAdventure",
+      "revision": "6ac78232d5aedcc85ce5f27d060ea92366f7c24a",
+      "source_path": "content/particle/particle_leaf_pink.png"
+    },
+    "assets/wonderland_human/ninja/Floor.png": {
+      "sha256": "cea66d3c9068b58d1bbed0aedeadc9679ac1ee1ce3375c6cf396bf954d28361b",
+      "repository": "https://github.com/clear-code-projects/Zelda",
+      "revision": "5f4c57bfbb162d2f19b287a5c24816d93c17e08d",
+      "source_path": "15 - fixes audio.zip:graphics/tilemap/Floor.png"
+    },
+    "assets/movement_human/paw-print.svg": {
+      "sha256": "05f13c3256b734267b86ec89c4382d929dbb3355d6cafd3f74daa19d44349392",
+      "repository": "https://github.com/game-icons/icons",
+      "revision": "82d948812bfe3f269ef8f731dcdb07b08160edc4",
+      "source_path": "lorc/paw-print.svg"
+    },
+    "assets/ambience_human/ComboWind.ogg": {
+      "sha256": "30f01cf54e4954d7eb840826c0b653706af2f76269cfcb41b8ebfc85fb27d4db",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/ComboWind.ogg"
+    },
+    "assets/ambience_human/birdsongnl.ogg": {
+      "sha256": "ddcaa8506b39f4beadedb77592f5e90e717135f81ca2700bf6e82aa1e795a598",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/birdsongnl.ogg"
+    },
+    "assets/ambience_human/robin2.ogg": {
+      "sha256": "fb7d54f8dafecf5442bdcaa49d3b8b4acf64dbacb6a2b98b40438ff5c5e2e432",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/robin2.ogg"
+    },
+    "assets/ambience_human/bluejay.ogg": {
+      "sha256": "833c5cff0eb1fbfb9834f9aa23e7ee36d3004b865eaf17f23d384fd8c2b131d6",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/bluejay.ogg"
+    },
+    "assets/ambience_human/Crickets_At_NightCombo.ogg": {
+      "sha256": "8adc1cab119d279f083be2b0b6ca7c254dbce86509483d38fad2475774147eac",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/Crickets_At_NightCombo.ogg"
+    },
+    "assets/ambience_human/Spooky_Water_Drops.ogg": {
+      "sha256": "4fc1ac352d5cf98345c393249412ed55f29bcaa95796541e3a6a220c4af7e417",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/Spooky_Water_Drops.ogg"
+    },
+    "assets/ambience_human/drippingwater_drip_a.ogg": {
+      "sha256": "0c61cdf2c2683ba7e463492213843e2ec5e0b4d42760a5adff3c0128c6a3a358",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/drippingwater_drip_a.ogg"
+    },
+    "assets/ambience_human/drippingwater_drip_b.ogg": {
+      "sha256": "ee127703638afaef5447067ea8155aa78b6c88847596c6703e0a5ddf24f25f51",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/drippingwater_drip_b.ogg"
+    },
+    "assets/ambience_human/lake_waves_2_calm.ogg": {
+      "sha256": "4c3f92a95df80d2f1754a765c443add0e58c27f2f3af45fa1a0fab0b1df56aef",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/lake_waves_2_calm.ogg"
+    },
+    "assets/ambience_human/small_waterfall.ogg": {
+      "sha256": "6acc7b6965b603a0450545152188c4cbb9b1e153c2df46a01cbc012a0c11c6f0",
+      "repository": "https://github.com/Neuromancer56/MinetestAmbience",
+      "revision": "4b78eb558617662c2c47f029679692780fcc46cf",
+      "source_path": "ambience/sounds/small_waterfall.ogg"
+    },
+    "assets/movement_human/echo-ripples.svg": {
+      "sha256": "73e020ba3ba748c5d447be90d3a50afd2422fe1ea76e8ed29dddbabf60c2d5c0",
+      "repository": "https://github.com/game-icons/icons",
+      "revision": "82d948812bfe3f269ef8f731dcdb07b08160edc4",
+      "source_path": "lorc/echo-ripples.svg"
+    },
+    "assets/wonderland_human/ninja/tree_03.png": {
+      "sha256": "7f88946ebcd1466a464f8008839bf578898e5ffaa6bf3c9e0537c246c3592c71",
+      "repository": "https://github.com/clear-code-projects/Zelda",
+      "revision": "5f4c57bfbb162d2f19b287a5c24816d93c17e08d",
+      "source_path": "15 - fixes audio.zip:graphics/objects/03.png"
+    },
+    "assets/wonderland_human/ninja/tree_04.png": {
+      "sha256": "982760fc002b7b34835ceae58976ab0fa5980a3e32a978a3f1affb0b1c65f55b",
+      "repository": "https://github.com/clear-code-projects/Zelda",
+      "revision": "5f4c57bfbb162d2f19b287a5c24816d93c17e08d",
+      "source_path": "15 - fixes audio.zip:graphics/objects/04.png"
+    },
+    "assets/wonderland_human/ninja/details.png": {
+      "sha256": "6a67025c65a78ce99ab3f18817d6bdf314fd61dc53523d21dd4eacbeed2d49be",
+      "repository": "https://github.com/clear-code-projects/Zelda",
+      "revision": "5f4c57bfbb162d2f19b287a5c24816d93c17e08d",
+      "source_path": "15 - fixes audio.zip:graphics/tilemap/details.png"
+    }
+  }
+}

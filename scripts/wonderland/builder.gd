@@ -26,7 +26,7 @@ func layer(name: String, kind: String, z: int) -> TileMapLayer:
 	var node := TileMapLayer.new()
 	node.name = name
 	node.tile_set = tiles[kind]
-	node.scale = Vector2.ONE*2
+	node.scale = Vector2.ONE*32.0/node.tile_set.tile_size.x
 	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	node.z_index = z
 	map.add_child(node)
@@ -250,7 +250,7 @@ func outdoor(id: String) -> void:
 	var path_cells: Array[Vector2i] = []
 	for y in cells.y:
 		for x in cells.x:
-			ground.set_cell(Vector2i(x,y),0,Vector2i(5,0))
+			ground.set_cell(Vector2i(x,y),0,Vector2i(11,12))
 			if path_distance(Vector2(x*32+16,y*32+16)) < (104 if id == "wonderland_village" else 79): path_cells.append(Vector2i(x,y))
 	road.set_cells_terrain_connect(path_cells,0,0,false)
 	forest(id)
@@ -356,13 +356,13 @@ func interior(id: String) -> void:
 	ground = layer("Ground","marble" if castle else "wood",-8)
 	for y in range(30):
 		for x in range(40):
-			if x>=4 and x<36 and y>=7 and y<26: ground.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
+			if x>=4 and x<36 and y>=7 and y<26: ground.set_cell(Vector2i(x,y),0,Vector2i(1,1) if castle else Vector2i(1,14))
 	var links := add_links(id)
 	for link in links:
 		var center := Vector2i(link.point/32)
 		for y in range(30):
 			for x in range(40):
-				if (link.side in ["west","east"] and abs(y-center.y)<3) or (link.side in ["north","south"] and abs(x-center.x)<3): ground.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
+				if (link.side in ["west","east"] and abs(y-center.y)<3) or (link.side in ["north","south"] and abs(x-center.x)<3): ground.set_cell(Vector2i(x,y),0,Vector2i(1,1) if castle else Vector2i(1,14))
 	if not castle:
 		entry("FromVillage",Vector2(640,736),Vector2.UP)
 		portal("ExitToVillage",Vector2(640,800),"wonderland_village","From_"+id,"south")

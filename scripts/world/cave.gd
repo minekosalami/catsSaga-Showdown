@@ -6,7 +6,6 @@ var room_mask: ShaderMaterial
 var screen_filter: ShaderMaterial
 var screen_layer: CanvasLayer
 var intro_started := false
-var drone: AudioStreamPlayer
 var gray := 0.0
 var boss: Node2D
 var host: Node
@@ -47,12 +46,6 @@ func _ready():
 	services = CanvasLayer.new()
 	services.set_script(preload("res://scripts/world/cave_services.gd"))
 	add_child(services)
-	drone = AudioStreamPlayer.new()
-	drone.stream = $UndergroundAtmosphere.sound("bed")
-	drone.pitch_scale = .45
-	drone.volume_db = -60
-	drone.bus = "Overworld"
-	add_child(drone)
 	boss = preload("res://scripts/incarna/rig.gd").new()
 	boss.name = "Incarna"
 	boss.preview_mode = true
@@ -84,16 +77,7 @@ func _process(delta: float):
 	gray = move_toward(gray,gray_target,delta) if in_quiet_room else 0.0
 	screen_filter.set_shader_parameter("amount",gray)
 	screen_layer.visible = gray > 0
-	if in_quiet_room:
-		if not drone.playing: drone.play()
-		drone.volume_db = lerpf(-60,-27,gray)
-	else:
-		drone.stop()
-	var ambience: Node = $UndergroundAtmosphere
-	if not Session.busy and not ambience.fade_started:
-		ambience.bed.volume_db = -28-28*gray
-		ambience.drip.volume_db = -28-28*gray
-		ambience.echo.volume_db = -32-28*gray
+	Ambience.quietness = gray
 	if current_room == 9 and not intro_started and not Session.story_flags.get("incarna_defeated",false) and not Session.busy and not host.checking_spawn and not Session.cave_event_active:
 		begin_intro()
 func _update_mask():

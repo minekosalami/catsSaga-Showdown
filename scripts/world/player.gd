@@ -28,6 +28,9 @@ func _ready() -> void:
 		sprite.texture = sprite_texture
 		sprite.scale = Vector2.ONE * sprite_height / float(sprite_texture.get_height())
 		$VisualPlaceholder.hide()
+	var movement_visual := preload("res://scripts/world/movement_visual.gd").new()
+	movement_visual.name = "MovementVisual"
+	add_child(movement_visual)
 
 func _physics_process(delta: float) -> void:
 	if movement_locked or Session.busy:

@@ -17,8 +17,15 @@ func _ready() -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if enabled else DisplayServer.WINDOW_MODE_WINDOWED)
 	)
 	content.add_child(fullscreen)
+	var ambient := CheckButton.new()
+	ambient.name = "AmbienceToggle"
+	ambient.text = "Environmental ambience"
+	ambient.set_pressed_no_signal(get_node("/root/Ambience").enabled)
+	ambient.toggled.connect(get_node("/root/Ambience").set_enabled)
+	content.add_child(ambient)
 
 func open() -> void:
 	var toggle := find_child("FullscreenToggle", true, false) as CheckButton
 	toggle.set_pressed_no_signal(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
-	popup_centered(Vector2i(360, 180))
+	(find_child("AmbienceToggle",true,false) as CheckButton).set_pressed_no_signal(get_node("/root/Ambience").enabled)
+	popup_centered(Vector2i(410, 240))

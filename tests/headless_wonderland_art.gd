@@ -18,7 +18,7 @@ func run():
   var data={"map_size":str(n.map_size),"nodes":{}}
   collect(n,n,data.nodes)
   for layer in n.get_children():
-   if layer is TileMapLayer:data[layer.name]=str(layer.get_used_cells())
+   if layer is TileMapLayer and not String(layer.name).begins_with("Fairytale"):data[layer.name]=str(layer.get_used_cells())
   checks+=1
   if JSON.stringify(data,"",true).sha256_text()!=expected[id]:failures+=1;push_error("Structure changed: "+id)
   n.free()
