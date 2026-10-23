@@ -127,13 +127,18 @@ func _draw() -> void:
 		var fade: float = 1-age/p.life
 		var point: Vector2 = p.point+p.velocity*age+Vector2(0,65)*age*age
 		if p.smoke:
-			draw_circle(point,4+age*22,Color(p.tint,fade*.12))
+			var extent := 16+age*24
+			draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("smoke",int(age/p.life*6)),Rect2(point-Vector2.ONE*extent*.5,Vector2.ONE*extent),false,Color(p.tint,fade*.22))
 		else:
-			draw_set_transform(point,p.spin+age*4)
-			draw_colored_polygon(PackedVector2Array([Vector2(-2,-2),Vector2(4,0),Vector2(-1,4)]),Color(p.tint,fade))
+			draw_set_transform(point.round(),p.spin+age*4)
+			draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("sparkle",int(age*14)),Rect2(-4,-4,8,8),false,Color(p.tint,fade))
 	draw_set_transform(Vector2.ZERO)
 	for crack in cracks:
 		var age: float = time-crack.start
+		if age<.4:
+			# Leave the actual safe corridor unobscured between adjacent impacts.
+			var lane_width: float = battle.arena_rect.size.x/battle.hazards.LANES
+			preload("res://scripts/ui/human_effects.gd").draw_impact(self,crack.point,age,.4,minf(12 if battle.reduced_effects else 16,lane_width*.25),Color("#FFA778"))
 		if age < .22:
 			for i in range(3,0,-1): draw_circle(crack.point,12+i*14,Color(1,.46,.36,(1-age/.22)*.025))
 		var fade := 1-smoothstep(.25,1.3,time-crack.start)

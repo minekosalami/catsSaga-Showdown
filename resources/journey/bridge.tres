@@ -5,7 +5,15 @@
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_04tn5"]
 texture = ExtResource("1_2l3tf")
 texture_region_size = Vector2i(64, 64)
+0:13/0 = 0
+1:13/0 = 0
+2:13/0 = 0
+0:14/0 = 0
 1:14/0 = 0
+2:14/0 = 0
+0:15/0 = 0
+1:15/0 = 0
+2:15/0 = 0
 
 [resource]
 tile_size = Vector2i(64, 64)

@@ -96,7 +96,8 @@ func run() -> void:
 		var bridges: TileMapLayer = world.map.get_node("Bridges")
 		var water: TileMapLayer = world.map.get_node("Water")
 		for cell in bridges.get_used_cells():
-			check(water.get_cell_tile_data(cell).get_collision_polygons_count(0)==0,area+" crossing has no underwater collider")
+			var data := water.get_cell_tile_data(cell)
+			check(data==null or data.get_collision_polygons_count(0)==0,area+" crossing or dry abutment has no underwater collider")
 		check(world.map.get_node("Characters").find_children("*Cave*","",true,false).is_empty() and world.map.get_node("Characters").find_children("*Wonderland*","",true,false).is_empty(),area+" has no archived entrance objects")
 		check(world.map_ui.visible_boss_markers().all(func(marker):return marker.id not in ["wonderland_door","underground_cave"]),area+" has no archived entrance markers")
 		if area=="bart_area":

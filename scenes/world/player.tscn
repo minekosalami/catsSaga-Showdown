@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 [ext_resource type="Script" path="res://scripts/world/player.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/placeholder.gd" id="2"]
 [ext_resource type="Texture2D" path="res://assets/player/player.png.png" id="player_texture"]
+[ext_resource type="Script" path="res://scripts/world/exploration_camera.gd" id="camera"]
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(28, 28)
 [node name="Explorer" type="CharacterBody2D" groups=["overworld_player"]]
@@ -16,5 +17,6 @@ script = ExtResource("2")
 box_size = Vector2(64, 32)
 caption = "PLAYER"
 [node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("camera")
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0

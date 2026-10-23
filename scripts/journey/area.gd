@@ -5,6 +5,10 @@ func _ready() -> void:
 	var ambience := preload("res://scripts/journey/forest_atmosphere.gd").new()
 	ambience.name = "ForestAtmosphere"
 	add_child(ambience)
+func _process(_delta: float) -> void:
+	var world := get_parent()
+	if world.get("player")!=null:
+		$Understory.material.set_shader_parameter("player_world",world.player.global_position)
 func is_walkable_position(point: Vector2) -> bool:
 	return Rect2(Vector2(48,48),map_size-Vector2(96,96)).has_point(point) and not _in_water(point)
 func _in_water(point: Vector2) -> bool:

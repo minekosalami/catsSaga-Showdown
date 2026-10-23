@@ -15,6 +15,7 @@ var float_pixels := 0.0
 func _ready() -> void:
 	rest_scale = scale
 	rest_offset = offset
+	preload("res://scripts/ui/pixel_art.gd").apply(self)
 
 func _process(_delta: float) -> void:
 	apply_clock(get_parent().clock)
@@ -31,8 +32,13 @@ func apply_clock(playback: float) -> void:
 		else:
 			envelope = 1-smoothstep(rise,pulse_duration,measure_phase)
 	var attack_emphasis := 1-smoothstep(70.40,70.80,playback) if playback >= 70.40 else 0.0
-	scale = rest_scale * (1+pulse_amount * envelope+0.035*attack_emphasis)
+	var settings := get_node("/root/VisualSettings")
+	var amount: float = .25 if settings.reduced else settings.motion
+	var breath := sin(playback*2.1)*.012
+	var recoil := envelope*pulse_amount*amount
+	scale = rest_scale * Vector2(1+recoil+breath,1-recoil*.4-breath+0.035*attack_emphasis)
+	rotation = (sin(playback*TAU/9.6)*.035+sin(playback*TAU/measure)*.012)*amount
 	self_modulate = Color.WHITE.lerp(Color(1.5,1.2,1.2),attack_emphasis)
-	float_pixels = sin(playback * TAU / float_cycle) * float_amplitude
+	float_pixels = sin(playback * TAU / float_cycle) * float_amplitude*amount
 	# offset moves drawing only; position stays the stable formation/spawn origin.
 	offset = rest_offset + Vector2(0,float_pixels/maxf(0.001,scale.y))

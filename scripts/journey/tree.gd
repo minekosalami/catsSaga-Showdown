@@ -10,7 +10,7 @@ func refresh() -> void:
 	var sprite := get_node_or_null("Sprite2D") as Sprite2D
 	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if sprite == null or collision == null or sprite.texture == null:return
-	var height := 142.0*size_multiplier
+	var height := 128.0*size_multiplier
 	sprite.scale = Vector2.ONE*height/sprite.texture.get_height()
 	sprite.position.y = -height*.43
 	var shadow := get_node_or_null("GroundShadow") as Sprite2D
