@@ -430,16 +430,27 @@ func _spiral_direction() -> float:
 	return 1.0 if int(attack_index / 3) % 2 == 0 else -1.0
 
 func fire_gapped_ring(count: int, bullet_speed: float, offset: float, color: Color) -> void:
+	var aim := PI*.5
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player!=null:aim = (player.get_node("CollisionShape2D").global_position-global_position).angle()
+	var formation := preload("res://scripts/systems/combat_aim.gd")
+	var visible := formation.visible_count(count)
 	var gap := PI / 2 + sin(elapsed * 0.2) * 0.35
-	for i in range(count):
-		var angle := offset + TAU * i / count
+	for i in range(visible):
+		var angle := formation.lower_angle(i,visible,aim,offset)
 		if absf(wrapf(angle - gap, -PI, PI)) > 0.30:
 			fire_bullet(Vector2.RIGHT.rotated(angle), bullet_speed, color)
 
 func fire_flower(count: int, bullet_speed: float, petals: int, offset: float, color: Color) -> void:
-	for i in range(count):
-		var angle := offset + TAU * i / count
-		var petal_speed := bullet_speed + 25.0 * cos(angle * petals)
+	var aim := PI*.5
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player!=null:aim = (player.get_node("CollisionShape2D").global_position-global_position).angle()
+	var formation := preload("res://scripts/systems/combat_aim.gd")
+	var visible := formation.visible_count(count)
+	for i in range(visible):
+		var angle := formation.lower_angle(i,visible,aim,offset)
+		# Retain the petal speed modulation and existing curved projectile styles.
+		var petal_speed := bullet_speed + 25.0 * cos((offset+TAU*i/visible) * petals)
 		var style := 2 if i % petals == 0 else 3
 		fire_bullet(Vector2.RIGHT.rotated(angle), petal_speed, color, style, 0.10 * _spiral_direction())
 

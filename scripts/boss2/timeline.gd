@@ -138,8 +138,12 @@ func fire(direction: Vector2, speed: float, tint: Color) -> void:
 	battle.add_child(projectile)
 
 func ring(count: int, speed: float, offset: float, tint: Color, gap: float = 0.27) -> void:
-	for i in range(count):
-		var angle := TAU * i / count + offset
+	var origin := boss.global_position+Vector2(0,55)
+	var aim: float = (battle.player.hit_center()-origin).angle()
+	var formation := preload("res://scripts/systems/combat_aim.gd")
+	var visible := formation.visible_count(count)
+	for i in range(visible):
+		var angle := formation.lower_angle(i,visible,aim,offset)
 		if absf(wrapf(angle-PI/2,-PI,PI)) >= gap:
 			fire(Vector2.RIGHT.rotated(angle),speed,tint)
 

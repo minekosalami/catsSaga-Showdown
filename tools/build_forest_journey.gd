@@ -4,7 +4,8 @@ const Plan = preload("res://scripts/journey/layout.gd")
 const FLOOR = preload("res://assets/wonderland_human/ninja/tileset_floor.png")
 const LARGE = preload("res://assets/wonderland_human/ninja/Floor.png")
 const DETAILS = preload("res://assets/wonderland_human/ninja/details.png")
-const TREES := [preload("res://assets/overhaul_human/ninja/tree_round.png"),preload("res://assets/wonderland_human/ninja/tree_03.png"),preload("res://assets/wonderland_human/ninja/tree_04.png")]
+const TREES := [preload("res://assets/overhaul_human/ninja/tree_round.png"),preload("res://assets/wonderland_human/ninja/tree_04.png")]
+const Terrain = preload("res://scripts/journey/terrain_rules.gd")
 var sets := {}
 var foliage_material: ShaderMaterial
 var map: Node2D
@@ -50,7 +51,13 @@ func resources() -> void:
 	var water: Array[Vector2i] = []
 	for y in range(7,10):
 		for x in range(11,14): road.append(Vector2i(x,y)); water.append(Vector2i(x,y-1))
-	sets = {"grass":atlas(FLOOR,16,grass),"path":atlas(FLOOR,16,road),"water":atlas(LARGE,64,water,true),"bridge":atlas(LARGE,64,[Vector2i(1,14)]),"plants":atlas(DETAILS,64,[Vector2i(0,2),Vector2i(1,2),Vector2i(2,2),Vector2i(3,2),Vector2i(5,2),Vector2i(0,0),Vector2i(1,0),Vector2i(3,0)])}
+	var wood: Array[Vector2i] = []
+	for y in range(13,16):
+		for x in range(3):wood.append(Vector2i(x,y))
+	var quarters: Array[Vector2i] = []
+	for y in range(12,21):
+		for x in range(22,38):quarters.append(Vector2i(x,y))
+	sets = {"grass":atlas(FLOOR,16,grass),"path":atlas(FLOOR,16,road),"water":atlas(LARGE,64,water,true),"bridge":atlas(LARGE,64,wood),"trail_surface":atlas(FLOOR,8,quarters),"water_surface":atlas(LARGE,32,quarters),"plants":atlas(DETAILS,64,[Vector2i(0,2),Vector2i(1,2),Vector2i(2,2),Vector2i(3,2),Vector2i(5,2),Vector2i(0,0),Vector2i(1,0),Vector2i(3,0)])}
 	var water_source := sets.water.get_source(0) as TileSetAtlasSource
 	for cell in water:
 		water_source.create_alternative_tile(cell,1)
@@ -144,7 +151,7 @@ func body(label: String,point: Vector2,texture: Texture2D,height: float,width: f
 	if tree:
 		sprite.material = foliage_material
 		node.set_script(load("res://scripts/journey/tree.gd"))
-		node.size_multiplier = height/142.0
+		node.size_multiplier = height/128.0
 	own(sprite,node)
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"
@@ -186,6 +193,11 @@ func npc_copy(original: Node,path: String,point: Vector2) -> void:
 			shape.shape.height = 26
 			shape.position.y = -8
 			own(shape,trunk)
+	if copy.name in ["ForestNPC","EvilBart","Boss2NPC","BlankKitten"]:
+		var pose := Node.new()
+		pose.name = "VisualPose"
+		pose.set_script(preload("res://scripts/journey/npc_pose.gd"))
+		own(pose,copy)
 	_set_owner(copy)
 	protected.append(point)
 	stamp(point,150)
@@ -222,12 +234,19 @@ func build(area: String) -> void:
 		var node := Node2D.new();node.name = name;node.y_sort_enabled = name == "Characters";own(node)
 	var ground := layer("GrassGround","grass",2,-10)
 	var path := layer("Paths","path",2,-8)
+	path.hide() # Editable logical footprint; the connected quarter atlas renders it.
+	var trail_surface := layer("TrailSurface","trail_surface",2,-8)
 	var water := layer("Water","water",.5,-7)
+	water.hide() # Collision footprint stays 32px; only the surface needs quarter tiles.
+	var water_surface := layer("WaterSurface","water_surface",.5,-7)
 	var water_material := ShaderMaterial.new()
 	water_material.shader = preload("res://shaders/forest_water.gdshader")
-	water.material = water_material
+	water_surface.material = water_material
 	var bridge := layer("Bridges","bridge",.5,-6)
 	var plants := layer("Understory","plants",.5,-3)
+	var grass_material := ShaderMaterial.new()
+	grass_material.shader = preload("res://shaders/forest_understory.gdshader")
+	plants.material = grass_material
 	var grid := Vector2i(ceili(map.map_size.x/32),ceili(map.map_size.y/32))
 	var noise := FastNoiseLite.new();noise.seed = int(rng.seed);noise.frequency = .09
 	for y in grid.y:
@@ -236,6 +255,8 @@ func build(area: String) -> void:
 			var variant := 11 if rng.randf()<.75 else rng.randi_range(12,15)
 			ground.set_cell(cell,0,Vector2i(variant,12))
 	ground.modulate = Color("#dce8cf") if id == "deep_forest" else (Color("#d3e1df") if id == "flooded_forest" else Color.WHITE)
+	trail_surface.modulate = ground.modulate
+	water_surface.modulate = ground.modulate
 	route(Plan.points(id))
 	var width: float = map.map_size.x
 	# Three connected scenic loops per region: hand-composed branches, not empty fields.
@@ -245,6 +266,8 @@ func build(area: String) -> void:
 		var extent: float = map.map_size.y*(.76 if below else .24)
 		var first := Vector2(x-180,Plan.SEAM_Y)
 		var branch := PackedVector2Array([first,Vector2(x-160,extent-80),Vector2(x+80,extent),Vector2(x+320,extent-180),Vector2(x+360,Plan.SEAM_Y)])
+		if id=="flooded_forest":
+			branch = [PackedVector2Array([Vector2(844,912),Vector2(900,1500),Vector2(850,2200),Vector2(1104,2334),Vector2(1344,2154),Vector2(1500,1800),Vector2(1400,1200),Vector2(1376,1130)]),PackedVector2Array([Vector2(2144,816),Vector2(2087,737),Vector2(2200,440),Vector2(2680,600),Vector2(2440,1100)]),PackedVector2Array([Vector2(2850,912),Vector2(2580,1560),Vector2(2570,2080),Vector2(2810,2400),Vector2(3070,2334),Vector2(3552,2380),Vector2(3680,1990),Vector2(3552,1550),Vector2(3200,1300),Vector2(2850,912)])][index]
 		route(branch,70)
 		var discovery := Marker2D.new();discovery.name = "ScenicClearing"+str(index);discovery.position = Vector2(x+80,extent)
 		own(discovery,map.get_node("Discoveries"))
@@ -257,7 +280,9 @@ func build(area: String) -> void:
 		mark.position = landmark_points[i]
 		own(mark,map.get_node("Discoveries"))
 		if i==1:
-			route(PackedVector2Array([Vector2(width*.55,Plan.SEAM_Y),Vector2(width*.55-100,mark.position.y-60),mark.position]),65)
+			route(PackedVector2Array([Vector2(2440,1100),Vector2(2440,1500),mark.position]) if id=="flooded_forest" else PackedVector2Array([Vector2(width*.55,Plan.SEAM_Y),Vector2(width*.55-100,mark.position.y-60),mark.position]),65)
+		if id=="flooded_forest" and i==5:
+			route(PackedVector2Array([Vector2(3630,2154),mark.position]),55)
 	marker("Start",Plan.SPAWNS[id])
 	for alias in ["FromEntrance","FromDeep","FromBart","FromFlooded","FromEntranceShortcut","FromBartShortcut","FromFloodedShortcut","FromCave","FromWonderland"]:
 		marker(alias,Vector2(width-224,Plan.SEAM_Y) if (id=="entrance" and alias=="FromDeep") or (id=="deep_forest" and alias in ["FromBart","FromFlooded"]) or (id=="bart_area" and alias=="FromFloodedShortcut") else Plan.SPAWNS[id],Vector2.LEFT if alias in ["FromBart","FromFloodedShortcut"] else Vector2.RIGHT)
@@ -280,15 +305,33 @@ func build(area: String) -> void:
 	elif id=="flooded_forest":
 		npc_copy(original,"Characters/Boss2NPC",Vector2(3200,800));route(PackedVector2Array([Vector2(2850,Plan.SEAM_Y),Vector2(3200,864),Vector2(3480,Plan.SEAM_Y)]),90)
 	original.free()
-	# Marshes / connected pond banks stay away from NPC clearings and cross dry bridges.
+	# Two authored rectangular crossings, never a boardwalk stamped along a bank.
+	var crossings: Array[Rect2i] = []
+	if id=="flooded_forest":crossings.assign([Rect2i(54,24,13,4),Rect2i(103,65,10,4)])
+	for rect in crossings:
+		for y in range(rect.position.y,rect.end.y):
+			for x in range(rect.position.x,rect.end.x):
+				var cell := Vector2i(x,y)
+				# Side rails run along the banks of the deck; both walking ends stay open.
+				var tile := Vector2i(1,13 if y==rect.position.y else (15 if y==rect.end.y-1 else 14))
+				bridge.set_cell(cell,0,tile)
+				path_cells[cell] = true
+	bridge.modulate = Color("#c6b39a")
+	map.set_meta("bridge_rects",crossings)
+	# Recess pond banks around dry trails instead of producing slivers of planks.
 	for y in grid.y:
 		for x in grid.x:
 			var cell := Vector2i(x,y);var p := Vector2(cell)*32+Vector2(16,16)
 			var lake := ((p-Vector2(width*.55,map.map_size.y*.72))/Vector2(width*.14,180)).length()<1
 			if id=="flooded_forest": lake = absf(p.x-width*.49-sin(p.y*.006)*115)<110 or ((p-Vector2(width*.76,map.map_size.y*.65))/Vector2(450,320)).length()<1
-			if lake and not protected_point(p,180):
+			var channel := id=="flooded_forest" and absf(p.x-width*.49-sin(p.y*.006)*115)<110
+			var dry_shoulder := false
+			if id!="flooded_forest" and not channel and bridge.get_cell_source_id(cell)<0:
+				for offset in [Vector2i.ZERO,Vector2i.LEFT,Vector2i.RIGHT,Vector2i.UP,Vector2i.DOWN]:
+					if path_cells.has(cell+offset):dry_shoulder = true
+			var island := id=="flooded_forest" and p.distance_to(Vector2(width*.73+320,map.map_size.y*.76-180))<72
+			if lake and not island and not dry_shoulder and not protected_point(p,90 if id=="flooded_forest" else 180):
 				water_cells[cell] = true
-				if path_cells.has(cell):bridge.set_cell(cell,0,Vector2i(1,14))
 	for cell: Vector2i in water_cells:
 		var tx := 12;var ty := 7
 		if not water_cells.has(cell+Vector2i.LEFT):tx=11
@@ -303,6 +346,8 @@ func build(area: String) -> void:
 		if not path_cells.has(cell+Vector2i.UP):ty=7
 		elif not path_cells.has(cell+Vector2i.DOWN):ty=9
 		path.set_cell(cell,0,Vector2i(tx,ty))
+	Terrain.paint(trail_surface,path_cells,false)
+	Terrain.paint(water_surface,water_cells,true)
 	# Jittered, noise-weighted clusters keep a dense, irregular canopy on both sides.
 	var count := 0
 	for y in range(80,int(map.map_size.y)-32,82):
@@ -312,7 +357,7 @@ func build(area: String) -> void:
 			if distance_to_route(point)<118 or path_cells.has(cell) or water_cells.has(cell) or protected_point(point,178):continue
 			if rng.randf()<.08+maxf(0,noise.get_noise_2d(point.x*.025,point.y*.025))*.2:continue
 			var scale := rng.randf_range(.85,1.17) if rng.randf()<.80 else (rng.randf_range(.7,.85) if rng.randf()<.65 else rng.randf_range(1.25,1.5))
-			body("Tree"+str(count),point,TREES[rng.randi_range(0,2)],142*scale,9*scale,25*scale,true)
+			body("Tree"+str(count),point,TREES[rng.randi_range(0,TREES.size()-1)],128*scale,9*scale,25*scale,true)
 			count+=1
 			if count%3==0:
 				var p := point+Vector2(34,24)

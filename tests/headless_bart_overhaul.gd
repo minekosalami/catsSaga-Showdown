@@ -104,7 +104,8 @@ func run() -> void:
 	for bullet in get_nodes_in_group("enemy_bullets"):
 		speeds[roundi(bullet.speed)] = true
 		types[bullet.visual_style] = true
-	check(get_nodes_in_group("enemy_bullets").size() == 24 and speeds.size() > 1 and types.has(2) and types.has(3), "flower uses radial petals, varying speeds and heavy/diamond identities")
+	var directed := get_nodes_in_group("enemy_bullets").all(func(bullet):return bullet.direction.y>.05)
+	check(get_nodes_in_group("enemy_bullets").size() == 15 and directed and speeds.size() > 1 and types.has(2) and types.has(3), "directed petal fan preserves speed variety and heavy/diamond identities without doubling lower-field density")
 	await clear_bullets()
 	boss.fire_wave(15,210,0)
 	var wave_ok := true

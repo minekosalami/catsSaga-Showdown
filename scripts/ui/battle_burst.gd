@@ -27,7 +27,14 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func _draw() -> void:
-	preload("res://scripts/ui/human_effects.gd").draw_impact(self,Vector2.ZERO,age,duration,reach*.65,tint)
+	var reduced: bool = get_node("/root/VisualSettings").reduced
+	var extent := reach*(.48 if reduced else .85)
+	var human := preload("res://scripts/ui/human_effects.gd")
+	human.draw_impact(self,Vector2.ZERO,age,duration,extent,tint)
+	if not reduced:
+		for side in [-1,1]:
+			var point := Vector2(side*reach*age/duration*.75,-reach*age/duration*.25).round()
+			human.draw_impact(self,point,age,duration,extent*.32,tint)
 	var progress := clampf(age / duration, 0, 1)
 	var color := Color(tint, (1 - progress) * 0.65)
 	for i in range(12):

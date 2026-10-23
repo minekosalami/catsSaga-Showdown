@@ -20,6 +20,9 @@ var boss_sprite: Sprite2D
 var boss_offset := Vector2.ZERO
 var boss_scale := Vector2.ONE
 var boss_flash := 0.0
+var boss_recoil := 0.0
+var boss_attack := -1
+var boss_phase := 1
 
 func _ready() -> void:
 	z_index = -9
@@ -93,18 +96,31 @@ func _process(delta: float) -> void:
 		boss_sprite = candidate.get_node("Sprite2D")
 		boss_offset = boss_sprite.offset
 		boss_scale = candidate.sprite_resting_scale
+		preload("res://scripts/ui/pixel_art.gd").apply(boss_sprite)
+		boss_sprite.material.set_shader_parameter("display_size",boss_sprite.texture.get_size()*boss_scale)
 		candidate.health_changed.connect(_boss_health_changed)
 	if is_instance_valid(boss_sprite) and is_instance_valid(observed_boss) and not observed_boss.defeated_already:
 		boss_flash = maxf(0,boss_flash-delta/0.12)
 		boss_sprite.self_modulate = Color.WHITE.lerp(Color(1.65,1.35,1.45),boss_flash)
 		if clock > 7.45:
-			boss_sprite.offset = boss_offset+Vector2(0,sin(clock*1.8)*1.5/maxf(boss_sprite.scale.y,0.001))
-			boss_sprite.scale = boss_scale*(1+pulse*0.012)
+			if observed_boss.attack_index!=boss_attack:
+				boss_attack = observed_boss.attack_index
+				boss_recoil = 1.0
+			boss_recoil = maxf(0,boss_recoil-delta*8)
+			var amount: float = .25 if get_node("/root/VisualSettings").reduced else get_node("/root/VisualSettings").motion
+			var anticipate := 1-smoothstep(0,.18,observed_boss.shoot_timer)
+			boss_sprite.offset = boss_offset+Vector2(0,(sin(clock*1.8)*2.5+boss_recoil*5-anticipate*2)*amount/maxf(boss_sprite.scale.y,0.001))
+			boss_sprite.scale = boss_scale*Vector2(1+(pulse*.018+boss_recoil*.045)*amount,1-(pulse*.01+boss_recoil*.035)*amount)
+			boss_sprite.rotation = sin(clock*1.1)*.025*amount
 
 func _boss_health_changed(health: int, _maximum: int, _phase: int) -> void:
 	if health < last_boss_health:
 		impact = maxf(impact,0.32)
 		boss_flash = 1.0
+		preload("res://scripts/ui/battle_burst.gd").spawn(battle,observed_boss.global_position,look.accent,26)
+	if _phase!=boss_phase:
+		boss_phase = _phase
+		preload("res://scripts/ui/battle_burst.gd").spawn(battle,observed_boss.global_position,look.accent,85)
 	last_boss_health = health
 
 func update_clock(playback: float) -> void:

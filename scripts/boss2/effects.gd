@@ -52,7 +52,7 @@ func dissolve(point: Vector2, tint: Color, radius: float) -> void:
 func afterimage(sprite: Sprite2D) -> void:
 	if ghosts.size() >= MAX_GHOSTS:
 		ghosts.pop_front()
-	ghosts.append({"texture":sprite.texture,"position":sprite.global_position,"scale":sprite.global_scale,"age":0.0})
+	ghosts.append({"texture":sprite.texture,"position":sprite.global_position,"scale":sprite.global_scale,"flip_h":sprite.flip_h,"rotation":sprite.global_rotation,"age":0.0})
 
 func graze(point: Vector2, tint: Color) -> void:
 	graze_count += 1
@@ -93,8 +93,6 @@ func _draw() -> void:
 			draw_arc(p.point,p.dissolve_radius*(1+(1-fade)*0.6),0,TAU,16,Color(p.tint,fade*fade),1.2,true)
 		elif p.shard:
 			preload("res://scripts/ui/human_effects.gd").draw_impact(self,p.point,p.age,p.life,9,p.tint)
-			draw_set_transform(p.point,p.spin+p.age*6)
-			draw_colored_polygon(PackedVector2Array([Vector2(-3,-2),Vector2(4,0),Vector2(-1,4)]),Color(p.tint,fade))
 		else:
-			draw_line(p.point,p.point-p.velocity.normalized()*5,Color(p.tint,fade),1.2,true)
+			draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("sparkle",int(p.age*14)),Rect2(p.point.round()-Vector2(4,4),Vector2(8,8)),false,Color(p.tint,fade))
 	draw_set_transform(Vector2.ZERO)

@@ -37,7 +37,17 @@ def main():
             if file.suffix.lower() in (".mp3", ".wav"):
                 music += 1
     for path in ["scripts/boss.gd", "scenes/player.gd", "scripts/world/player.gd", "scripts/boss2/timeline.gd", "scripts/boss2/player.gd", "scripts/boss2/projectile.gd", "scripts/boss2/ricochet.gd", "scripts/boss2/laser.gd", "scripts/boss2/cross_laser.gd", "scripts/blankkitten/battle.gd", "scripts/blankkitten/star.gd", "scripts/blankkitten/timeline.gd", "scripts/systems/music.gd", "scripts/systems/ambience.gd", "default_bus_layout.tres"]:
-        assert (ROOT/path).read_bytes() == before(path), "Mechanics/audio changed: " + path
+        current = (ROOT/path).read_bytes()
+        expected = before(path)
+        # Only the follow-up task's three authorized direction corrections are
+        # exempt. Every other function, constant and byte must still match.
+        approved = {"scripts/boss.gd": ["fire_gapped_ring", "fire_flower"], "scripts/boss2/timeline.gd": ["ring"]}.get(path, [])
+        if approved:
+            source = current.decode()
+            for name in approved:
+                source = source.replace(function(source, name), function(expected.decode(), name), 1)
+            current = source.encode()
+        assert current == expected, "Protected mechanics/audio changed: " + path
         count += 1
     protected = {
         "scripts/enemybullet.gd": ["_physics_process", "_on_area_entered"],

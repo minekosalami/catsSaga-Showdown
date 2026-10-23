@@ -17,11 +17,14 @@ var water_nearby := false
 var sample_clock := 0.0
 var water_map_id := 0
 var water_layers: Array[Node] = []
+var rest_scale := Vector2.ONE
 func _ready() -> void:
  ink_material = ShaderMaterial.new()
  ink_material.shader = preload("res://shaders/human_icon_mask.gdshader")
  sprite = get_parent().sprite
  rest_offset = sprite.offset
+ rest_scale = sprite.scale
+ preload("res://scripts/ui/pixel_art.gd").apply(sprite)
  previous = get_parent().global_position
  z_index = -1
  shadow = Sprite2D.new()
@@ -54,6 +57,10 @@ func _process(delta: float) -> void:
  var moving: bool = actor.velocity.length()>15 and distance<100 and not actor.movement_locked and not Session.busy
  clock += delta*(12 if actor.velocity.length()>300 else 9)
  var bob := -absf(sin(clock))*2.2 if moving else 0.0
+ var breath := sin(clock*.26)*.012 if not moving else 0.0
+ var stride := sin(clock*2)*.018 if moving else 0.0
+ sprite.scale = sprite.scale.lerp(rest_scale*Vector2(1-breath*.5+stride,1+breath-stride*.6),1-exp(-delta*12))
+ sprite.rotation = lerp_angle(sprite.rotation,clampf(actor.velocity.x/390,-1,1)*.035 if moving else 0.0,1-exp(-delta*14))
  var target := rest_offset+Vector2(0,bob/maxf(sprite.scale.y,.001))
  sprite.offset = sprite.offset.lerp(target,1-exp(-delta*18))
  shadow.scale.x = 3.2+(.1*sin(clock) if moving else 0)
@@ -80,18 +87,22 @@ func stamp(actor: Node2D) -> void:
  var world := actor.get_parent()
  var plan := preload("res://scripts/wonderland/layout.gd")
  if plan.regions().has(Session.area_id) and not plan.OUTDOORS.has(Session.area_id) and not water_nearby:return
+ var ripple := water_nearby
+ if ripple and world.get("map")!=null:
+  var bridge := world.map.get_node_or_null("Bridges") as TileMapLayer
+  if bridge!=null and bridge.get_cell_source_id(bridge.local_to_map(bridge.to_local(water_point)))>=0:ripple = false
  # Pawprints belong to terrain. No footprints on furniture, battle air or menus.
  var picture := Sprite2D.new()
- picture.texture = RIPPLE if water_nearby else PAW
+ picture.texture = RIPPLE if ripple else PAW
  picture.material = ink_material
- picture.scale = Vector2(16,8)/512.0 if water_nearby else Vector2.ONE*(9.0/512.0)
+ picture.scale = Vector2(16,8)/512.0 if ripple else Vector2.ONE*(9.0/512.0)
  picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
- picture.modulate = Color("#ddfbff") if water_nearby else Color("#62543e")
+ picture.modulate = Color("#ddfbff") if ripple else Color("#62543e")
  picture.modulate.a = .24
  picture.z_index = -4
  world.add_child(picture)
  var facing: Vector2 = actor.facing_direction
  foot = 1-foot
- picture.global_position = water_point if water_nearby else actor.global_position+Vector2(0,24)+facing.orthogonal()*(5 if foot else -5)
- picture.rotation = 0 if water_nearby else facing.angle()+PI*.5
- prints.append({"sprite":picture,"age":0.0,"water":water_nearby})
+ picture.global_position = water_point if ripple else actor.global_position+Vector2(0,24)+facing.orthogonal()*(5 if foot else -5)
+ picture.rotation = 0 if ripple else facing.angle()+PI*.5
+ prints.append({"sprite":picture,"age":0.0,"water":ripple})

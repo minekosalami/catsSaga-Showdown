@@ -21,13 +21,14 @@ static func frame(kind: String,index: int) -> Texture2D:
 static func draw_projectile(canvas: CanvasItem,radius: float,tint: Color,clock: float,style: int = 0) -> void:
 	# A dark separation edge and exact-radius rim make dangerous geometry clear.
 	canvas.draw_circle(Vector2.ZERO,radius+1.3,Color("#080c19"))
-	var art := frame("nova",int(clock*11)%4)
-	canvas.draw_texture_rect(art,Rect2(Vector2.ONE*-radius,Vector2.ONE*radius*2),false,tint.lightened(.5))
+	var art := frame("sparkle",int(clock*9)) if style==1 else frame("nova",int(clock*11)%4)
+	var extent := ceilf(radius)*2
+	canvas.draw_texture_rect(art,Rect2(Vector2.ONE*-extent*.5,Vector2.ONE*extent),false,tint.lightened(.5))
 	if style==2:
 		var flame := frame("flame",int(clock*14))
 		var size := flame.get_size()*(radius*2.5/flame.get_height())
 		canvas.draw_texture_rect(flame,Rect2(Vector2(-size.x*.5,-radius*1.45),size),false,Color(1,1,1,.7))
-	elif style in [1,3]:
+	elif style==3:
 		canvas.draw_texture_rect(frame("sparkle",int(clock*12)),Rect2(Vector2.ONE*-radius*1.15,Vector2.ONE*radius*2.3),false,tint.lightened(.6))
 	canvas.draw_arc(Vector2.ZERO,radius,0,TAU,20,tint.lightened(.5),.9,true)
 	canvas.draw_circle(Vector2.ZERO,maxf(1,radius*.26),Color.WHITE)

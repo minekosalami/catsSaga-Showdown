@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "draw_calls": 108.0,
+    "median_frame_ms": 16.256,
+    "nodes": 6138,
+    "p95_frame_ms": 18.022,
+    "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+    "static_memory_mb": 78.1675090789795
+  },
+  "final": {
+    "draw_calls": 89.0,
+    "median_frame_ms": 15.862,
+    "nodes": 6206,
+    "p95_frame_ms": 20.317,
+    "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+    "static_memory_mb": 83.0711765289307
+  }
+}

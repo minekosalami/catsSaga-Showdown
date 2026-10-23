@@ -11,7 +11,7 @@ uniform bool boss_active = false;
 uniform vec4 arena = vec4(0.0,0.0,1.0,1.0);
 uniform sampler2D floor_sheet : filter_nearest;
 void fragment() {
- vec2 uv = UV;
+ vec2 uv = (floor(UV*vec2(270.0,450.0))+.5)/vec2(270.0,450.0);
  float t = clock*motion*(1.0-reduced*.7);
  vec2 p = (uv-vec2(.5,.30))*vec2(1.0,1.66);
  float r = length(p);
@@ -56,6 +56,11 @@ void fragment() {
  // Ribbon bands unfurl through the authored climax, outside the dodging floor.
  float ribbon = pow(.5+.5*sin(angle*7.0-r*23.0+t*.25+sin(angle*3.0-t*.1)),15.0);
  color += mix(a,b,r)*ribbon*climactic*.13*canopy;
+ // Layered depth grows at established section cues, never at new timestamps.
+ float echo = pow(.5+.5*sin((r+sin(angle*3.0-t*.12)*.025)*83.0+t*.32),24.0);
+ float corona = exp(-abs(r-(.33+sin(angle*8.0+t*.07)*.035))*38.0);
+ color += b*echo*(.035+phase*.065)*canopy*(1.0-reduced*.7);
+ color += mix(a,b,.65)*corona*(.05+climactic*.09)*canopy;
  color += a*(.025+phase*.035+bass*.014)*(edge+upper*.2);
  color += b*detail*.025*petals;
  float inside = step(arena.x,uv.x)*step(uv.x,arena.x+arena.z)*step(arena.y,uv.y)*step(uv.y,arena.y+arena.w);

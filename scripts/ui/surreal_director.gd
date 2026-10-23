@@ -14,13 +14,14 @@ var detail := 0.0
 var reactive_enabled := false
 var reduced_fx := false
 var motion := .8
+var portrait_scale := Vector2.ZERO
 func _ready() -> void:
 	battle = get_parent()
 	identity = 2 if battle.scene_file_path.contains("blankkitten") else (1 if battle.scene_file_path.contains("boss2") else 0)
 	z_index = -2
 	composite = SubViewportContainer.new()
 	composite.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	composite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	composite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(composite)
 	view = SubViewport.new()
 	view.size = Vector2i(270,450)
@@ -76,6 +77,12 @@ func update_clock(time: float) -> void:
 	var active := identity>0 or ("boss" in battle and is_instance_valid(battle.boss))
 	if identity==2:
 		if is_instance_valid(battle.hazards): battle.hazards.ball_material.set_shader_parameter("human_flame",preload("res://scripts/ui/human_effects.gd").frame("flame",int(clock*14)))
+		if is_instance_valid(battle.presentation):
+			var portrait: Sprite2D = battle.presentation.sprite
+			if portrait_scale==Vector2.ZERO:portrait_scale = portrait.scale
+			var breath := sin(clock*2.1)*.012*(.25 if reduced_fx else motion)
+			portrait.scale = portrait_scale*Vector2(1-breath*.6,1+breath)
+			# Existing beat-bob/spin pivots and all morph timing remain authoritative.
 		section = [0.05,.26,.43,.10,.65,.78,1.0,.08][Cue.stage_at(clock)]
 	else:
 		section = battle.get_node("CinematicArena").look.stage_at(clock)

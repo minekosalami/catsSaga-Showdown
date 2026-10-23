@@ -50,6 +50,8 @@ static func draw_motion_trail(canvas: CanvasItem, radius: float, tint: Color, di
 	var length := clampf((speed-90.0)*0.035,0,12)
 	if length <= 0:
 		return
-	for i in range(3):
-		var p := -direction*(radius+1+length*i/3)
-		canvas.draw_line(p,p-direction*length/3,Color(tint,0.22-i*0.065),maxf(1,2-i*0.45),true)
+	var clock: float = canvas.animation_time if "animation_time" in canvas else 0.0
+	for i in range(2):
+		var point := (-direction*(radius+3+length*i*.65)).round()
+		var size := Vector2.ONE*maxf(4,roundf(radius*(1.2-i*.3)))
+		canvas.draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("sparkle",int(clock*10+i)),Rect2(point-size*.5,size),false,Color(tint.lightened(.4),.22-i*.08))
