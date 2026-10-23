@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/forest_sway.gdshader" id="1_shb7n"]
+
+[resource]
+shader = ExtResource("1_shb7n")
+shader_parameter/strength = null

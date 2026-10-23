@@ -1,29 +1,32 @@
 extends Node2D
 
 const MAPS := {
-	"entrance": preload("res://scenes/world/forest_entrance.tscn"),
-	"deep_forest": preload("res://scenes/world/deep_forest.tscn"),
-	"bart_area": preload("res://scenes/world/bart_area.tscn"),
-	"flooded_forest": preload("res://scenes/world/flooded_forest.tscn"),
-	"underground_cave": preload("res://scenes/world/underground_cave.tscn"),
-	"wonderland_forest": preload("res://scenes/wonderland/wonderland_forest.tscn"),
-	"tea_gardens": preload("res://scenes/wonderland/tea_gardens.tscn"),
-	"mushroom_thicket": preload("res://scenes/wonderland/mushroom_thicket.tscn"),
-	"royal_woods": preload("res://scenes/wonderland/royal_woods.tscn"),
-	"wonderland_village": preload("res://scenes/wonderland/wonderland_village.tscn"),
-	"queens_castle": preload("res://scenes/wonderland/queens_castle.tscn"),
-	"castle_hall": preload("res://scenes/wonderland/castle_hall.tscn"),
-	"royal_library": preload("res://scenes/wonderland/royal_library.tscn"),
-	"banquet_hall": preload("res://scenes/wonderland/banquet_hall.tscn"),
-	"throne_room": preload("res://scenes/wonderland/throne_room.tscn"),
-	"mushroom_cottage": preload("res://scenes/wonderland/mushroom_cottage.tscn"),
-	"teapot_house": preload("res://scenes/wonderland/teapot_house.tscn"),
-	"flower_shop": preload("res://scenes/wonderland/flower_shop.tscn"),
-	"clockmakers_house": preload("res://scenes/wonderland/clockmakers_house.tscn"),
-	"bakery": preload("res://scenes/wonderland/bakery.tscn"),
-	"royal_gift_shop": preload("res://scenes/wonderland/royal_gift_shop.tscn"),
-	"storytellers_cottage": preload("res://scenes/wonderland/storytellers_cottage.tscn"),
-	"tiny_pink_house": preload("res://scenes/wonderland/tiny_pink_house.tscn")
+	"entrance": preload("res://scenes/journey/forest_entrance.tscn"),
+	"deep_forest": preload("res://scenes/journey/deep_forest.tscn"),
+	"bart_area": preload("res://scenes/journey/bart_area.tscn"),
+	"flooded_forest": preload("res://scenes/journey/flooded_forest.tscn")
+}
+## Recoverable source paths; inactive scenes are not initialized during play.
+const ARCHIVED_MAP_PATHS := {
+	"underground_cave": "res://scenes/world/underground_cave.tscn",
+	"wonderland_forest": "res://scenes/wonderland/wonderland_forest.tscn",
+	"tea_gardens": "res://scenes/wonderland/tea_gardens.tscn",
+	"mushroom_thicket": "res://scenes/wonderland/mushroom_thicket.tscn",
+	"royal_woods": "res://scenes/wonderland/royal_woods.tscn",
+	"wonderland_village": "res://scenes/wonderland/wonderland_village.tscn",
+	"queens_castle": "res://scenes/wonderland/queens_castle.tscn",
+	"castle_hall": "res://scenes/wonderland/castle_hall.tscn",
+	"royal_library": "res://scenes/wonderland/royal_library.tscn",
+	"banquet_hall": "res://scenes/wonderland/banquet_hall.tscn",
+	"throne_room": "res://scenes/wonderland/throne_room.tscn",
+	"mushroom_cottage": "res://scenes/wonderland/mushroom_cottage.tscn",
+	"teapot_house": "res://scenes/wonderland/teapot_house.tscn",
+	"flower_shop": "res://scenes/wonderland/flower_shop.tscn",
+	"clockmakers_house": "res://scenes/wonderland/clockmakers_house.tscn",
+	"bakery": "res://scenes/wonderland/bakery.tscn",
+	"royal_gift_shop": "res://scenes/wonderland/royal_gift_shop.tscn",
+	"storytellers_cottage": "res://scenes/wonderland/storytellers_cottage.tscn",
+	"tiny_pink_house": "res://scenes/wonderland/tiny_pink_house.tscn"
 }
 var map: Node2D
 var player: CharacterBody2D
@@ -39,6 +42,11 @@ var pending_encounter := "bart"
 var map_ui: CanvasLayer
 
 func _ready() -> void:
+	# Archived resources remain loadable in the editor, never as a playable save.
+	if not preload("res://scripts/journey/layout.gd").active(Session.area_id):
+		Session.area_id = "flooded_forest"
+		Session.entry_marker = "Start"
+		Session.restore_position = false
 	map = MAPS[Session.area_id].instantiate()
 	add_child(map)
 	player = preload("res://scenes/world/player.tscn").instantiate()
@@ -67,7 +75,8 @@ func _ready() -> void:
 	dialogue.finished.connect(_on_dialogue_finished)
 	for portal in map.get_node("Portals").get_children():
 		portal.travel_requested.connect(_travel)
-	preload("res://scripts/world/destination_sign.gd").install(map)
+	if not preload("res://scripts/journey/layout.gd").active(Session.area_id):
+		preload("res://scripts/world/destination_sign.gd").install(map)
 	_build_hud()
 	interaction_indicator = Label.new()
 	interaction_indicator.name = "InteractionIndicator"
@@ -149,7 +158,7 @@ func _build_hud() -> void:
 	interaction_hint.offset_bottom = -24
 	interaction_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interaction_hint.add_theme_font_size_override("font_size",14)
-	interaction_hint.text = "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
+	interaction_hint.text = ""
 
 func _process(_delta: float) -> void:
 	player.movement_locked = checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
@@ -166,7 +175,7 @@ func _process(_delta: float) -> void:
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	if nearest_npc != null:
 		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -62)
-	interaction_hint.text = nearest_npc.get_meta("interaction_label","Z  Interact") if nearest_npc != null else "WASD / ARROWS  Move   |   SHIFT  Sprint   |   Z  Interact   |   M  Map   |   SPACE  Inventory   |   ESC  Pause"
+	interaction_hint.text = nearest_npc.get_meta("interaction_label","Z  Interact") if nearest_npc != null else ""
 
 func _input(event: InputEvent) -> void:
 	if map_ui.handle_input(event):

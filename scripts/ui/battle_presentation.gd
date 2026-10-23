@@ -41,7 +41,7 @@ func update_clock(playback: float) -> void:
 	queue_redraw()
 
 func apply_shake(offset: Vector2) -> void:
-	var visual_offset := offset.limit_length(3.0) * shake_intensity
+	var visual_offset: Vector2 = offset.limit_length(3.0) * shake_intensity * (0.0 if get_node("/root/VisualSettings").reduced else get_node("/root/VisualSettings").motion)
 	position = visual_offset
 	background.position = background_origin + visual_offset
 

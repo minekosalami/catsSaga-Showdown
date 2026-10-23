@@ -1,0 +1,361 @@
+{
+  "files": {
+    "assets/overhaul_human/ninja/tree_round.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/objects/02.png",
+      "sha256": "3c9c81d7e07dbec0b7aa3d2c9b81dcbe6a26ff22fe55a9439e0e7f2c46b05619",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/stump.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/objects/0.png",
+      "sha256": "0c3f5475fb93a6b39f804597c09f99b8fa276c6472cea4a661205d24dbb13ccd",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/rock.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/objects/09.png",
+      "sha256": "b4c0bf7e447711d2243f01f8933172a80ac7eba448c5385261111b1649e2cb53",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_00.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/0.png",
+      "sha256": "d06120c37acd332f247500ff09d634a447296b1493616108073b9b8acba0d3ce",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_01.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/01.png",
+      "sha256": "2107efa7c6d793d903713db2734546c2fd2589a818c2c344adf46d20a8cf880a",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_02.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/02.png",
+      "sha256": "5902b733c8198c8c4acc556a69b5a46451ba14b2d1d366bb1cec2fa7890cead4",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_03.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/03.png",
+      "sha256": "e4163907711f8e098712ef9fe11916c9ff33b3b50aac1e0a7b5ef9c16006f9e2",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_04.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/04.png",
+      "sha256": "77657d704f542a18f234e2789670fe3b46d129a6d7e87482d6957eda41a5635b",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_05.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/05.png",
+      "sha256": "56abff622d657cda4b51f183d7d1ca17db76abae3b5f5d2fee8510403ea48df1",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_06.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/06.png",
+      "sha256": "6d3120afb62f05a8ae34bb6bd96eb74169a489737422d43abcb6ba019fda97b6",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_07.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/07.png",
+      "sha256": "f2fda9d5333c481fb57c1fd98c5dfb99239629c9709d0976313a1c7773b7f8b1",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_08.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/08.png",
+      "sha256": "70686fe7ad58c7e714a7652dff8457015398da336290de8089e3a0cbb682f172",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_09.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/09.png",
+      "sha256": "60168fe10ab13768877dbd9e7f789f19961d541ad8ff05ac527a6cd55538cac2",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_10.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/10.png",
+      "sha256": "5701915e8551cd9f2801918df38f4497b50e6b16224f4024da8be1e1c468a60a",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/flame_11.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/flame/frames/11.png",
+      "sha256": "42d9b84fd14b627a3973ba8c81d05ea2cecc80992f3c7d8d5a7c3f62bd1a52e3",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_00.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/0.png",
+      "sha256": "9da00571a01462cfa7b8f0ccb58fa7759f72bb396826b80949f41b4052d76305",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_01.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/1.png",
+      "sha256": "6a10d9a30d8a10ee3e8ea7f010ae2bf5f44e34d91809693a843b45c81a219ae2",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_02.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/2.png",
+      "sha256": "4418c9eb26ecdc0eccabab279c7d503fd56afb659eaaf97c62cfe9d0363ef4b4",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_03.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/3.png",
+      "sha256": "7bf0986cc241093f01974865d0614194564881a4c195322dd2e22da24189a537",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_04.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/4.png",
+      "sha256": "7da08d3209d239993eb955c3b35c9ad102c5b9568330720919ad67ae88b5ae7b",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/nova_05.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/nova/5.png",
+      "sha256": "48853a20d368c590c447f073c57a0da9fb2cf7544003e68971b1b457fa8e278d",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/sparkle_00.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/sparkle/0.png",
+      "sha256": "94e3342217022819360df026fffe0e1bf2a57801a4be5222409deecf107ef369",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/sparkle_01.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/sparkle/1.png",
+      "sha256": "c582d4133040b9acd86b36f864699f2ed43a2d2a7f3ac65907a05aec904d660e",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/sparkle_02.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/sparkle/2.png",
+      "sha256": "0a4819778b97ab470da6e429809dea30ea8bdbe268c9158467abd54ca4b9fab7",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/sparkle_03.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/sparkle/3.png",
+      "sha256": "9cd0b25a194dcdf3be0883459fe6cfd1c12bda780a295b03b7d2b77f3ec5f9db",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/sparkle_04.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/sparkle/4.png",
+      "sha256": "cff4311adebfd10899a26d13512e1b5e28c667756ea35d4d588ec1937ffe7fde",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_00.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/0.png",
+      "sha256": "e6b0d2e8973ea29cb72477f38297dce75ebd5c7a985ccd56d99a27a30ba1c164",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_01.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/1.png",
+      "sha256": "5184fbe0d8d7360cad8f9add1d548ed8303bbba80bdc81423c0f44ce15798832",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_02.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/2.png",
+      "sha256": "4c8ef9f14dde8252b60f7b91cba4e4a44b9ea555cd288b052f06f4746c8b9d3e",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_03.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/3.png",
+      "sha256": "71ebe2cab6291ccad55fb250d5ee024b59b810f66d7e2c81965e69e4e25def49",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_04.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/4.png",
+      "sha256": "7281922c96f794abdf1dcee7fd11e133603e55a1ccbf1d2e878cbea63a549bee",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/smoke_05.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/smoke/5.png",
+      "sha256": "0c1aea6ec6775f8f26a28b8350542a0bc5c1644f34add98b967a9df799a80b73",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_00.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00000.png",
+      "sha256": "ca82c3af8f5cc8156ebee5354e76592007efce04d897fa534148bd06b8fd2aaa",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_01.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00001.png",
+      "sha256": "5df90c7041963cf9cf30ad523bad8877a5d57b0fcfb139ed0128ccbffd1dd970",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_02.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00002.png",
+      "sha256": "45ffd71904c5b5456b3362c160fe9ae6fee493bab938485a2db53fa087e751d3",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_03.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00003.png",
+      "sha256": "bc8a12a7ad27f112e4afc5516652ae1e69187b2f32d79e63109de742d7689e78",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_04.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00004.png",
+      "sha256": "aeaedc1d2986e973dd9612a3af0f51be50dfdabfc8ef7289ac82c8eb54dfd794",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_05.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00005.png",
+      "sha256": "8436e50e463a33d82d68901f4fb6371ebc47d7b9b6ed87817b686638279ec0e9",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_06.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00006.png",
+      "sha256": "265d3fc0aedd12308a2922612a79f72aa4cc7fbb094ddcda05e6198d70ebb25c",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_07.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00007.png",
+      "sha256": "5dcdda2aff383f088b687f3fb2b57280a19958f00d1265e6baf0fb4808eadfd1",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_08.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00008.png",
+      "sha256": "fb3a183d483fe2b19cd0fd75de6ffba509a9a453cbf35121ccb305d7dfd170bc",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_09.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00009.png",
+      "sha256": "54a6bf80209657d7a378ba07f9054e54c7d0dde4ddbc0c56b8d0a5c4f1d7a043",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_10.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00010.png",
+      "sha256": "1c813e938b057fed625e7c76c6535a7c23ab4915e2c3625ca464c9eee929bfdd",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    },
+    "assets/overhaul_human/ninja/leaf_11.png": {
+      "source_url": "https://github.com/clear-code-projects/Zelda/blob/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/15%20-%20fixes%20audio.zip",
+      "archive_path": "15 - fixes audio/graphics/particles/leaf1/leaf1_00011.png",
+      "sha256": "d8f7d170b74d8f59bed0f86437c143b76df448aabcf5c9252bf2782ad7753b4d",
+      "creator": "Pixel-Boy",
+      "license": "CC0",
+      "evidence": "Original 2022 distribution README credits Ninja Adventure artwork to Pixel-Boy and declares CC0; first-party Pixel-Boy repository corroborates the artist/pack."
+    }
+  },
+  "license_evidence": {
+    "url": "https://raw.githubusercontent.com/clear-code-projects/Zelda/5f4c57bfbb162d2f19b287a5c24816d93c17e08d/README.md",
+    "sha256": "52ef58eecc27cbe36e768736d2417a455959d9edbea1e3522025618c3f9c53cc",
+    "notice_path": "assets/overhaul_human/LICENSE.md"
+  }
+}

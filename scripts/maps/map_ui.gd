@@ -31,6 +31,7 @@ func setup(host: Node2D) -> void:
 	layer = 30
 	var terrain_path := "res://resources/maps/underground_terrain.res" if Session.area_id == "underground_cave" else "res://resources/maps/world_terrain.res"
 	if Layout.EXTRA.has(Session.area_id): terrain_path = "res://resources/maps/"+Layout.Wonderland.group(Session.area_id)+"_terrain.res"
+	if preload("res://scripts/journey/layout.gd").active(Session.area_id): terrain_path = "res://resources/journey/world_terrain.res"
 	var terrain: Texture2D = load(terrain_path)
 	boss_locations = terrain.get_meta("boss_locations", {})
 	if Layout.same_map(Session.area_id,"flooded_forest"):
@@ -145,6 +146,10 @@ func open_map() -> void:
 	target_zoom = 2.0
 	full_map.zoom = target_zoom
 	full_map.center_world = Layout.world_point(Session.area_id,world.player.position)
+	if preload("res://scripts/journey/layout.gd").active(Session.area_id):
+		target_zoom = clampf((full_map.size.x-32)/Layout.SIZE.x,.7,2.0)
+		full_map.zoom = target_zoom
+		full_map.center_world = Vector2(Layout.SIZE)*.5
 	world.player.velocity = Vector2.ZERO
 	world.player.movement_locked = true
 	map_frame.show()
@@ -190,8 +195,8 @@ func handle_input(event: InputEvent) -> bool:
 			inventory_opened = true
 			var items: Array[String] = []
 			if Session.story_flags.get("flooded_forest_key_obtained",false): items.append("Flooded Forest Key")
-			if Session.story_flags.get("cave_red_key_obtained",false): items.append("Red Key")
-			if Session.story_flags.get(Layout.Wonderland.PINK_KEY,false): items.append("Pink Wonderland Key")
+			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get("cave_red_key_obtained",false): items.append("Red Key")
+			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get(Layout.Wonderland.PINK_KEY,false): items.append("Pink Wonderland Key")
 			inventory_contents.text = "\n".join(items) if not items.is_empty() else "No items collected."
 			inventory.show()
 			world.player.velocity = Vector2.ZERO
@@ -295,10 +300,11 @@ func visible_boss_markers() -> Array:
 	for id in boss_locations:
 		var boss: Dictionary = boss_locations[id]
 		var cell := Vector2i(boss.local_position / Layout.TILE_PIXELS) / Session.exploration.CELL_TILES
-		var defeated: bool = Session.evil_bart_defeated if id == "bart" else Session.story_flags.get("boss2_defeated",false)
+		var defeated: bool = Session.evil_bart_defeated if id == "bart" else Session.story_flags.get(id+"_defeated",false)
 		var discovered: bool = defeated or Session.exploration.visited(boss.area,cell)
 		if not discovered and not Session.reveal_all_locations: continue
-		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":"Evil Bart" if id == "bart" else "Boss 2","color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
+		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":{"bart":"Evil Bart","boss2":"Boss 2","blankkitten":"BlankKitten"}.get(id,id),"color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
+	if preload("res://scripts/journey/layout.gd").active(Session.area_id): return markers
 	var cave_discovered: bool = Session.story_flags.get("underground_cave_discovered",false) or Session.exploration.region_discovered("underground_cave")
 	if cave_entrance != null and (cave_discovered or Session.reveal_all_locations):
 		markers.append({"id":"underground_cave","area":"flooded_forest","local_position":cave_entrance,"point":Layout.world_point("flooded_forest",cave_entrance),"defeated":false,"discovered":cave_discovered,"color":Color("#D9DED2") if cave_discovered else Color("#E4B765"),"label":"Underground Cave"})
@@ -321,5 +327,6 @@ func visible_region_markers() -> Array:
 		if area == "flooded_forest": discovered = discovered or Session.story_flags.get("flooded_forest_unlocked",false) or Session.story_flags.get("boss2_defeated",false)
 		if not discovered and not Session.reveal_all_locations: continue
 		var point := Vector2(Layout.region(area).size)*Layout.TILE_PIXELS*.5
+		if preload("res://scripts/journey/layout.gd").active(area): point.y*=1.6
 		markers.append({"id":area,"area":area,"local_position":point,"point":Layout.world_point(area,point),"label":Layout.region(area).name,"discovered":discovered})
 	return markers

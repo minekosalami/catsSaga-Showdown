@@ -1,8 +1,8 @@
 extends RefCounted
 
 const Sketch := preload("res://scripts/ui/sketch_theme.gd")
-const INK := Color("#10161D")
-const EDGE := Color("#586875")
+const INK := Color("#10111C")
+const EDGE := Color("#776A91")
 const BLUE := Color("#81D8ED")
 const PAPER := Color("#F4F0E7")
 
@@ -12,16 +12,16 @@ static func theme() -> Theme:
 	return result
 
 static func card() -> StyleBoxFlat:
-	var box := Sketch.box(Color(INK,0.90),Color("#374554"))
+	var box := Sketch.box(Color(INK,0.96),Color("#655A77"))
 	box.set_content_margin_all(8)
-	box.border_width_left = 1
+	box.border_width_left = 3
 	box.border_width_right = 1
 	box.border_width_top = 1
 	box.border_width_bottom = 1
-	box.corner_radius_top_left = 2
+	box.corner_radius_top_left = 0
 	box.corner_radius_top_right = 2
 	box.corner_radius_bottom_left = 2
-	box.corner_radius_bottom_right = 2
+	box.corner_radius_bottom_right = 0
 	return box
 
 static func progress(bar: ProgressBar, tint: Color = BLUE) -> void:

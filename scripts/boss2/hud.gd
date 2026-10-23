@@ -181,7 +181,7 @@ func update(clock: float) -> void:
 
 func show_phase(title: String) -> void:
 	current_phase_label.text = title
-	phase_transition.flash_strength = phase_flash_strength
+	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
 	phase_transition.border_strength = phase_border_strength
 	var tint := Color("#B6EAF2") if title in ["RICOCHET()","Finale()"] else HUDStyle.BLUE
 	if title == "CrossLaser()":

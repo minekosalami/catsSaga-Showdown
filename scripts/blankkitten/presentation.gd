@@ -43,7 +43,8 @@ func _ready() -> void:
 	background_viewport.disable_3d = true
 	background_viewport.gui_disable_input = true
 	background_viewport.world_2d = World2D.new()
-	background_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	background_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED if battle.has_node("SurrealDirector") else SubViewport.UPDATE_ALWAYS
+	background_container.visible = not battle.has_node("SurrealDirector")
 	background_container.add_child(background_viewport)
 	smoke = ColorRect.new()
 	smoke.name = "LayeredAtmosphere"
@@ -121,7 +122,7 @@ func update_clock(time: float) -> void:
 	fire_strength = Cue.fire_at(clock)
 	fire_material.set_shader_parameter("clock",clock)
 	fire_material.set_shader_parameter("intensity",fire_strength)
-	var strength := .35 if battle.reduced_effects else 1.0
+	var strength: float = .25 if battle.reduced_effects or get_node("/root/VisualSettings").reduced else 1.0
 	fire_material.set_shader_parameter("strength",strength)
 	var resolution := smoothstep(130.28,Cue.END,clock)
 	smoke_strength = (.15+distortion*.06+fire_strength*.45)*(1-resolution*.85)
@@ -149,16 +150,16 @@ func update_clock(time: float) -> void:
 	var section := Cue.stage_at(clock)
 	var intensity: float = [0.55,0.8,1.25,0.5,1.45,1.65,2.0,0.5][section]
 	var settle := 1-smoothstep(130.28,Cue.END,clock) if section == 7 else 1.0
-	intensity *= settle
+	intensity *= settle*get_node("/root/VisualSettings").motion
 	var beat := clock / Cue.BEAT * TAU
 	# Independent nested pivots prevent a spin tween from overriding the bob.
 	bob_pivot.position.y = sin(beat)*3.2*intensity
-	bob_pivot.rotation = sin(beat*0.5)*deg_to_rad(3+minf(intensity,2))*settle
+	bob_pivot.rotation = sin(beat*0.5)*deg_to_rad(3+minf(intensity,2))*settle*get_node("/root/VisualSettings").motion
 	var target := Cue.morph_at(clock)
 	if target >= 0:
 		var progress := clampf((clock-(Cue.STARTS[target]-Cue.MORPH))/Cue.MORPH,0,1)
 		spin_direction = 1 if target%2 == 1 else -1
-		spin_pivot.rotation = spin_direction*TAU*smoothstep(0,1,progress)
+		spin_pivot.rotation = spin_direction*TAU*smoothstep(0,1,progress) if not get_node("/root/VisualSettings").reduced else 0.0
 	else:
 		spin_pivot.rotation = 0 # 2π is the same visual orientation at the join.
 	if title != null:
@@ -170,7 +171,7 @@ func _draw() -> void:
 	var rect: Rect2 = battle.arena_rect
 	var transition := Cue.morph_at(clock)
 	var beat := 1-smoothstep(0,.23,fposmod(clock,Cue.MEASURE))
-	var strength := .35 if battle.reduced_effects else 1.0
+	var strength: float = .25 if battle.reduced_effects or get_node("/root/VisualSettings").reduced else 1.0
 	var resolution := smoothstep(130.28,Cue.END,clock)
 	var tint := Color("#EAE4F3").lerp(Color("#FFADB4"),fire_strength*.25)
 	# Technical ornament stays outside the gameplay silhouette.

@@ -1,0 +1,177 @@
+{
+  "method": "Read-only source PCM analysis, 22050 Hz mono, 2048-sample Hann FFT / 1024 hop. Existing authoritative encounter cues define sections; no invented beat timestamps. RMS and flux inform presentation only, not attacks.",
+  "tracks": {
+    "evil_bart": {
+      "source": "assets/fight.v.scale - catsSaga version.mp3",
+      "sha256": "936051ef9ea4de0ed3a2d44227b5b25eeb88769fe36855c1b2bb42b2a42874b9",
+      "sections": [
+        {
+          "start": 0,
+          "end": 6.85,
+          "rms_dbfs": -26.22,
+          "mean_spectral_centroid_hz": 1557.9,
+          "mean_positive_spectral_flux": 0.1622
+        },
+        {
+          "start": 6.85,
+          "end": 20.57,
+          "rms_dbfs": -3.42,
+          "mean_spectral_centroid_hz": 803.0,
+          "mean_positive_spectral_flux": 0.3233
+        },
+        {
+          "start": 20.57,
+          "end": 34.28,
+          "rms_dbfs": -3.75,
+          "mean_spectral_centroid_hz": 842.7,
+          "mean_positive_spectral_flux": 0.3163
+        },
+        {
+          "start": 34.28,
+          "end": 48,
+          "rms_dbfs": -3.75,
+          "mean_spectral_centroid_hz": 901.8,
+          "mean_positive_spectral_flux": 0.3295
+        },
+        {
+          "start": 48,
+          "end": 61.71,
+          "rms_dbfs": -3.42,
+          "mean_spectral_centroid_hz": 869.4,
+          "mean_positive_spectral_flux": 0.332
+        },
+        {
+          "start": 61.71,
+          "end": 89.14,
+          "rms_dbfs": -3.44,
+          "mean_spectral_centroid_hz": 841.2,
+          "mean_positive_spectral_flux": 0.3303
+        },
+        {
+          "start": 89.14,
+          "end": 116,
+          "rms_dbfs": -3.01,
+          "mean_spectral_centroid_hz": 851.3,
+          "mean_positive_spectral_flux": 0.3236
+        },
+        {
+          "start": 116,
+          "end": 123,
+          "rms_dbfs": -12.26,
+          "mean_spectral_centroid_hz": 1213.1,
+          "mean_positive_spectral_flux": 0.2948
+        }
+      ]
+    },
+    "doppelcat": {
+      "source": "assets/soundtrack/SyNaPse - 003.mp3",
+      "sha256": "10eef74b6c31274fecbd379b218e3e8ce36c972c8fe8aa9af0d90c3bc321571e",
+      "sections": [
+        {
+          "start": 0,
+          "end": 12.8,
+          "rms_dbfs": -13.36,
+          "mean_spectral_centroid_hz": 1917.6,
+          "mean_positive_spectral_flux": 0.344
+        },
+        {
+          "start": 12.8,
+          "end": 38.4,
+          "rms_dbfs": -11.69,
+          "mean_spectral_centroid_hz": 2764.2,
+          "mean_positive_spectral_flux": 0.335
+        },
+        {
+          "start": 38.4,
+          "end": 64,
+          "rms_dbfs": -8.86,
+          "mean_spectral_centroid_hz": 2234.6,
+          "mean_positive_spectral_flux": 0.294
+        },
+        {
+          "start": 64,
+          "end": 70.4,
+          "rms_dbfs": -10.95,
+          "mean_spectral_centroid_hz": 1480.3,
+          "mean_positive_spectral_flux": 0.234
+        },
+        {
+          "start": 70.4,
+          "end": 89.6,
+          "rms_dbfs": -8.77,
+          "mean_spectral_centroid_hz": 2231.9,
+          "mean_positive_spectral_flux": 0.294
+        },
+        {
+          "start": 89.6,
+          "end": 140.8,
+          "rms_dbfs": -11.29,
+          "mean_spectral_centroid_hz": 1160.5,
+          "mean_positive_spectral_flux": 0.2124
+        }
+      ]
+    },
+    "blankkitten": {
+      "source": "assets/soundtrack/catVibes - 004.mp3",
+      "sha256": "a7a6c213749d619adebd831fe4c4c53bff4eade01adb5a48d8553e2db5b0c179",
+      "sections": [
+        {
+          "start": 0,
+          "end": 13.71,
+          "rms_dbfs": -12.35,
+          "mean_spectral_centroid_hz": 1525.5,
+          "mean_positive_spectral_flux": 0.2895
+        },
+        {
+          "start": 13.71,
+          "end": 34.28,
+          "rms_dbfs": -9.59,
+          "mean_spectral_centroid_hz": 1607.2,
+          "mean_positive_spectral_flux": 0.3297
+        },
+        {
+          "start": 34.28,
+          "end": 61.71,
+          "rms_dbfs": -11.71,
+          "mean_spectral_centroid_hz": 1761.3,
+          "mean_positive_spectral_flux": 0.3099
+        },
+        {
+          "start": 61.71,
+          "end": 68.57,
+          "rms_dbfs": -13.72,
+          "mean_spectral_centroid_hz": 1389.7,
+          "mean_positive_spectral_flux": 0.2694
+        },
+        {
+          "start": 68.57,
+          "end": 89.14,
+          "rms_dbfs": -9.62,
+          "mean_spectral_centroid_hz": 1610.0,
+          "mean_positive_spectral_flux": 0.3307
+        },
+        {
+          "start": 89.14,
+          "end": 102.85,
+          "rms_dbfs": -9.74,
+          "mean_spectral_centroid_hz": 1653.9,
+          "mean_positive_spectral_flux": 0.3406
+        },
+        {
+          "start": 102.85,
+          "end": 130.28,
+          "rms_dbfs": -9.68,
+          "mean_spectral_centroid_hz": 1631.4,
+          "mean_positive_spectral_flux": 0.3357
+        },
+        {
+          "start": 130.28,
+          "end": 145.71,
+          "rms_dbfs": -16.21,
+          "mean_spectral_centroid_hz": 1237.3,
+          "mean_positive_spectral_flux": 0.2308
+        }
+      ]
+    }
+  }
+}

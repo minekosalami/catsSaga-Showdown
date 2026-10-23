@@ -1,12 +1,12 @@
 extends Node2D
 
+var clock := 0.0
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+func _process(delta: float) -> void:
+	clock += delta
+	queue_redraw()
 func _draw() -> void:
-	# Original ink-framed terminal token; distinct from cats and round bullets.
-	var shell := PackedVector2Array([Vector2(-19, -17), Vector2(0, -25), Vector2(19, -17), Vector2(22, 13), Vector2(0, 24), Vector2(-22, 13)])
-	draw_colored_polygon(shell, Color("#111218"))
-	shell.append(shell[0])
-	draw_polyline(shell, Color("#eeeae2"), 2.0, true)
-	draw_polyline(PackedVector2Array([Vector2(-10, -7), Vector2(-15, 0), Vector2(-10, 7)]), Color("#eeeae2"), 2.0, true)
-	draw_polyline(PackedVector2Array([Vector2(10, -7), Vector2(15, 0), Vector2(10, 7)]), Color("#eeeae2"), 2.0, true)
-	draw_line(Vector2(3, -8), Vector2(-3, 8), Color("#e498bc"), 2.0, true)
-	draw_line(Vector2(-8, 17), Vector2(7, 18), Color("#888890"), 1.0, true)
+	draw_circle(Vector2(0,2),25,Color("#0a0c18"))
+	draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("flame",int(clock*12)),Rect2(-18,-30,36,58),false)
+	draw_arc(Vector2.ZERO,24,clock*.2,clock*.2+TAU*.72,32,Color("#e7a5c6"),1,true)

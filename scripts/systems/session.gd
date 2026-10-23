@@ -122,6 +122,7 @@ func new_game() -> void:
 	restore_position = false
 	evil_bart_defeated = false
 	story_flags.clear()
+	story_flags[preload("res://scripts/journey/layout.gd").REVISION] = true
 	exploration.reset()
 	map_reveal_cheat = false
 	key_notification_pending = false
@@ -130,6 +131,7 @@ func new_game() -> void:
 		save_current()
 
 func travel(destination: String, marker: String, cave_motion: bool = false) -> void:
+	if not preload("res://scripts/journey/layout.gd").active(destination): return
 	if busy:
 		return
 	area_id = destination
@@ -170,6 +172,7 @@ func begin_boss2_battle(position_before_battle: Vector2) -> void:
 
 ## Future encounters use this entry point without duplicating the curtain.
 func begin_encounter(identifier: String, host_path: String, before: Vector2, completed_flag: String) -> void:
+	if identifier == "incarna": return # Complete implementation retained for relocation.
 	if busy or story_flags.get(completed_flag, false):
 		return
 	return_position = before
@@ -213,6 +216,7 @@ func main_menu() -> void:
 	await transition_to("res://scenes/main_menu.tscn")
 
 func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false) -> bool:
+	if scene_path.begins_with("res://scenes/incarna/") or scene_path.begins_with("res://scenes/wonderland/") or scene_path=="res://scenes/world/underground_cave.tscn": return false
 	if busy:
 		return false
 	busy = true
@@ -318,8 +322,9 @@ func _freeze_entry_tree(node: Node, root_node: bool = true) -> void:
 func return_to_cave() -> void:
 	if busy: return
 	encounter_active = false
-	area_id = "underground_cave"
-	restore_position = true
+	area_id = "flooded_forest"
+	entry_marker = "Start"
+	restore_position = false
 	cave_event_active = false
 	await transition_to("res://scenes/world/overworld.tscn")
 

@@ -78,6 +78,15 @@ func validate(value: Variant) -> Dictionary:
 		return {}
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true
+	# Preserve every archived flag/fog byte. Old saves load safely in the active
+	# forest without rewriting or deleting the original file during read.
+	var journey := preload("res://scripts/journey/layout.gd")
+	if not journey.active(area):
+		area = "flooded_forest"
+		point = journey.SPAWNS[area]
+	elif not flags.get(journey.REVISION,false):
+		point = journey.SPAWNS[area]
+	flags[journey.REVISION] = true
 	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:

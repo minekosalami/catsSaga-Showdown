@@ -42,11 +42,8 @@ static func shared_atlas() -> ImageTexture:
 	return atlas
 
 static func draw_orb(canvas: CanvasItem, radius: float, tint: Color, clock: float) -> void:
-	var shared := shared_atlas()
-	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*(-radius-4),Vector2.ONE*(radius+4)*2),Rect2(0,128,64,64),tint)
-	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*-radius,Vector2.ONE*radius*2),Rect2(0,0,64,64),tint)
-	canvas.draw_texture_rect_region(shared,Rect2(Vector2.ONE*-radius*0.64,Vector2.ONE*radius*1.28),Rect2(0,64,64,64),Color(1,1,1,0.94+0.06*sin(clock*4)))
-	canvas.draw_arc(Vector2.ZERO,radius-0.5,0,TAU,24,tint.lightened(0.25),1,true)
+	var style: int = canvas.visual_style if "visual_style" in canvas else 1
+	preload("res://scripts/ui/human_effects.gd").draw_projectile(canvas,radius,tint,clock,style)
 
 static func draw_motion_trail(canvas: CanvasItem, radius: float, tint: Color, direction: Vector2, speed: float) -> void:
 	# Low-opacity tail outside the crisp core. No stored positions or nodes.

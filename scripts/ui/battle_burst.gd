@@ -27,6 +27,7 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func _draw() -> void:
+	preload("res://scripts/ui/human_effects.gd").draw_impact(self,Vector2.ZERO,age,duration,reach*.65,tint)
 	var progress := clampf(age / duration, 0, 1)
 	var color := Color(tint, (1 - progress) * 0.65)
 	for i in range(12):
