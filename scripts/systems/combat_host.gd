@@ -43,10 +43,11 @@ func return_to_forest() -> void:
 	Session.return_to_forest()
 
 func retry() -> void:
-	Session.transition_to("res://scenes/combat_host.tscn", true)
+	if battle.game_over and Session.encounter_active:Session.retry_last_save()
+	else:Session.transition_to("res://scenes/combat_host.tscn",true)
 
 func main_menu() -> void:
-	Session.main_menu()
+	Session.request_main_menu()
 
 func finish_entry() -> void:
 	Session.restore_suspended_modes()

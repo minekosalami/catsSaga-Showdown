@@ -77,10 +77,11 @@ func _ready() -> void:
 		portal.travel_requested.connect(_travel)
 	if not preload("res://scripts/journey/layout.gd").active(Session.area_id):
 		preload("res://scripts/world/destination_sign.gd").install(map)
+	preload("res://scripts/world/save_statue.gd").install(map)
 	_build_hud()
 	interaction_indicator = Label.new()
 	interaction_indicator.name = "InteractionIndicator"
-	interaction_indicator.text = "[Z]"
+	interaction_indicator.text = "["+get_node("/root/GameSettings").binding_label("interact")+"]"
 	interaction_indicator.add_theme_font_override("font", preload("res://assets/ui/fonts/DejaVuSansMono.ttf"))
 	interaction_indicator.add_theme_font_size_override("font_size", 18)
 	interaction_indicator.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -173,15 +174,16 @@ func _process(_delta: float) -> void:
 			nearest_npc = npc
 	interaction_hint.visible = not checking_spawn and not Session.world_menu_open() and not dialogue.active and not awaiting_victory_dialogue and not Session.busy and not get_tree().paused
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
+	interaction_indicator.text="["+get_node("/root/GameSettings").binding_label("interact")+"]"
 	if nearest_npc != null:
 		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -62)
-	interaction_hint.text = nearest_npc.get_meta("interaction_label","Z  Interact") if nearest_npc != null else ""
+	interaction_hint.text = get_node("/root/GameSettings").binding_label("interact")+"  "+("Save" if nearest_npc.has_meta("save_statue") else "Interact") if nearest_npc != null else ""
 
 func _input(event: InputEvent) -> void:
 	if map_ui.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return
-	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z:
+	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event.is_action_pressed("interact") and not event.is_echo():
 		if nearest_npc.has_method("handle_interaction") and nearest_npc.handle_interaction(self):
 			get_viewport().set_input_as_handled()
 			return
@@ -215,10 +217,8 @@ func _on_dialogue_finished() -> void:
 			Session.begin_battle(player.position)
 	elif completed_victory:
 		Session.story_flags.erase("bart_victory_dialogue_pending")
-		Session.save_current()
 	elif completed_boss2:
 		Session.story_flags.erase("boss2_victory_dialogue_pending")
-		Session.save_current()
 
 func _travel(destination: String, entry: String) -> void:
 	if checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or get_tree().paused:

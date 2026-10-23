@@ -109,7 +109,7 @@ func update_clock(clock: float) -> void:
 	particles = particles.filter(func(p): return time-p.start < p.life and time >= p.start)
 	cracks = cracks.filter(func(p): return time-p.start < 1.3 and time >= p.start)
 	var fade := 1-smoothstep(0,.2,time-shake_start)
-	var amount := 0.0 if battle.reduced_effects else shake_amount*fade
+	var amount := 0.0 if battle.reduced_effects or not get_node("/root/GameSettings").values.shake else shake_amount*fade
 	battle.position = Vector2(sin(time*93),cos(time*117))*amount
 	queue_redraw()
 

@@ -145,6 +145,7 @@ func _ready() -> void:
 			return_button = button
 			button.pressed.connect(func(): get_tree().current_scene.return_to_forest())
 		elif action == "RETRY":
+			button.name="RetryButton"
 			button.pressed.connect(func(): get_tree().current_scene.retry())
 		else:
 			button.pressed.connect(func(): get_tree().current_scene.main_menu())
@@ -174,14 +175,15 @@ func update(clock: float) -> void:
 	arena_overlay.update_clock(clock)
 	stamina_bar.value = battle.player.stamina
 	stamina_bar.modulate = Color("#F48BB6") if battle.player.stamina < 0.2 else Color.WHITE
-	stamina_caption.text = "SPRINT() / RELEASE X" if battle.player.exhausted_until_release else ("SPRINT() / EMPTY" if battle.player.stamina <= 0.001 else "SPRINT() / X")
+	var ability_key: String=get_node("/root/GameSettings").binding_label("ability")
+	stamina_caption.text = "SPRINT() / RELEASE "+ability_key if battle.player.exhausted_until_release else ("SPRINT() / EMPTY" if battle.player.stamina <= 0.001 else "SPRINT() / "+ability_key)
 	var authored_intro: bool = not battle.introductory_dialogue.begins_with("[Automatic introductory dialogue placeholder")
 	dialogue_label.visible = (clock < 12.80 and authored_intro) or (clock >= 64.00 and clock < 70.00) or (clock >= 70.40 and clock < 71.20)
 	dialogue_label.text = battle.introductory_dialogue if clock < 12.80 else ("NOW DIE!" if clock >= 70.40 else "You're stronger than you look. But how long can you survive?")
 
 func show_phase(title: String) -> void:
 	current_phase_label.text = title
-	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
+	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced or get_node("/root/GameSettings").values.flashing else phase_flash_strength
 	phase_transition.border_strength = phase_border_strength
 	var tint := Color("#B6EAF2") if title in ["RICOCHET()","Finale()"] else HUDStyle.BLUE
 	if title == "CrossLaser()":
@@ -206,6 +208,7 @@ func show_result(victory: bool) -> void:
 	dialogue_label.hide()
 	arena_overlay.hide()
 	result_label.text = "VICTORY()" if victory else "GAME OVER()"
+	end_screen.find_child("RetryButton",true,false).text="RETRY" if victory else "LOAD LAST SAVE"
 	result_label.add_theme_font_size_override("font_size",48 if victory else 40)
 	return_button.visible = victory
 	end_screen.show()

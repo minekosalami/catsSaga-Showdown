@@ -1,216 +1,131 @@
 extends Control
-
-const SketchTheme = preload("res://scripts/ui/sketch_theme.gd")
-const SketchButton = preload("res://scripts/ui/sketch_button.gd")
-const SketchBackground = preload("res://scripts/ui/sketch_background.gd")
-
-var transitioning: bool = false
-var options_dialog: AcceptDialog
+const Style = preload("res://scripts/ui/menu/theme.gd")
 var menu_container: VBoxContainer
 var title_label: Label
-var info_container: VBoxContainer
-var controls_panel: MarginContainer
-var controls_grids: Array[GridContainer] = []
-var asset_credits_dialog: AcceptDialog
-var info_content: Label
+var page: VBoxContainer
+var center: CenterContainer
+var status: Label
+var transitioning := false
+var page_kind := ""
 
 func _ready() -> void:
-	theme = SketchTheme.create()
-	_build_menu()
-	menu_container.modulate.a = 0.0
-	create_tween().tween_property(menu_container, "modulate:a", 1.0, 0.35)
-	menu_container.get_node("StartButton").grab_focus()
-
-func _build_menu() -> void:
-	var background := Control.new()
-	background.set_script(SketchBackground)
-	background.name = "Background"
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	theme=Style.create()
+	var background := ColorRect.new()
+	background.name="Background"
+	background.set_script(preload("res://scripts/ui/menu/background.gd"))
 	add_child(background)
-	var center := CenterContainer.new()
-	center.name = "CenterContainer"
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center=CenterContainer.new()
+	center.name="CenterContainer"
 	add_child(center)
-	menu_container = VBoxContainer.new()
-	menu_container.name = "Menu"
-	menu_container.custom_minimum_size.x = 400
-	menu_container.add_theme_constant_override("separation", 16)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	menu_container=VBoxContainer.new()
+	menu_container.name="Menu"
+	menu_container.custom_minimum_size.x=400
+	menu_container.add_theme_constant_override("separation",12)
 	center.add_child(menu_container)
-	title_label = Label.new()
-	title_label.text = "catsSaga()"
-	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.add_theme_font_size_override("font_size", 52)
-	title_label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
-	menu_container.add_child(title_label)
-	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 42
-	menu_container.add_child(spacer)
-	_button(menu_container, "START GAME", "StartButton", _start_game)
-	var continue_button := _button(menu_container, "CONTINUE()", "ContinueButton", _continue_game)
-	continue_button.disabled = Session.saves.read_save().is_empty()
-	_button(menu_container, "OPTIONS", "OptionsButton", _open_options)
-	_button(menu_container, "INFO", "InfoButton", _show_info)
-	_button(menu_container, "QUIT", "QuitButton", _quit_game)
-	_build_info(center)
+	title_label=heading(menu_container,"catsSaga()",48)
+	var space := Control.new()
+	space.custom_minimum_size.y=18
+	menu_container.add_child(space)
+	for item in [["Continue","ContinueButton",_continue_game],["New Game","NewGameButton",_start_game],["Settings","SettingsButton",Session.open_options],["Credits","CreditsButton",_show_credits],["Quit","QuitButton",_quit_game]]:
+		var b := Style.button(menu_container,item[0],item[2])
+		b.name=item[1]
+	menu_container.get_node("ContinueButton").disabled=Session.saves.most_recent_slot()==0
+	status=Label.new()
+	status.custom_minimum_size=Vector2(400,48)
+	status.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	status.add_theme_font_size_override("font_size",13)
+	status.text=Session.migration_message
+	Session.migration_message=""
+	menu_container.add_child(status)
+	_fade(menu_container)
+	menu_container.get_node("NewGameButton" if Session.saves.most_recent_slot()==0 else "ContinueButton").grab_focus()
 
-func _button(parent: Node, text: String, node_name: String, action: Callable) -> Button:
-	var button := Button.new()
-	button.set_script(SketchButton)
-	button.name = node_name
-	button.text = text
-	button.custom_minimum_size = Vector2(360, 56)
-	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	button.add_theme_font_size_override("font_size", 18)
-	button.pressed.connect(action)
-	parent.add_child(button)
-	return button
-
-func _build_info(center: CenterContainer) -> void:
-	info_container = VBoxContainer.new()
-	info_container.name = "Info"
-	info_container.custom_minimum_size.x = 400
-	info_container.add_theme_constant_override("separation", 16)
-	center.add_child(info_container)
-	var heading := Label.new()
-	heading.text = "// INFO"
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.add_theme_font_size_override("font_size", 28)
-	info_container.add_child(heading)
-	_button(info_container, "CONTROLS", "ControlsButton", _show_controls)
-	_button(info_container, "CREDITS", "CreditsButton", _show_credits)
-	info_content = Label.new()
-	info_content.name = "InfoContent"
-	info_content.custom_minimum_size = Vector2(400, 205)
-	info_content.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info_content.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_content.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	info_content.add_theme_font_size_override("font_size", 14)
-	info_container.add_child(info_content)
-	var asset_button := _button(info_container,"ASSET CREDITS","AssetCreditsButton",_open_asset_credits)
-	asset_button.custom_minimum_size.y = 36
-	asset_button.add_theme_font_size_override("font_size",14)
-	asset_button.hide()
-	_build_controls()
-	_button(info_container, "BACK", "BackButton", _back_to_menu)
-	info_container.hide()
-
-func _show_info() -> void:
+func heading(parent: Node,text: String,size: int=26) -> Label:
+	var label := Label.new()
+	label.text=text
+	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size",size)
+	parent.add_child(label)
+	return label
+func _fade(control: Control) -> void:
+	control.modulate.a=0
+	create_tween().tween_property(control,"modulate:a",1.0,.24)
+func _new_page(kind: String,title: String) -> void:
+	if is_instance_valid(page):
+		page.hide()
+		page.queue_free()
+	page_kind=kind
 	menu_container.hide()
-	info_container.show()
-	_show_controls()
-	info_container.get_node("ControlsButton").grab_focus()
-	info_container.modulate.a = 0.0
-	create_tween().tween_property(info_container, "modulate:a", 1.0, 0.2)
-
-func _show_controls() -> void:
-	info_container.get_node("AssetCreditsButton").hide()
-	info_content.hide()
-	controls_panel.show()
-
-func _show_credits() -> void:
-	info_container.get_node("AssetCreditsButton").show()
-	controls_panel.hide()
-	info_content.show()
-	info_content.add_theme_font_size_override("font_size", 20)
-	info_content.text = "LLiosette — Creator\n\nBasic Caves & Dungeons — schwarnhild\nschwarnhild.itch.io"
-
-func _open_asset_credits() -> void:
-	if is_instance_valid(asset_credits_dialog):
-		asset_credits_dialog.popup_centered()
-		return
-	var viewer := AcceptDialog.new()
-	asset_credits_dialog = viewer
-	viewer.name = "AssetCreditsDialog"
-	viewer.title = "Asset credits and licenses"
-	viewer.theme = preload("res://scripts/ui/sketch_theme.gd").create()
-	viewer.size = Vector2i(780,540)
-	var text := RichTextLabel.new()
-	text.name = "AssetNotices"
-	text.custom_minimum_size = Vector2(720,440)
-	text.selection_enabled = true
-	text.add_theme_font_size_override("normal_font_size",14)
-	text.text = preload("res://resources/ui/wonderland_asset_notices.tres").get_meta("text")
-	viewer.add_child(text)
-	add_child(viewer)
-	viewer.close_requested.connect(viewer.hide)
-	viewer.popup_centered()
-
-func _back_to_menu() -> void:
-	info_container.hide()
-	menu_container.show()
-	menu_container.get_node("InfoButton").grab_focus()
-
-func _unhandled_input(event: InputEvent) -> void:
-	if info_container.visible and event.is_action_pressed("ui_cancel"):
-		_back_to_menu()
-		get_viewport().set_input_as_handled()
-
+	page=VBoxContainer.new()
+	page.custom_minimum_size.x=500 if kind=="credits" else 440
+	page.add_theme_constant_override("separation",14)
+	center.add_child(page)
+	heading(page,title)
+	_fade(page)
 func _start_game() -> void:
-	if transitioning or Session.busy:
-		return
-	if not Session.saves.read_save().is_empty():
-		Session.confirm_action("Start a new game? The current save will be replaced.", _begin_new_game)
-	else:
-		_begin_new_game()
-
-func _begin_new_game() -> void:
-	if transitioning or Session.busy:
-		return
-	transitioning = true
-	for child in menu_container.get_children():
-		if child is Button:
-			child.disabled = true
-	Session.new_game()
-
+	if transitioning or Session.busy:return
+	_new_page("slots","New Game")
+	for slot in range(1,4):
+		var data: Dictionary=Session.saves.read_slot(slot)
+		var description := "Empty" if not Session.saves.slot_exists(slot) else "Unreadable — original retained until confirmed replacement"
+		if not data.is_empty():description="%s · %02d:%02d"%[data.area.replace("_"," ").capitalize(),int(data.playtime)/3600,int(data.playtime)/60%60]
+		var line := VBoxContainer.new()
+		line.add_theme_constant_override("separation",6)
+		page.add_child(line)
+		var caption := heading(line,"Slot %d — %s"%[slot,description],14)
+		caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		var actions := HBoxContainer.new()
+		line.add_child(actions)
+		var button := Style.button(actions,"New Game",_select_new_slot.bind(slot))
+		button.custom_minimum_size=Vector2(220,44)
+		var load_button := Style.button(actions,"Load",_load_slot.bind(slot))
+		load_button.custom_minimum_size=Vector2(220,44)
+		load_button.disabled=data.is_empty()
+		if slot==1:button.grab_focus()
+	var hint := heading(page,"Save progress at cat statues.\nA replaced slot is written only when you save.",13)
+	hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	Style.button(page,"Back",go_back)
+func _select_new_slot(slot: int) -> void:
+	if Session.saves.slot_exists(slot):
+		Session.confirm_action("Start a new game in Slot %d? Saving at a cat statue will replace its previous progress."%slot,_begin_new_game.bind(slot))
+	else:_begin_new_game(slot)
+func _begin_new_game(slot: int=1) -> void:
+	if transitioning or Session.busy:return
+	transitioning=true
+	Session.new_game(slot)
 func _continue_game() -> void:
-	if transitioning or Session.busy:
+	_load_slot(Session.saves.most_recent_slot())
+func _load_slot(slot: int) -> void:
+	if transitioning or Session.busy:return
+	if Session.saves.read_slot(slot).is_empty():
+		status.text="No valid save. No new game was started."
+		Session.show_notification(status.text)
 		return
-	if Session.saves.read_save().is_empty():
-		menu_container.get_node("ContinueButton").disabled = true
-		return
-	transitioning = true
-	Session.load_game()
-
-func _open_options() -> void:
-	Session.open_options()
-	options_dialog = Session.options_dialog
-
+	transitioning=true
+	Session.load_game(slot)
+func _show_credits() -> void:
+	_new_page("credits","Credits")
+	var text := RichTextLabel.new()
+	text.custom_minimum_size=Vector2(600,360)
+	text.selection_enabled=true
+	text.add_theme_font_size_override("normal_font_size",15)
+	text.text="LLiosette — Creator\n\n"+preload("res://resources/ui/wonderland_asset_notices.tres").get_meta("text")+"\n\nBasic Caves & Dungeons — schwarnhild\nhttps://schwarnhild.itch.io\n\nDejaVu fonts — DejaVu contributors / Bitstream Vera license.\nFull font license: assets/ui/fonts/LICENSE.txt"
+	page.add_child(text)
+	Style.button(page,"Back",go_back).grab_focus()
+func go_back() -> bool:
+	if page_kind.is_empty():return false
+	var kind := page_kind
+	page_kind=""
+	page.hide()
+	page.queue_free()
+	menu_container.show()
+	menu_container.get_node("CreditsButton" if kind=="credits" else "NewGameButton").grab_focus()
+	_fade(menu_container)
+	return true
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and go_back():get_viewport().set_input_as_handled()
 func _quit_game() -> void:
 	get_tree().quit()
-
-func _build_controls() -> void:
-	controls_panel = MarginContainer.new()
-	controls_panel.name = "ControlsContent"
-	for side in ["left", "right", "top", "bottom"]:
-		controls_panel.add_theme_constant_override("margin_" + side, 20)
-	info_container.add_child(controls_panel)
-	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 20)
-	controls_panel.add_child(content)
-	for section in [
-		["// MOVEMENT", [["WASD / ARROWS", "Move"], ["SHIFT", "Focus movement"]]],
-		["// ATTACK", [["Z", "Shoot"], ["X", "SATURATE"]]]
-	]:
-		var heading := Label.new()
-		heading.text = section[0]
-		heading.add_theme_font_size_override("font_size", 12)
-		heading.add_theme_color_override("font_color", SketchTheme.MUTED)
-		content.add_child(heading)
-		var grid := GridContainer.new()
-		grid.columns = 2
-		grid.add_theme_constant_override("h_separation", 24)
-		grid.add_theme_constant_override("v_separation", 18)
-		content.add_child(grid)
-		controls_grids.append(grid)
-		for binding in section[1]:
-			for column in range(2):
-				var label := Label.new()
-				label.text = binding[column]
-				label.custom_minimum_size = Vector2(140 if column == 0 else 160, 32)
-				label.add_theme_font_size_override("font_size", 15)
-				grid.add_child(label)
-	var note := Label.new()
-	note.text = "SATURATE: once/run. Boss 2: X — SPRINT\nOverworld: Z — interact, SHIFT — sprint\nM — map (ARROWS pan / SCROLL zoom)\nSPACE — inventory   ESC — pause\nZ — confirm   X — back / cancel\nF11 — fullscreen"
-	note.add_theme_font_size_override("font_size", 13)
-	note.add_theme_color_override("font_color", SketchTheme.MUTED)
-	content.add_child(note)

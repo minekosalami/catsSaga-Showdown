@@ -46,7 +46,7 @@ func enable_analysis() -> void:
 		index = AudioServer.bus_count
 		AudioServer.add_bus()
 		AudioServer.set_bus_name(index,"BossMusic")
-		AudioServer.set_bus_send(index,"Master")
+		AudioServer.set_bus_send(index,"Music")
 		var spectrum := AudioEffectSpectrumAnalyzer.new()
 		spectrum.fft_size = AudioEffectSpectrumAnalyzer.FFT_SIZE_1024
 		AudioServer.add_bus_effect(index,spectrum)
@@ -66,7 +66,7 @@ func _process(delta: float) -> void:
 func update_clock(time: float) -> void:
 	clock = time
 	var settings := get_node("/root/VisualSettings")
-	reduced_fx = settings.reduced or (identity==2 and battle.reduced_effects)
+	reduced_fx = settings.reduced or get_node("/root/GameSettings").values.flashing or (identity==2 and battle.reduced_effects)
 	motion = settings.motion
 	var target := Vector2i(135,225) if reduced_fx else Vector2i(270,450)
 	if view.size!=target or composite.scale.x!=540.0/target.x:

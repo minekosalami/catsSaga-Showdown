@@ -9,8 +9,10 @@ func _ready() -> void:
 	position_smoothing_enabled = false
 	process_priority = 50
 	followed = get_parent().global_position
+	zoom=Vector2.ONE*get_node("/root/GameSettings").values.zoom
 func _process(delta: float) -> void:
 	if Session.busy or get_parent().movement_locked:return
+	zoom=Vector2.ONE*get_node("/root/GameSettings").values.zoom
 	var actor := get_parent()
 	var target: Vector2 = actor.velocity/actor.speed*look_ahead
 	target = target.limit_length(look_ahead)

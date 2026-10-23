@@ -39,7 +39,7 @@ func _process(delta: float) -> void:
 	var bounce := sin(age*(8 if moving else 2.2))*(0.6 if moving else 0.4)
 	sprite.offset = rest_offset+Vector2(0,(bounce+recoil*2.5)/maxf(sprite.scale.y,0.001))
 	sprite.rotation = lerp_angle(sprite.rotation,rest_rotation+clampf(velocity.x/450.0,-1,1)*0.035,1-exp(-delta*12))
-	focus_alpha = move_toward(focus_alpha,1.0 if Input.is_key_pressed(KEY_SHIFT) else 0.0,delta/0.16)
+	focus_alpha = move_toward(focus_alpha,1.0 if Input.is_action_pressed("focus") else 0.0,delta/0.16)
 	queue_redraw()
 
 func _draw() -> void:

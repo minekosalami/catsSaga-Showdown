@@ -17,7 +17,7 @@ var water_proximity := 0.0
 var water_blend := 0.0
 var elapsed := 0.0
 func _ready() -> void:
- process_mode = Node.PROCESS_MODE_ALWAYS
+ process_mode = Node.PROCESS_MODE_PAUSABLE
  rng.randomize()
  load_settings()
  for bus_name in ["Ambience","CaveAmbience"]:

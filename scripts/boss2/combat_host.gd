@@ -8,4 +8,5 @@ func record_victory() -> void:
 func return_to_forest() -> void:
 	Session.return_to_flooded_forest()
 func retry() -> void:
-	Session.transition_to("res://scenes/boss2/combat_host.tscn", true)
+	if battle.game_over and Session.encounter_active:Session.retry_last_save()
+	else:Session.transition_to("res://scenes/boss2/combat_host.tscn",true)
