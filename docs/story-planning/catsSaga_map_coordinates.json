@@ -1,0 +1,2306 @@
+{
+  "schema": "catsSaga.story-planning.coordinates.v1",
+  "generated_utc": "2026-10-23T23:16:37.434777+00:00",
+  "source_commit": "a15df454791f7544d73d4a92a1566a4320ea7ef4",
+  "image": {
+    "file": "catsSaga_full_world_map.png",
+    "width": 16256,
+    "height": 4224,
+    "format": "PNG",
+    "color_mode": "RGB",
+    "sha256": "fb8b016e752e5a823d3be660e651b750f66fe5a83797e8e35f476a28fbc29696",
+    "image_pixels_per_godot_unit": 1,
+    "assembled_world_origin_image": [
+      320,
+      416
+    ],
+    "rendered_scenery_world_bounds": [
+      -256.0,
+      -256.0,
+      16128.0,
+      3584.0
+    ],
+    "rendered_scenery_image_bounds": [
+      64.0,
+      160.0,
+      16128.0,
+      3584.0
+    ],
+    "declared_world_bounds": [
+      0.0,
+      0.0,
+      15616.0,
+      3072.0
+    ],
+    "padding_is_not_playable": true
+  },
+  "coordinate_conventions": {
+    "origin": "top-left",
+    "x_direction": "right",
+    "y_direction": "down",
+    "unit": "Godot 2D pixels, not meters",
+    "assembled_world": "Planning-only placement of four separately loaded scenes. Runtime global_position is local to the active region; assembled offsets are not runtime scene positions.",
+    "placement_evidence": "Actual scene map_size and root transforms checked against scripts/maps/world_layout.gd offsets × TILE_PIXELS. All six actual portals validate adjacent order and shared y=912 seam.",
+    "pixel_coordinates": "Continuous image coordinates; the center of raster pixel (i,j) is (i+0.5,j+0.5). Integer world positions map to the corresponding continuous image coordinates.",
+    "bounds": "[x,y,width,height]; region membership is half-open: x<=point.x<x+width and y<=point.y<y+height."
+  },
+  "mapping": {
+    "assembled_world_to_image": [
+      [
+        1,
+        0,
+        320
+      ],
+      [
+        0,
+        1,
+        416
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "image_to_assembled_world": [
+      [
+        1,
+        0,
+        -320
+      ],
+      [
+        0,
+        1,
+        -416
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "image_to_local_formula": {
+      "x": "image_x - 320 - region.world_offset[0]",
+      "y": "image_y - 416 - region.world_offset[1]"
+    },
+    "source_layout": "Preserved north-up/top-down orientation; no rotation, nonuniform scaling or map resizing."
+  },
+  "regions": [
+    {
+      "bridge_cells": 0,
+      "entries": {
+        "FromBart": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromBartShortcut": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromCave": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromDeep": {
+          "local_position": [
+            2976.0,
+            912.0
+          ],
+          "world_position": [
+            2976.0,
+            912.0
+          ],
+          "image_position": [
+            3296.0,
+            1328.0
+          ]
+        },
+        "FromEntrance": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromEntranceShortcut": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromFlooded": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromFloodedShortcut": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "FromWonderland": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        },
+        "Start": {
+          "local_position": [
+            240.0,
+            912.0
+          ],
+          "world_position": [
+            240.0,
+            912.0
+          ],
+          "image_position": [
+            560.0,
+            1328.0
+          ]
+        }
+      },
+      "id": "entrance",
+      "name": "Forest Entrance",
+      "scene": "res://scenes/journey/forest_entrance.tscn",
+      "scene_sha256": "b6a141d84284ecb1b542136590ecab4cd0dd659ede9669f41a2e963f1d799893",
+      "size_world": [
+        3200.0,
+        1824.0
+      ],
+      "source_transform": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "terrain_cell_size_world": 32,
+      "tree_count": 451,
+      "water_cells": 203,
+      "world_offset": [
+        0.0,
+        0.0
+      ],
+      "local_bounds": [
+        0,
+        0,
+        3200.0,
+        1824.0
+      ],
+      "world_bounds": [
+        0.0,
+        0.0,
+        3200.0,
+        1824.0
+      ],
+      "image_bounds": [
+        320.0,
+        416.0,
+        3200.0,
+        1824.0
+      ],
+      "local_to_assembled_world": [
+        [
+          1,
+          0,
+          0.0
+        ],
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "assembled_world_to_local": [
+        [
+          1,
+          0,
+          -0.0
+        ],
+        [
+          0,
+          1,
+          -0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "local_to_image": [
+        [
+          1,
+          0,
+          320.0
+        ],
+        [
+          0,
+          1,
+          416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "image_to_local": [
+        [
+          1,
+          0,
+          -320.0
+        ],
+        [
+          0,
+          1,
+          -416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "bridge_cells": 0,
+      "entries": {
+        "FromBart": {
+          "local_position": [
+            4896.0,
+            912.0
+          ],
+          "world_position": [
+            8096.0,
+            912.0
+          ],
+          "image_position": [
+            8416.0,
+            1328.0
+          ]
+        },
+        "FromBartShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromCave": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromDeep": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromEntrance": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromEntranceShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromFlooded": {
+          "local_position": [
+            4896.0,
+            912.0
+          ],
+          "world_position": [
+            8096.0,
+            912.0
+          ],
+          "image_position": [
+            8416.0,
+            1328.0
+          ]
+        },
+        "FromFloodedShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "FromWonderland": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        },
+        "Start": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            3424.0,
+            912.0
+          ],
+          "image_position": [
+            3744.0,
+            1328.0
+          ]
+        }
+      },
+      "id": "deep_forest",
+      "name": "Deep Forest",
+      "scene": "res://scenes/journey/deep_forest.tscn",
+      "scene_sha256": "1ea38998280ed341e499f69313b01dff912689ac1fb856c61ca79488be927cfa",
+      "size_world": [
+        5120.0,
+        2880.0
+      ],
+      "source_transform": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "terrain_cell_size_world": 32,
+      "tree_count": 1432,
+      "water_cells": 383,
+      "world_offset": [
+        3200.0,
+        0.0
+      ],
+      "local_bounds": [
+        0,
+        0,
+        5120.0,
+        2880.0
+      ],
+      "world_bounds": [
+        3200.0,
+        0.0,
+        5120.0,
+        2880.0
+      ],
+      "image_bounds": [
+        3520.0,
+        416.0,
+        5120.0,
+        2880.0
+      ],
+      "local_to_assembled_world": [
+        [
+          1,
+          0,
+          3200.0
+        ],
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "assembled_world_to_local": [
+        [
+          1,
+          0,
+          -3200.0
+        ],
+        [
+          0,
+          1,
+          -0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "local_to_image": [
+        [
+          1,
+          0,
+          3520.0
+        ],
+        [
+          0,
+          1,
+          416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "image_to_local": [
+        [
+          1,
+          0,
+          -3520.0
+        ],
+        [
+          0,
+          1,
+          -416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "bridge_cells": 0,
+      "entries": {
+        "FromBart": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromBartShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromCave": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromDeep": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromEntrance": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromEntranceShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromFlooded": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "FromFloodedShortcut": {
+          "local_position": [
+            2976.0,
+            912.0
+          ],
+          "world_position": [
+            11296.0,
+            912.0
+          ],
+          "image_position": [
+            11616.0,
+            1328.0
+          ]
+        },
+        "FromWonderland": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        },
+        "Start": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            8544.0,
+            912.0
+          ],
+          "image_position": [
+            8864.0,
+            1328.0
+          ]
+        }
+      },
+      "id": "bart_area",
+      "name": "Evil Bart's Area",
+      "scene": "res://scenes/journey/bart_area.tscn",
+      "scene_sha256": "51a5a3ba5ef8b59e113b2f1672192c497aa3d4551df26bcd819e575d91cee9fb",
+      "size_world": [
+        3200.0,
+        1824.0
+      ],
+      "source_transform": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "terrain_cell_size_world": 32,
+      "tree_count": 470,
+      "water_cells": 209,
+      "world_offset": [
+        8320.0,
+        0.0
+      ],
+      "local_bounds": [
+        0,
+        0,
+        3200.0,
+        1824.0
+      ],
+      "world_bounds": [
+        8320.0,
+        0.0,
+        3200.0,
+        1824.0
+      ],
+      "image_bounds": [
+        8640.0,
+        416.0,
+        3200.0,
+        1824.0
+      ],
+      "local_to_assembled_world": [
+        [
+          1,
+          0,
+          8320.0
+        ],
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "assembled_world_to_local": [
+        [
+          1,
+          0,
+          -8320.0
+        ],
+        [
+          0,
+          1,
+          -0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "local_to_image": [
+        [
+          1,
+          0,
+          8640.0
+        ],
+        [
+          0,
+          1,
+          416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "image_to_local": [
+        [
+          1,
+          0,
+          -8640.0
+        ],
+        [
+          0,
+          1,
+          -416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "bridge_cells": 92,
+      "entries": {
+        "FromBart": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromBartShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromCave": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromDeep": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromEntrance": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromEntranceShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromFlooded": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromFloodedShortcut": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "FromWonderland": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        },
+        "Start": {
+          "local_position": [
+            224.0,
+            912.0
+          ],
+          "world_position": [
+            11744.0,
+            912.0
+          ],
+          "image_position": [
+            12064.0,
+            1328.0
+          ]
+        }
+      },
+      "id": "flooded_forest",
+      "name": "Flooded Forest",
+      "scene": "res://scenes/journey/flooded_forest.tscn",
+      "scene_sha256": "dd741546a4e446399aa3e0da020c07dd150b8f5fad301815d8443bee0d90889e",
+      "size_world": [
+        4096.0,
+        3072.0
+      ],
+      "source_transform": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "terrain_cell_size_world": 32,
+      "tree_count": 1116,
+      "water_cells": 4003,
+      "world_offset": [
+        11520.0,
+        0.0
+      ],
+      "local_bounds": [
+        0,
+        0,
+        4096.0,
+        3072.0
+      ],
+      "world_bounds": [
+        11520.0,
+        0.0,
+        4096.0,
+        3072.0
+      ],
+      "image_bounds": [
+        11840.0,
+        416.0,
+        4096.0,
+        3072.0
+      ],
+      "local_to_assembled_world": [
+        [
+          1,
+          0,
+          11520.0
+        ],
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "assembled_world_to_local": [
+        [
+          1,
+          0,
+          -11520.0
+        ],
+        [
+          0,
+          1,
+          -0.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "local_to_image": [
+        [
+          1,
+          0,
+          11840.0
+        ],
+        [
+          0,
+          1,
+          416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "image_to_local": [
+        [
+          1,
+          0,
+          -11840.0
+        ],
+        [
+          0,
+          1,
+          -416.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "bosses": [
+    {
+      "encounter_id": "bart",
+      "id": "B1",
+      "local_position": [
+        1792.0,
+        896.0
+      ],
+      "name": "Evil Bart",
+      "node": "Characters/EvilBart",
+      "region": "bart_area",
+      "world_position": [
+        10112.0,
+        896.0
+      ],
+      "image_position": [
+        10432.0,
+        1312.0
+      ]
+    },
+    {
+      "encounter_id": "boss2",
+      "id": "B2",
+      "local_position": [
+        3200.0,
+        800.0
+      ],
+      "name": "Doppelcat",
+      "node": "Characters/Boss2NPC",
+      "region": "flooded_forest",
+      "world_position": [
+        14720.0,
+        800.0
+      ],
+      "image_position": [
+        15040.0,
+        1216.0
+      ]
+    },
+    {
+      "encounter_id": "blankkitten",
+      "id": "B3",
+      "local_position": [
+        1344.0,
+        600.0
+      ],
+      "name": "BlankKitten",
+      "node": "Characters/BlankKitten",
+      "region": "deep_forest",
+      "world_position": [
+        4544.0,
+        600.0
+      ],
+      "image_position": [
+        4864.0,
+        1016.0
+      ]
+    }
+  ],
+  "save_points": [
+    {
+      "id": "S1",
+      "local_position": [
+        640.0,
+        1168.0
+      ],
+      "node": "CatSaveStatue",
+      "region": "entrance",
+      "source": "res://scripts/world/save_statue.gd:LOCATIONS",
+      "world_position": [
+        640.0,
+        1168.0
+      ],
+      "visual_icon_center_world": [
+        640.0,
+        1124.0
+      ],
+      "visual_icon_center_image": [
+        960.0,
+        1540.0
+      ],
+      "image_position": [
+        960.0,
+        1584.0
+      ]
+    },
+    {
+      "id": "S2",
+      "local_position": [
+        640.0,
+        560.0
+      ],
+      "node": "CatSaveStatue",
+      "region": "deep_forest",
+      "source": "res://scripts/world/save_statue.gd:LOCATIONS",
+      "world_position": [
+        3840.0,
+        560.0
+      ],
+      "visual_icon_center_world": [
+        3840.0,
+        516.0
+      ],
+      "visual_icon_center_image": [
+        4160.0,
+        932.0
+      ],
+      "image_position": [
+        4160.0,
+        976.0
+      ]
+    },
+    {
+      "id": "S3",
+      "local_position": [
+        1472.0,
+        416.0
+      ],
+      "node": "@Node2D@57",
+      "region": "deep_forest",
+      "source": "res://scripts/world/save_statue.gd:LOCATIONS",
+      "world_position": [
+        4672.0,
+        416.0
+      ],
+      "visual_icon_center_world": [
+        4672.0,
+        372.0
+      ],
+      "visual_icon_center_image": [
+        4992.0,
+        788.0
+      ],
+      "image_position": [
+        4992.0,
+        832.0
+      ]
+    },
+    {
+      "id": "S4",
+      "local_position": [
+        1568.0,
+        1040.0
+      ],
+      "node": "CatSaveStatue",
+      "region": "bart_area",
+      "source": "res://scripts/world/save_statue.gd:LOCATIONS",
+      "world_position": [
+        9888.0,
+        1040.0
+      ],
+      "visual_icon_center_world": [
+        9888.0,
+        996.0
+      ],
+      "visual_icon_center_image": [
+        10208.0,
+        1412.0
+      ],
+      "image_position": [
+        10208.0,
+        1456.0
+      ]
+    },
+    {
+      "id": "S5",
+      "local_position": [
+        3008.0,
+        1120.0
+      ],
+      "node": "CatSaveStatue",
+      "region": "flooded_forest",
+      "source": "res://scripts/world/save_statue.gd:LOCATIONS",
+      "world_position": [
+        14528.0,
+        1120.0
+      ],
+      "visual_icon_center_world": [
+        14528.0,
+        1076.0
+      ],
+      "visual_icon_center_image": [
+        14848.0,
+        1492.0
+      ],
+      "image_position": [
+        14848.0,
+        1536.0
+      ]
+    }
+  ],
+  "save_point_anchor_note": "Positions are the save-node interaction/ground origin. The rendered star icon is centered 44 Godot units above it at the frozen initial bob phase; both positions are recorded.",
+  "player_spawn": {
+    "local_position": [
+      240.0,
+      912.0
+    ],
+    "node": "Entries/Start",
+    "region": "entrance",
+    "world_position": [
+      240.0,
+      912.0
+    ],
+    "image_position": [
+      560.0,
+      1328.0
+    ]
+  },
+  "area_transitions": {
+    "connections": [
+      {
+        "id": "T1",
+        "from_region": "entrance",
+        "to_region": "deep_forest",
+        "portal_ids": [
+          "entrance_ToRight",
+          "deep_forest_ToLeft"
+        ],
+        "midpoint_world": [
+          3200.0,
+          912.0
+        ],
+        "midpoint_image": [
+          3520.0,
+          1328.0
+        ],
+        "eastbound_gated": false
+      },
+      {
+        "id": "T2",
+        "from_region": "deep_forest",
+        "to_region": "bart_area",
+        "portal_ids": [
+          "deep_forest_ToRight",
+          "bart_area_ToLeft"
+        ],
+        "midpoint_world": [
+          8320.0,
+          912.0
+        ],
+        "midpoint_image": [
+          8640.0,
+          1328.0
+        ],
+        "eastbound_gated": false
+      },
+      {
+        "id": "T3",
+        "from_region": "bart_area",
+        "to_region": "flooded_forest",
+        "portal_ids": [
+          "bart_area_ToRight",
+          "flooded_forest_ToLeft"
+        ],
+        "midpoint_world": [
+          11520.0,
+          912.0
+        ],
+        "midpoint_image": [
+          11840.0,
+          1328.0
+        ],
+        "eastbound_gated": true
+      }
+    ],
+    "directed_portals": [
+      {
+        "can_travel_in_initial_state": true,
+        "destination": "deep_forest",
+        "destination_entry": "FromEntrance",
+        "destination_local_position": [
+          224.0,
+          912.0
+        ],
+        "destination_world_position": [
+          3424.0,
+          912.0
+        ],
+        "id": "entrance_ToRight",
+        "local_position": [
+          3136.0,
+          912.0
+        ],
+        "node": "Portals/ToRight",
+        "region": "entrance",
+        "required_flag": "",
+        "world_position": [
+          3136.0,
+          912.0
+        ],
+        "image_position": [
+          3456.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          3744.0,
+          1328.0
+        ]
+      },
+      {
+        "can_travel_in_initial_state": true,
+        "destination": "entrance",
+        "destination_entry": "FromDeep",
+        "destination_local_position": [
+          2976.0,
+          912.0
+        ],
+        "destination_world_position": [
+          2976.0,
+          912.0
+        ],
+        "id": "deep_forest_ToLeft",
+        "local_position": [
+          64.0,
+          912.0
+        ],
+        "node": "Portals/ToLeft",
+        "region": "deep_forest",
+        "required_flag": "",
+        "world_position": [
+          3264.0,
+          912.0
+        ],
+        "image_position": [
+          3584.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          3296.0,
+          1328.0
+        ]
+      },
+      {
+        "can_travel_in_initial_state": true,
+        "destination": "bart_area",
+        "destination_entry": "FromDeep",
+        "destination_local_position": [
+          224.0,
+          912.0
+        ],
+        "destination_world_position": [
+          8544.0,
+          912.0
+        ],
+        "id": "deep_forest_ToRight",
+        "local_position": [
+          5056.0,
+          912.0
+        ],
+        "node": "Portals/ToRight",
+        "region": "deep_forest",
+        "required_flag": "",
+        "world_position": [
+          8256.0,
+          912.0
+        ],
+        "image_position": [
+          8576.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          8864.0,
+          1328.0
+        ]
+      },
+      {
+        "can_travel_in_initial_state": true,
+        "destination": "deep_forest",
+        "destination_entry": "FromBart",
+        "destination_local_position": [
+          4896.0,
+          912.0
+        ],
+        "destination_world_position": [
+          8096.0,
+          912.0
+        ],
+        "id": "bart_area_ToLeft",
+        "local_position": [
+          64.0,
+          912.0
+        ],
+        "node": "Portals/ToLeft",
+        "region": "bart_area",
+        "required_flag": "",
+        "world_position": [
+          8384.0,
+          912.0
+        ],
+        "image_position": [
+          8704.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          8416.0,
+          1328.0
+        ]
+      },
+      {
+        "can_travel_in_initial_state": false,
+        "destination": "flooded_forest",
+        "destination_entry": "FromDeep",
+        "destination_local_position": [
+          224.0,
+          912.0
+        ],
+        "destination_world_position": [
+          11744.0,
+          912.0
+        ],
+        "id": "bart_area_ToRight",
+        "local_position": [
+          3136.0,
+          912.0
+        ],
+        "node": "Portals/ToRight",
+        "region": "bart_area",
+        "required_flag": "flooded_forest_key_obtained",
+        "world_position": [
+          11456.0,
+          912.0
+        ],
+        "image_position": [
+          11776.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          12064.0,
+          1328.0
+        ]
+      },
+      {
+        "can_travel_in_initial_state": true,
+        "destination": "bart_area",
+        "destination_entry": "FromFloodedShortcut",
+        "destination_local_position": [
+          2976.0,
+          912.0
+        ],
+        "destination_world_position": [
+          11296.0,
+          912.0
+        ],
+        "id": "flooded_forest_ToLeft",
+        "local_position": [
+          64.0,
+          912.0
+        ],
+        "node": "Portals/ToLeft",
+        "region": "flooded_forest",
+        "required_flag": "",
+        "world_position": [
+          11584.0,
+          912.0
+        ],
+        "image_position": [
+          11904.0,
+          1328.0
+        ],
+        "destination_image_position": [
+          11616.0,
+          1328.0
+        ]
+      }
+    ],
+    "note": "Arrows join the existing opposing portal centers. Teleports arrive at destination_entry, not at the opposite portal center. Destination marker positions are recorded explicitly."
+  },
+  "blocked_passages": [
+    {
+      "id": "G1",
+      "region": "bart_area",
+      "portal_id": "bart_area_ToRight",
+      "local_position": [
+        3136.0,
+        912.0
+      ],
+      "world_position": [
+        11456.0,
+        912.0
+      ],
+      "image_position": [
+        11776.0,
+        1328.0
+      ],
+      "required_flag": "flooded_forest_key_obtained",
+      "condition": "Session.evil_bart_defeated AND Session.story_flags[required_flag], or the existing session-only debug override",
+      "direction": "eastbound only; reverse portal has no required flag",
+      "state_in_export": "locked (initial progression state)"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "B1",
+      "label": "Evil Bart",
+      "anchor_image": [
+        10432.0,
+        1312.0
+      ],
+      "callout_rect_image": [
+        10320,
+        1212,
+        224,
+        34
+      ],
+      "leader_end_image": [
+        10432.0,
+        1246
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            10432.0,
+            1269.0
+          ],
+          [
+            10432.0,
+            1246
+          ]
+        ]
+      ],
+      "color": "#ffbd85"
+    },
+    {
+      "id": "B2",
+      "label": "Doppelcat",
+      "anchor_image": [
+        15040.0,
+        1216.0
+      ],
+      "callout_rect_image": [
+        14928,
+        1252,
+        224,
+        39
+      ],
+      "leader_end_image": [
+        15040.0,
+        1252
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            15040.0,
+            1229.0
+          ],
+          [
+            15040.0,
+            1252
+          ]
+        ]
+      ],
+      "color": "#ffbd85"
+    },
+    {
+      "id": "B3",
+      "label": "BlankKitten",
+      "anchor_image": [
+        4864.0,
+        1016.0
+      ],
+      "callout_rect_image": [
+        4736,
+        878,
+        256,
+        34
+      ],
+      "leader_end_image": [
+        4864.0,
+        912
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            4864.0,
+            917.0
+          ],
+          [
+            4864.0,
+            912
+          ]
+        ]
+      ],
+      "color": "#ffbd85"
+    },
+    {
+      "id": "S1",
+      "label": "SAVE",
+      "anchor_image": [
+        960.0,
+        1584.0
+      ],
+      "callout_rect_image": [
+        1064,
+        1688,
+        145,
+        33
+      ],
+      "leader_end_image": [
+        1064,
+        1688
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            960.0,
+            1584.0
+          ],
+          [
+            1064,
+            1688
+          ]
+        ]
+      ],
+      "color": "#f4f4ee"
+    },
+    {
+      "id": "S2",
+      "label": "SAVE",
+      "anchor_image": [
+        4160.0,
+        976.0
+      ],
+      "callout_rect_image": [
+        4088,
+        1126,
+        144,
+        33
+      ],
+      "leader_end_image": [
+        4160.0,
+        1126
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            4160.0,
+            976.0
+          ],
+          [
+            4160.0,
+            1126
+          ]
+        ]
+      ],
+      "color": "#f4f4ee"
+    },
+    {
+      "id": "S3",
+      "label": "SAVE",
+      "anchor_image": [
+        4992.0,
+        832.0
+      ],
+      "callout_rect_image": [
+        4637,
+        1042,
+        145,
+        33
+      ],
+      "leader_end_image": [
+        4782,
+        1042
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            4992.0,
+            832.0
+          ],
+          [
+            4948.161616161616,
+            875.8383838383838
+          ]
+        ],
+        [
+          [
+            4909.979797979798,
+            914.0202020202021
+          ],
+          [
+            4907.151515151515,
+            916.8484848484849
+          ]
+        ],
+        [
+          [
+            4817.353535353535,
+            1006.6464646464647
+          ],
+          [
+            4782,
+            1042
+          ]
+        ]
+      ],
+      "color": "#f4f4ee"
+    },
+    {
+      "id": "S4",
+      "label": "SAVE",
+      "anchor_image": [
+        10208.0,
+        1456.0
+      ],
+      "callout_rect_image": [
+        10136,
+        1319,
+        144,
+        33
+      ],
+      "leader_end_image": [
+        10208.0,
+        1352
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            10208.0,
+            1456.0
+          ],
+          [
+            10208.0,
+            1452.0
+          ]
+        ],
+        [
+          [
+            10208.0,
+            1372.0
+          ],
+          [
+            10208.0,
+            1352
+          ]
+        ]
+      ],
+      "color": "#f4f4ee"
+    },
+    {
+      "id": "S5",
+      "label": "SAVE",
+      "anchor_image": [
+        14848.0,
+        1536.0
+      ],
+      "callout_rect_image": [
+        14776,
+        1399,
+        144,
+        33
+      ],
+      "leader_end_image": [
+        14848.0,
+        1432
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            14848.0,
+            1536.0
+          ],
+          [
+            14848.0,
+            1532.0
+          ]
+        ],
+        [
+          [
+            14848.0,
+            1452.0
+          ],
+          [
+            14848.0,
+            1432
+          ]
+        ]
+      ],
+      "color": "#f4f4ee"
+    },
+    {
+      "id": "START",
+      "label": "",
+      "anchor_image": [
+        560.0,
+        1328.0
+      ],
+      "callout_rect_image": [
+        510,
+        1259,
+        100,
+        33
+      ],
+      "leader_end_image": [
+        560.0,
+        1292
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            560.0,
+            1328.0
+          ],
+          [
+            560.0,
+            1292
+          ]
+        ]
+      ],
+      "color": "#97f2af"
+    },
+    {
+      "id": "T1",
+      "label": "",
+      "anchor_image": [
+        3520.0,
+        1328.0
+      ],
+      "callout_rect_image": [
+        3494,
+        1259,
+        52,
+        33
+      ],
+      "leader_end_image": [
+        3520.0,
+        1292
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            3520.0,
+            1328.0
+          ],
+          [
+            3520.0,
+            1292
+          ]
+        ]
+      ],
+      "color": "#f1e5bd"
+    },
+    {
+      "id": "T2",
+      "label": "",
+      "anchor_image": [
+        8640.0,
+        1328.0
+      ],
+      "callout_rect_image": [
+        8614,
+        1259,
+        52,
+        33
+      ],
+      "leader_end_image": [
+        8640.0,
+        1292
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            8640.0,
+            1328.0
+          ],
+          [
+            8640.0,
+            1292
+          ]
+        ]
+      ],
+      "color": "#f1e5bd"
+    },
+    {
+      "id": "T3",
+      "label": "",
+      "anchor_image": [
+        11840.0,
+        1328.0
+      ],
+      "callout_rect_image": [
+        11814,
+        1259,
+        52,
+        33
+      ],
+      "leader_end_image": [
+        11840.0,
+        1292
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            11840.0,
+            1328.0
+          ],
+          [
+            11840.0,
+            1292
+          ]
+        ]
+      ],
+      "color": "#ffb080"
+    },
+    {
+      "id": "G1",
+      "label": "EASTBOUND GATE",
+      "anchor_image": [
+        11776.0,
+        1328.0
+      ],
+      "callout_rect_image": [
+        11986,
+        1312,
+        302,
+        32
+      ],
+      "leader_end_image": [
+        11986,
+        1328.0
+      ],
+      "visible_leader_segments_image": [
+        [
+          [
+            11776.0,
+            1328.0
+          ],
+          [
+            11986,
+            1328.0
+          ]
+        ]
+      ],
+      "color": "#ff8888"
+    }
+  ],
+  "planning_instructions": [
+    "Draw on a copy and retain the original image width, height and crop.",
+    "Supply annotation center pixels or the annotated image; identify the region if a mark touches a boundary.",
+    "First convert image to assembled world, then subtract the selected region offset to obtain the exact Godot scene-local position.",
+    "If an annotated copy is uniformly resized without cropping, first multiply its x/y coordinates by original width/annotated width and original height/annotated height. Cropping requires its original crop origin as well.",
+    "Points outside region rectangles are padding/void/visual overhang, not playable locations. Water and colliders still require gameplay placement checks.",
+    "This export adds no characters, dialogue, events, triggers or progression. Wonderland, Underground Cave, Incarna and combat arenas are excluded."
+  ],
+  "rendering": {
+    "engine": "Godot 4.6.3",
+    "renderer": "GL Compatibility / Mesa llvmpipe / X11",
+    "method": "Actual PackedScene instances and existing SaveStatue.install(map), rendered at native 1:1 with Canvas2D Y-sort; 44 viewport tiles stitched losslessly. No map-UI cache or terrain reconstruction.",
+    "tile_max_pixels": [
+      1536,
+      1024
+    ],
+    "tile_count": 44,
+    "animation": "Engine.time_scale=0.0; two consecutive render frames compared byte-identical before capture. Initial progression state; no fog, HUD or player avatar.",
+    "visible_sprite_count": 7116,
+    "visible_sprite_bounds_world": [
+      -19.3657760620117,
+      -142.481231689453,
+      15637.2548828125,
+      3234.55004882812
+    ],
+    "overscan_world_units": 256
+  },
+  "validation": {
+    "complete_regions": 4,
+    "bosses": 3,
+    "save_stars": 5,
+    "directed_portals": 6,
+    "transition_pairs": 3,
+    "progression_gated_directions": 1,
+    "all_actual_scene_bounds_match_layout": true,
+    "assembly_offsets_also_match_cumulative_actual_scene_widths": true,
+    "all_visible_sprite_bounds_inside_export": true,
+    "capture_tiles_cover_entire_render_rect_exactly": true,
+    "coordinate_roundtrip_checks": 4015,
+    "maximum_coordinate_roundtrip_error_world_units": 0,
+    "direct_godot_reference_patches": [
+      {
+        "id": "B3",
+        "world_rect": [
+          4416.0,
+          472.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "B1",
+        "world_rect": [
+          9984.0,
+          768.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "B2",
+        "world_rect": [
+          14592.0,
+          672.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "S1",
+        "world_rect": [
+          512.0,
+          1040.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 82,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "S2",
+        "world_rect": [
+          3712.0,
+          432.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 82,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "S3",
+        "world_rect": [
+          4544.0,
+          288.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 82,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "S4",
+        "world_rect": [
+          9760.0,
+          912.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 14,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "S5",
+        "world_rect": [
+          14400.0,
+          992.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 82,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "START",
+        "world_rect": [
+          112.0,
+          784.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM9",
+        "world_rect": [
+          1152.0,
+          640.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM10",
+        "world_rect": [
+          2688.0,
+          640.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM11",
+        "world_rect": [
+          4224.0,
+          640.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM12",
+        "world_rect": [
+          7296.0,
+          1664.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM13",
+        "world_rect": [
+          10368.0,
+          640.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": true,
+        "edge_pixels_different": 0,
+        "maximum_edge_neighborhood_radius_pixels": 0,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      },
+      {
+        "id": "SEAM14",
+        "world_rect": [
+          11904.0,
+          1664.0,
+          256,
+          256
+        ],
+        "exact_pixel_match": false,
+        "edge_pixels_different": 17,
+        "maximum_edge_neighborhood_radius_pixels": 1,
+        "all_pixels_match_or_match_adjacent_shader_edge": true
+      }
+    ],
+    "reference_comparison_note": "Independent 256px viewports match exactly except for at most one-pixel raster-edge choices in existing shader/nearest-filtered artwork (maximum 82 changed pixels of 65,536). The exported scenery itself is the unresized native Godot tile capture; it is not corrected or repainted.",
+    "annotation_boxes_avoid_all_visible_sprite_bounds": true,
+    "tracked_source_files_verified_unchanged": 1879,
+    "runtime_files_modified": [],
+    "game_export_exclusion": "docs/.gdignore already excludes the docs tree from Godot resource import; docs/story-planning/.gdignore also supplied. No runtime references to deliverables; no export presets configured."
+  },
+  "source_file_sha256": {
+    "project.godot": "ae955f8ef46c7d456ddb50985e65f12cdba8d1039cc5981099995fa24816b91d",
+    "scripts/journey/layout.gd": "0eb84e4f4e14d585fe56fa75f10608a672eca374cb07034a63654f75df3e006f",
+    "scripts/maps/world_layout.gd": "8d693f2275aaaa4bf589883db0aa69642202a3b2b807510c7f7392c5948d332e",
+    "scripts/world/save_statue.gd": "64710779fc3cb5af05bbe73eb984b33d71ad1ed429bbfe8d1ca6fa5ce7a9eb4d",
+    "scripts/world/portal.gd": "96f581fb07990982e4024e17a271d071043b9c400ec4fe0833e84880c5b6de2b",
+    "scripts/world/overworld.gd": "d643dc6b8e5abefbe19a3bccb5c7a228a5fc9dd8e73440eacd42921caee0993f",
+    "scenes/journey/forest_entrance.tscn": "b6a141d84284ecb1b542136590ecab4cd0dd659ede9669f41a2e963f1d799893",
+    "scenes/journey/deep_forest.tscn": "1ea38998280ed341e499f69313b01dff912689ac1fb856c61ca79488be927cfa",
+    "scenes/journey/bart_area.tscn": "51a5a3ba5ef8b59e113b2f1672192c497aa3d4551df26bcd819e575d91cee9fb",
+    "scenes/journey/flooded_forest.tscn": "dd741546a4e446399aa3e0da020c07dd150b8f5fad301815d8443bee0d90889e"
+  },
+  "asset_notices": {
+    "full_notice": "docs/environment-asset-credits.md",
+    "LPC": "Lanea Zimmerman (Sharm), CC BY-SA 3.0. https://github.com/OpenGameArt/LiberatedPixelCup ; https://creativecommons.org/licenses/by-sa/3.0/",
+    "LPC_Revised": "Eliza Wyatt (DeathsDarling), Lanea Zimmerman (Sharm), Hyptosis, BlueCarrot16; OGA-BY 3.0. https://github.com/ElizaWy/LPC ; https://opengameart.org/content/oga-by-30-faq",
+    "Ninja_Adventure": "Pixel-Boy, CC0. https://pixel-boy.itch.io/ninja-adventure-asset-pack",
+    "save_star": "Kenney Game icon pack, CC0. https://kenney.nl/assets/game-icons",
+    "cat_characters": "Existing user-supplied artwork; unchanged.",
+    "new_creative_assets_generated": false,
+    "annotation_type": "Requested technical labels, outlines and legend using existing DejaVu font. No new terrain/artwork generated."
+  }
+}
