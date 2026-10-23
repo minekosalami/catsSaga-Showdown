@@ -158,10 +158,10 @@ func refresh() -> void:
 	controls.ambient.set_pressed_no_signal(get_node("/root/Ambience").enabled)
 	controls.reduced.set_pressed_no_signal(get_node("/root/VisualSettings").reduced)
 	controls.motion.set_value_no_signal(get_node("/root/VisualSettings").motion)
-	var current := DisplayServer.window_get_mode()
-	display_mode_picker.select(2 if current==DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN else (1 if current==DisplayServer.WINDOW_MODE_FULLSCREEN else 0))
+	display_mode_picker.select(settings.current_display_mode())
 	resolution.disabled=display_mode_picker.get_selected_id()!=0
-	var index: int=resolutions.find(DisplayServer.window_get_size())
+	var target_size: Vector2i=settings.values.window_size if settings.current_display_mode()!=0 else DisplayServer.window_get_size()
+	var index: int=resolutions.find(target_size)
 	resolution.select(maxi(0,index))
 	keep.visible=settings.trial
 	revert.visible=settings.trial

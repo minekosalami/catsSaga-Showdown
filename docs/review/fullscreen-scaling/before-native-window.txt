@@ -1,0 +1,11 @@
+
+xwininfo: Window id: 0x273 (the root window) (has no name)
+
+  Root window id: 0x273 (the root window) (has no name)
+  Parent window id: 0x0 (none)
+     2 children:
+     0x400001 (has no name): ()  10x10+-20+-20  +-20+-20
+     0x200003 "Godot": ("Godot_Engine" "catsSaga()")  1280x720+320+180  +320+180
+        1 child:
+        0x200004 (has no name): ()  1x1+0+0  +320+180
+

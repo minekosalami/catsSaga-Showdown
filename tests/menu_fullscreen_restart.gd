@@ -16,6 +16,6 @@ func run() -> void:
 	else:
 		await create_timer(.35).timeout
 		print("FULLSCREEN actual mode ",DisplayServer.window_get_mode()," preference ",settings.values.display_mode)
-		var ok: bool = DisplayServer.window_get_mode()==DisplayServer.WINDOW_MODE_FULLSCREEN and settings.values.display_mode==1
+		var ok: bool = settings.current_display_mode()==1 and settings.values.display_mode==1 and DisplayServer.window_get_size()==DisplayServer.screen_get_size()
 		print("FULLSCREEN RESTART ","PASS" if ok else "FAIL")
 		quit(0 if ok else 1)
