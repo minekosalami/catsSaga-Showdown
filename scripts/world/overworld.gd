@@ -176,7 +176,7 @@ func _process(_delta: float) -> void:
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	interaction_indicator.text="["+get_node("/root/GameSettings").binding_label("interact")+"]"
 	if nearest_npc != null:
-		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -62)
+		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -96 if nearest_npc.has_meta("save_statue") else -62)
 	interaction_hint.text = get_node("/root/GameSettings").binding_label("interact")+"  "+("Save" if nearest_npc.has_meta("save_statue") else "Interact") if nearest_npc != null else ""
 
 func _input(event: InputEvent) -> void:

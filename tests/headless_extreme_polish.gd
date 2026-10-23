@@ -75,7 +75,7 @@ func run() -> void:
 	await create_timer(.5).timeout
 	check(actor.sprite.flip_h,"right key flips only the cat sprite")
 	check(camera.lead.x>10 and camera.lead.length()<=camera.look_ahead+.01,"responsive bounded directional look-ahead")
-	check(camera.global_position==camera.global_position.round(),"pixel-aligned exploration camera")
+	check(camera.global_position.distance_to(camera.followed)<.001,"exploration camera follows without world-grid quantization")
 	check(actor.scale==Vector2.ONE and actor.rotation==0 and actor.get_node("CollisionShape2D").shape==body,"animation never mirrors or scales the physics body")
 	key(KEY_RIGHT,false)
 	var scale_before: Vector2 = actor.sprite.scale

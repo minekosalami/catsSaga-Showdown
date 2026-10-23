@@ -1,0 +1,94 @@
+{
+  "repository": "https://github.com/ElizaWy/LPC",
+  "revision": "f07f7f5892e67c932c68f70bb04472f2c64e46bc",
+  "files": [
+    {
+      "upstream_path": "README.md",
+      "sha256": "17d205b3243ff635139edc10e9f2b95e1d1cf7497e53c79b370abc3730dac88d",
+      "bytes": 2359,
+      "file": "README.md"
+    },
+    {
+      "upstream_path": "Credits.txt",
+      "sha256": "794bf995ef2498603bc4250155da687ca256a9246a8e2a68ebab3270ee924a15",
+      "bytes": 1522,
+      "file": "Credits.txt"
+    },
+    {
+      "upstream_path": "Terrain/Credits.txt",
+      "sha256": "b0f3a11db7ece49cbf5483a36909a8c31310b9169932052710e6a76172d1a6c0",
+      "bytes": 3325,
+      "file": "Terrain-Credits.txt"
+    },
+    {
+      "upstream_path": "Terrain/flowers.png",
+      "sha256": "e698d0db83e5238ea3fcc8783f1294b70312e2170a8856cb5a99ca40e7f6cddb",
+      "bytes": 30094,
+      "file": "flowers.png",
+      "size": [
+        352,
+        160
+      ],
+      "atlas_cell_pixels": [
+        32,
+        32
+      ]
+    },
+    {
+      "upstream_path": "Terrain/mushrooms.png",
+      "sha256": "b83d21f0ffbbe5d21963d4ccc1f28baae6cca6bedc901cd54924f9a3c370354a",
+      "bytes": 6915,
+      "file": "mushrooms.png",
+      "size": [
+        192,
+        160
+      ],
+      "atlas_cell_pixels": [
+        32,
+        32
+      ]
+    },
+    {
+      "upstream_path": "Terrain/plants_summer.png",
+      "sha256": "66ca3a60067d123c02cbae5874c17da1c7a3f0da4142066b9711de79f99228d7",
+      "bytes": 26593,
+      "file": "plants_summer.png",
+      "size": [
+        512,
+        160
+      ],
+      "atlas_cell_pixels": [
+        32,
+        32
+      ]
+    },
+    {
+      "upstream_path": "Terrain/wildflowers_summer.png",
+      "sha256": "ec0774429f514ae192f25466ccfd5cbaa3426f23e4533df7621e2d42e3de9f3a",
+      "bytes": 3924,
+      "file": "wildflowers_summer.png",
+      "size": [
+        144,
+        160
+      ],
+      "atlas_cell_pixels": [
+        16,
+        32
+      ]
+    }
+  ],
+  "license": "OGA-BY-3.0",
+  "license_url": "https://opengameart.org/content/oga-by-30-faq",
+  "creators": [
+    "Eliza Wyatt (DeathsDarling)",
+    "Lanea Zimmerman (Sharm)",
+    "Hyptosis",
+    "BlueCarrot16",
+    "Demetrius"
+  ],
+  "upstream_commit_date": "2023-12-01T21:10:56-05:00",
+  "checked_on": "2026-10-23",
+  "human_provenance": "Artist-owned repository; Credits.txt explicitly states lovingly hand drawn, curated, and compiled. Terrain/Credits.txt names original artists and sources for each sheet. Artist file history records terrain reorganization on 2023-12-01; repository established 2021-05-31.",
+  "modifications": "None. Source PNG and author/license notices are unchanged bytes. Godot atlas regions and sprite transforms compose them.",
+  "style_grid_pixels": 32
+}

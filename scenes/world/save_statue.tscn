@@ -1,29 +1,20 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 [ext_resource type="Script" path="res://scripts/world/save_statue.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/player.png.png" id="cat"]
-[ext_resource type="Texture2D" path="res://assets/overhaul_human/ninja/rock.png" id="rock"]
-[ext_resource type="Shader" path="res://shaders/actor_pixels.gdshader" id="pixels"]
-[sub_resource type="ShaderMaterial" id="stone"]
-shader = ExtResource("pixels")
-shader_parameter/display_size = Vector2(49, 65.3)
-shader_parameter/pixel_size = 2.0
-shader_parameter/grayscale = 1.0
+[ext_resource type="Texture2D" path="res://assets/save_star_human/star.png" id="star"]
+[ext_resource type="Shader" path="res://shaders/save_star.gdshader" id="outline"]
+[sub_resource type="ShaderMaterial" id="star_outline"]
+shader = ExtResource("outline")
 [sub_resource type="CircleShape2D" id="body"]
 radius = 14.0
 [node name="CatSaveStatue" type="Node2D"]
 script = ExtResource("script")
 interaction_radius = 100.0
-[node name="Pedestal" type="Sprite2D" parent="."]
-texture_filter = 1
-position = Vector2(0,-5)
-scale = Vector2(0.3125,0.3125)
-texture = ExtResource("rock")
-[node name="Cat" type="Sprite2D" parent="."]
+[node name="Star" type="Sprite2D" parent="."]
 texture_filter = 1
 position = Vector2(0,-44)
-scale = Vector2(0.1,0.1)
-texture = ExtResource("cat")
-material = SubResource("stone")
+scale = Vector2(1.5,1.5)
+texture = ExtResource("star")
+material = SubResource("star_outline")
 [node name="Trunk" type="StaticBody2D" parent="."]
 collision_layer = 1
 collision_mask = 2

@@ -19,8 +19,12 @@ func face_direction(direction: Vector2) -> void:
 @export var acceleration: float = 1800.0
 @export var deceleration: float = 2200.0
 var movement_locked: bool = false
+var previous_physics_position := Vector2.ZERO
+var physics_position := Vector2.ZERO
 
 func _ready() -> void:
+	previous_physics_position = global_position
+	physics_position = global_position
 	sprite = Sprite2D.new()
 	sprite.name = "PlayerSprite"
 	add_child(sprite)
@@ -32,7 +36,22 @@ func _ready() -> void:
 	movement_visual.name = "MovementVisual"
 	add_child(movement_visual)
 
+func visual_position() -> Vector2:
+	# Interpolate only exploration presentation. The body and its collisions stay
+	# on the fixed physics tick; teleports must never interpolate through terrain.
+	if not global_position.is_equal_approx(physics_position):return global_position
+	return previous_physics_position.lerp(physics_position,clampf(Engine.get_physics_interpolation_fraction(),0.0,1.0))
+
+func _process(_delta: float) -> void:
+	if Session.busy:return
+	var correction := visual_position()-global_position
+	sprite.position = correction
+	get_node("MovementVisual").position = correction
+
 func _physics_process(delta: float) -> void:
+	if not global_position.is_equal_approx(physics_position):
+		physics_position = global_position
+	previous_physics_position = physics_position
 	if movement_locked or Session.busy:
 		velocity = Vector2.ZERO
 		return
@@ -45,3 +64,4 @@ func _physics_process(delta: float) -> void:
 	var current_speed := speed * (sprint_multiplier if Input.is_action_pressed("focus") else 1.0)
 	velocity = velocity.move_toward(direction * current_speed, (acceleration if direction != Vector2.ZERO else deceleration) * delta)
 	move_and_slide()
+	physics_position = global_position

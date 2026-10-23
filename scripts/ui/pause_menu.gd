@@ -33,7 +33,7 @@ func _ready() -> void:
 	status=Label.new()
 	status.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	status.add_theme_font_size_override("font_size",13)
-	status.text="Save progress at cat statues."
+	status.text="Save progress at save stars."
 	column.add_child(status)
 	overlay.hide()
 func show_menu(_in_combat: bool) -> void:
