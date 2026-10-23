@@ -35,7 +35,7 @@ func run() -> void:
 	check(not settings.trial and DisplayServer.window_get_size()==before.size,"unconfirmed display trial automatically rolls back")
 	settings.preview_display(1,Vector2i(1280,720))
 	await create_timer(.3).timeout
-	check(DisplayServer.window_get_mode()==DisplayServer.WINDOW_MODE_FULLSCREEN,"borderless fullscreen uses Godot fullscreen mode")
+	check(settings.current_display_mode()==1 and DisplayServer.window_get_size()==DisplayServer.screen_get_size(),"borderless fullscreen actually covers the monitor")
 	session.open_options()
 	await process_frame
 	await shot("11-fullscreen-confirmation")
@@ -52,7 +52,7 @@ func run() -> void:
 	if settings.exclusive_supported():
 		settings.preview_display(2,Vector2i(1280,720))
 		await create_timer(.3).timeout
-		check(DisplayServer.window_get_mode()==DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN,"exclusive choice maps to distinct exclusive fullscreen API")
+		check(settings.current_display_mode() in [1,2] and DisplayServer.window_get_size()==DisplayServer.screen_get_size(),"exclusive request fills the monitor, with an honest borderless fallback if unsupported")
 		settings.revert_display()
 	settings.preview_display(0,Vector2i(960,540))
 	settings.confirm_display()

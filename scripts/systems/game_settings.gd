@@ -148,27 +148,47 @@ func exclusive_supported() -> bool:
 	return DisplayServer.get_name() in ["X11","Windows","macOS"]
 func resolution_options() -> Array[Vector2i]:
 	var result: Array[Vector2i]=[]
-	var screen := DisplayServer.screen_get_size()
+	var screen := DisplayServer.screen_get_usable_rect().size
 	for size in [Vector2i(960,540),Vector2i(1024,576),Vector2i(1280,720),Vector2i(1600,900),Vector2i(1920,1080),Vector2i(2560,1440)]:
 		if size.x<=screen.x and size.y<=screen.y:result.append(size)
 	return result
+func current_display_mode() -> int:
+	var native_mode := DisplayServer.window_get_mode()
+	if native_mode==DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:return 2
+	if native_mode==DisplayServer.WINDOW_MODE_FULLSCREEN:return 1
+	# Window managers may keep a native borderless fullscreen window in the
+	# WINDOWED state. Recognize it only when it actually covers this monitor.
+	var window := get_tree().root
+	var screen := window.current_screen
+	if window.borderless and DisplayServer.window_get_position()==DisplayServer.screen_get_position(screen) and DisplayServer.window_get_size()==DisplayServer.screen_get_size(screen):return 1
+	return 0
 func display_state() -> Dictionary:
-	return {"mode":DisplayServer.window_get_mode(),"size":DisplayServer.window_get_size(),"position":DisplayServer.window_get_position()}
+	return {"mode":DisplayServer.window_get_mode(),"size":DisplayServer.window_get_size(),"position":DisplayServer.window_get_position(),"borderless":get_tree().root.borderless}
+func _fullscreen_mode(mode: int) -> int:
+	return Window.MODE_EXCLUSIVE_FULLSCREEN if mode==2 and exclusive_supported() else Window.MODE_FULLSCREEN
 func apply_display(mode: int,size: Vector2i) -> void:
 	var window := get_tree().root
+	var screen_index := window.current_screen
 	window.mode=Window.MODE_WINDOWED
-	var screen := DisplayServer.screen_get_usable_rect()
+	if mode!=0:
+		# A fullscreen flag alone is not a size request on every backend/window
+		# manager. Explicit native geometry also updates the root render target.
+		window.borderless=true
+		window.position=DisplayServer.screen_get_position(screen_index)
+		window.size=DisplayServer.screen_get_size(screen_index)
+		window.mode=_fullscreen_mode(mode)
+		return
+	window.borderless=false
+	var screen := DisplayServer.screen_get_usable_rect(screen_index)
 	var bounded := Vector2i(clampi(size.x,640,maxi(640,screen.size.x)),clampi(size.y,360,maxi(360,screen.size.y)))
 	window.size=bounded
 	var pos: Vector2i=values.window_position
 	if pos.x<screen.position.x or pos.y<screen.position.y or pos.x+bounded.x>screen.end.x or pos.y+bounded.y>screen.end.y:pos=screen.position+(screen.size-bounded)/2
 	window.position=pos
-	if mode==1:window.mode=Window.MODE_FULLSCREEN
-	elif mode==2 and exclusive_supported():window.mode=Window.MODE_EXCLUSIVE_FULLSCREEN
 func preview_display(mode: int,size: Vector2i) -> void:
 	if trial:revert_display()
 	previous_display=display_state()
-	if previous_display.mode==DisplayServer.WINDOW_MODE_WINDOWED:
+	if current_display_mode()==0:
 		values.window_size=previous_display.size
 		values.window_position=previous_display.position
 	trial=true
@@ -177,9 +197,8 @@ func preview_display(mode: int,size: Vector2i) -> void:
 	display_trial_changed.emit()
 func confirm_display() -> void:
 	if not trial:return
-	var mode := DisplayServer.window_get_mode()
-	values.display_mode=2 if mode==DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN else (1 if mode==DisplayServer.WINDOW_MODE_FULLSCREEN else 0)
-	if mode==DisplayServer.WINDOW_MODE_WINDOWED:
+	values.display_mode=current_display_mode()
+	if values.display_mode==0:
 		values.window_size=DisplayServer.window_get_size()
 		values.window_position=DisplayServer.window_get_position()
 	trial=false
@@ -189,13 +208,14 @@ func revert_display() -> void:
 	if not trial:return
 	var window := get_tree().root
 	window.mode=Window.MODE_WINDOWED
+	window.borderless=previous_display.borderless
 	window.size=previous_display.size
 	window.position=previous_display.position
 	window.mode=previous_display.mode
 	trial=false
 	display_trial_changed.emit()
 func toggle_fullscreen() -> void:
-	var fullscreen := DisplayServer.window_get_mode() in [DisplayServer.WINDOW_MODE_FULLSCREEN,DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]
+	var fullscreen := current_display_mode()!=0
 	preview_display(0 if fullscreen else 1,values.window_size)
 	get_node("/root/Session").open_options()
 func restore_defaults() -> void:
