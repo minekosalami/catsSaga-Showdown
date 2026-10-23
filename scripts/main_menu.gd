@@ -85,12 +85,12 @@ func _start_game() -> void:
 		load_button.custom_minimum_size=Vector2(220,44)
 		load_button.disabled=data.is_empty()
 		if slot==1:button.grab_focus()
-	var hint := heading(page,"Save progress at cat statues.\nA replaced slot is written only when you save.",13)
+	var hint := heading(page,"Save progress at save stars.\nA replaced slot is written only when you save.",13)
 	hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	Style.button(page,"Back",go_back)
 func _select_new_slot(slot: int) -> void:
 	if Session.saves.slot_exists(slot):
-		Session.confirm_action("Start a new game in Slot %d? Saving at a cat statue will replace its previous progress."%slot,_begin_new_game.bind(slot))
+		Session.confirm_action("Start a new game in Slot %d? Saving at a save star will replace its previous progress."%slot,_begin_new_game.bind(slot))
 	else:_begin_new_game(slot)
 func _begin_new_game(slot: int=1) -> void:
 	if transitioning or Session.busy:return
@@ -113,6 +113,7 @@ func _show_credits() -> void:
 	text.selection_enabled=true
 	text.add_theme_font_size_override("normal_font_size",15)
 	text.text="LLiosette — Creator\n\n"+preload("res://resources/ui/wonderland_asset_notices.tres").get_meta("text")+"\n\nBasic Caves & Dungeons — schwarnhild\nhttps://schwarnhild.itch.io\n\nDejaVu fonts — DejaVu contributors / Bitstream Vera license.\nFull font license: assets/ui/fonts/LICENSE.txt"
+	text.text+="\n\n"+preload("res://resources/ui/environment_asset_notices.tres").get_meta("text")
 	page.add_child(text)
 	Style.button(page,"Back",go_back).grab_focus()
 func go_back() -> bool:

@@ -56,13 +56,10 @@ func _process(delta: float) -> void:
  previous = actor.global_position
  var moving: bool = actor.velocity.length()>15 and distance<100 and not actor.movement_locked and not Session.busy
  clock += delta*(12 if actor.velocity.length()>300 else 9)
- var bob := -absf(sin(clock))*2.2 if moving else 0.0
  var breath := sin(clock*.26)*.012 if not moving else 0.0
- var stride := sin(clock*2)*.018 if moving else 0.0
- sprite.scale = sprite.scale.lerp(rest_scale*Vector2(1-breath*.5+stride,1+breath-stride*.6),1-exp(-delta*12))
- sprite.rotation = lerp_angle(sprite.rotation,clampf(actor.velocity.x/390,-1,1)*.035 if moving else 0.0,1-exp(-delta*14))
- var target := rest_offset+Vector2(0,bob/maxf(sprite.scale.y,.001))
- sprite.offset = sprite.offset.lerp(target,1-exp(-delta*18))
+ sprite.scale = sprite.scale.lerp(rest_scale*Vector2(1-breath*.5,1+breath),1-exp(-delta*12))
+ sprite.rotation = lerp_angle(sprite.rotation,0.0,1-exp(-delta*14))
+ sprite.offset = rest_offset
  shadow.scale.x = 3.2+(.1*sin(clock) if moving else 0)
  sample_clock -= delta
  if sample_clock<=0:

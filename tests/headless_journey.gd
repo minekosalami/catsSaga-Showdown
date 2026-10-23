@@ -52,7 +52,7 @@ func run() -> void:
 		var world: Node = current_scene
 		check(world.map.map_size==Plan.SIZES[area],area+" preserves original bounds")
 		check(world.player.sprite.texture.resource_path=="res://assets/player/player.png.png",area+" preserves supplied player art")
-		check(world.map.get_node("Water").tile_set.get_source(0).texture.resource_path.contains("ninja"),area+" uses licensed human terrain")
+		check(world.map.get_node("Water").tile_set.get_source(0).texture.resource_path=="res://assets/environment_human/lpc/watergrass.png",area+" uses licensed human terrain")
 		check(world.map.get_meta("tree_count")>400,area+" has dense woodland")
 		var grid := grid_for(world)
 		var east: Vector2 = Plan.points(area)[-1]-Vector2(40,0) if area=="flooded_forest" else Vector2(world.map.map_size.x-224,Plan.SEAM_Y)

@@ -7,6 +7,7 @@ var lead := Vector2.ZERO
 func _ready() -> void:
 	set_process(true)
 	position_smoothing_enabled = false
+	process_callback = Camera2D.CAMERA2D_PROCESS_IDLE
 	process_priority = 50
 	followed = get_parent().global_position
 	zoom=Vector2.ONE*get_node("/root/GameSettings").values.zoom
@@ -17,8 +18,10 @@ func _process(delta: float) -> void:
 	var target: Vector2 = actor.velocity/actor.speed*look_ahead
 	target = target.limit_length(look_ahead)
 	lead = lead.lerp(target,1-exp(-delta*7))
-	var wanted: Vector2 = actor.global_position+lead
+	var wanted: Vector2 = actor.visual_position()+lead
 	if followed.distance_to(wanted)>500:followed = wanted
 	followed = followed.lerp(wanted,1-exp(-delta*follow_response))
-	# Integer camera centers stop subpixel scrolling from shimmering terrain.
-	global_position = (followed/2.0).round()*2.0
+	# A world-pixel grid becomes uneven screen jumps at fractional zoom/stretch.
+	# Track the same interpolated presentation as the cat, without quantization.
+	global_position = followed
+	force_update_scroll()

@@ -178,7 +178,7 @@ func grant_flooded_key() -> void:
 		call_deferred("_show_key_notification")
 
 func begin_boss2_battle(position_before_battle: Vector2) -> void:
-	if busy or area_id != "flooded_forest" or not story_flags.get("flooded_forest_key_obtained", false) or story_flags.get("boss2_defeated", false):
+	if busy or area_id != "flooded_forest" or not region_access_allowed(story_flags.get("flooded_forest_key_obtained", false)) or story_flags.get("boss2_defeated", false):
 		return
 	return_position = position_before_battle
 	encounter_id = "boss2"
@@ -346,7 +346,7 @@ func snapshot(area: String, point: Vector2) -> Dictionary:
 func save_current() -> bool:
 	var world := get_tree().current_scene
 	if not save_point_active or busy or encounter_active or world==null or world.name!="Overworld" or world.dialogue.active:
-		saves.last_error="Save only at a cat statue, outside combat and dialogue."
+		saves.last_error="Save only at a save point, outside combat and dialogue."
 		return false
 	world.update_map_exploration()
 	var data := snapshot(area_id,world.player.position)

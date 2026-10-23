@@ -305,7 +305,18 @@ func visible_boss_markers() -> Array:
 		var discovered: bool = defeated or Session.exploration.visited(boss.area,cell)
 		if not discovered and not Session.reveal_all_locations: continue
 		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":{"bart":"Evil Bart","boss2":"Boss 2","blankkitten":"BlankKitten"}.get(id,id),"color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
-	if preload("res://scripts/journey/layout.gd").active(Session.area_id): return markers
+	if preload("res://scripts/journey/layout.gd").active(Session.area_id):
+		# Save points follow the same saved fog discovery as existing boss markers.
+		# Their positions come from the interaction component, never a second map list.
+		var saves: Dictionary=preload("res://scripts/world/save_statue.gd").LOCATIONS
+		for area: String in saves:
+			for index in saves[area].size():
+				var position: Vector2=saves[area][index]
+				var cell:=Vector2i(position/Layout.TILE_PIXELS)/Session.exploration.CELL_TILES
+				var discovered: bool=Session.exploration.visited(area,cell)
+				if not discovered and not Session.reveal_all_locations:continue
+				markers.append({"id":"save_"+area+"_"+str(index),"area":area,"local_position":position,"point":Layout.world_point(area,position),"defeated":false,"discovered":discovered,"color":Color.WHITE if discovered else Color("#E4B765"),"label":"Save"})
+		return markers
 	var cave_discovered: bool = Session.story_flags.get("underground_cave_discovered",false) or Session.exploration.region_discovered("underground_cave")
 	if cave_entrance != null and (cave_discovered or Session.reveal_all_locations):
 		markers.append({"id":"underground_cave","area":"flooded_forest","local_position":cave_entrance,"point":Layout.world_point("flooded_forest",cave_entrance),"defeated":false,"discovered":cave_discovered,"color":Color("#D9DED2") if cave_discovered else Color("#E4B765"),"label":"Underground Cave"})

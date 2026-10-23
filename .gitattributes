@@ -1,2 +1,9 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+
+# Keep licensed upstream artwork and notices byte-identical to their source hashes.
+assets/environment_human/** -text
+assets/save_star_human/** -text
+# Original notices retain the publisher's CRLF and trailing whitespace.
+assets/environment_human/lpc_revised/Credits.txt -whitespace
+assets/environment_human/lpc_revised/Terrain-Credits.txt -whitespace

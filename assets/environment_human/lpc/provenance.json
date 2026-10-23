@@ -1,0 +1,141 @@
+{
+  "repository": "https://github.com/OpenGameArt/LiberatedPixelCup",
+  "revision": "f61104a1ecc54e7bce54b82ada7d7ba4c41bc524",
+  "files": [
+    {
+      "upstream_path": "README.md",
+      "sha256": "32f9e705282933793c0b999dc2c374c5bf27fd9b8ed4f0d943a5f8b5455ea272",
+      "bytes": 650,
+      "file": "README.md"
+    },
+    {
+      "upstream_path": "LICENSE-CC-BY-SA-3.0.txt",
+      "sha256": "3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f",
+      "bytes": 22240,
+      "file": "LICENSE-CC-BY-SA-3.0.txt"
+    },
+    {
+      "upstream_path": "tileset/original/authors.md",
+      "sha256": "708d626c1581fe5f0ce03231fc37fcdf5f4a8b74e516fa5ac9b0a4e3748f7567",
+      "bytes": 184,
+      "file": "authors.md"
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/bridges.png",
+      "sha256": "18b92672f26cc46f036ac3699416ffc3b19dc8a827756811c94384573b2c53e6",
+      "bytes": 8880,
+      "file": "bridges.png",
+      "size": [
+        192,
+        224
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/dirt.png",
+      "sha256": "115ffc435f5ce95a5462c08708a158bac014ac4f6fd631af44e335b77a0a264b",
+      "bytes": 8607,
+      "file": "dirt.png",
+      "size": [
+        96,
+        192
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/dirt2.png",
+      "sha256": "cc0d99cab8fc3d31912c9784394c1abbd016b0745dd9d8b682bbf4a2e2ec398f",
+      "bytes": 8718,
+      "file": "dirt2.png",
+      "size": [
+        96,
+        192
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/grass.png",
+      "sha256": "9fad54558dcb0aa91859869c603e76fe362ae320e0c4b1e873266566cb0d73a0",
+      "bytes": 8500,
+      "file": "grass.png",
+      "size": [
+        96,
+        192
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/grassalt.png",
+      "sha256": "01391d65597978216c1c3e5279ea86c92ca62b21f3e2d85b04eacb5cf78b8d13",
+      "bytes": 7918,
+      "file": "grassalt.png",
+      "size": [
+        96,
+        192
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/rock.png",
+      "sha256": "07e1db23fa156cb664d0ff4de8499bdd4527f035a828e4d7b050227743399576",
+      "bytes": 3927,
+      "file": "rock.png",
+      "size": [
+        64,
+        32
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/treetop.png",
+      "sha256": "37f3d9c4beb61b05fad39bd5efdecc03b5d67504307936397bb1645824bbf475",
+      "bytes": 11062,
+      "file": "treetop.png",
+      "size": [
+        192,
+        224
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/trunk.png",
+      "sha256": "8b03c5efa6950b5be6c6db989e22bee024c0ee232bc665768db3c35e68a28651",
+      "bytes": 4413,
+      "file": "trunk.png",
+      "size": [
+        192,
+        96
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/water.png",
+      "sha256": "6107522405d8c27b9bab7278f5dc14cd7cc0445592f5967d748cb81ede4b0d47",
+      "bytes": 7905,
+      "file": "water.png",
+      "size": [
+        96,
+        192
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/waterfall.png",
+      "sha256": "a41ef99c08449d44331a603df95f90365200768a6f6717124e9d0f2e4065ffed",
+      "bytes": 4700,
+      "file": "waterfall.png",
+      "size": [
+        96,
+        160
+      ]
+    },
+    {
+      "upstream_path": "tileset/original/Sharm/outdoor/PNG/watergrass.png",
+      "sha256": "bbbb43d2fc0209c881f4255aa82ca4805f65d97f242852f0132cb96f78e3ed5e",
+      "bytes": 9980,
+      "file": "watergrass.png",
+      "size": [
+        96,
+        192
+      ]
+    }
+  ],
+  "creator": "Lanea Zimmerman (Sharm)",
+  "license_selected": "CC-BY-SA-3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "upstream_commit_date": "2018-02-21T17:24:05-08:00",
+  "checked_on": "2026-10-23",
+  "source_grid_pixels": 32,
+  "modifications": "None. Source files are byte-for-byte originals. Game composition uses Godot AtlasTexture regions, TileSet placement, transforms and filtering."
+}
