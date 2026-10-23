@@ -60,7 +60,7 @@ func run() -> void:
 			await create_timer(.08).timeout
 			await snapshot("canopy-behind" if offset<0 else "canopy-front")
 	await forest("bart_area",Vector2(1792,1000),"bart-area")
-	await forest("flooded_forest",Vector2(2000,1100),"flooded-crossing")
+	await forest("flooded_forest",Vector2(1968,816),"flooded-crossing")
 	await forest("flooded_forest",Vector2(3150,900),"flooded-boss")
 	session.map_reveal_cheat = true
 	current_scene.map_ui.open_map()
