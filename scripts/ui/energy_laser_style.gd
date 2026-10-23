@@ -44,3 +44,10 @@ static func draw_beam(canvas: CanvasItem, length: float, width: float, tint: Col
 		var p := fposmod(clock*1.4+float(i)/6,1)
 		var angle := i*TAU/6+clock
 		canvas.draw_line(Vector2.RIGHT.rotated(angle)*width*0.4,Vector2.RIGHT.rotated(angle)*width*(0.4+p),Color(tint.lightened(0.5),(1-p)*0.5*opacity),1,true)
+
+	# Original human sparkle frames travel inside the luminous envelope. The
+	# opaque body/core above still defines the exact dangerous width.
+	for i in range(6):
+		var x := -length*.5+fposmod(clock*125+i*length/6,length)
+		var extent := minf(11,width*.45+3)
+		canvas.draw_texture_rect(preload("res://scripts/ui/human_effects.gd").frame("sparkle",int(clock*11+i)),Rect2(x-extent*.5,-extent*.5,extent,extent),false,Color(1,1,1,.45*opacity))

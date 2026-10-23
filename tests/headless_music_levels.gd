@@ -49,8 +49,7 @@ func run() -> void:
 	for encounter in [
 		["bart","res://scenes/combat_host.tscn"],
 		["boss2","res://scenes/boss2/combat_host.tscn"],
-		["blankkitten","res://scenes/blankkitten/combat_host.tscn"],
-		["incarna","res://scenes/incarna/combat_host.tscn"]
+		["blankkitten","res://scenes/blankkitten/combat_host.tscn"]
 	]:
 		session.encounter_id = encounter[0]
 		await session.transition_to(encounter[1],true)

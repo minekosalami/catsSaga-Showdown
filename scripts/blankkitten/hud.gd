@@ -38,7 +38,7 @@ func _ready() -> void:
 	root.theme = preload("res://scripts/ui/battle_hud_style.gd").theme()
 	add_child(root)
 	label("BLANKKITTEN",Rect2(20,24,500,34),25)
-	label("Sequence() // SURVIVE THE ABSENCE",Rect2(20,62,500,24),12)
+	label("Sequence()",Rect2(20,62,500,24),12)
 	stage_label = label("Introduction",Rect2(20,365,500,32),17)
 	var hud_back := ColorRect.new()
 	hud_back.position = Vector2(20,795)
@@ -83,7 +83,7 @@ func _ready() -> void:
 	stack.add_child(result_label)
 	var subtitle := Label.new()
 	subtitle.name = "Subtitle"
-	subtitle.text = "// signal lost"
+	subtitle.text = ""
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	subtitle.add_theme_font_size_override("font_size",14)
@@ -104,11 +104,20 @@ func _ready() -> void:
 	effects_toggle.position = Vector2(361,90)
 	effects_toggle.size = Vector2(158,30)
 	effects_toggle.add_theme_font_size_override("font_size",11)
-	effects_toggle.set_pressed_no_signal(bool(Session.get_meta("blankkitten_reduced_effects",false)))
+	effects_toggle.set_pressed_no_signal(get_node("/root/VisualSettings").reduced)
 	effects_toggle.toggled.connect(func(on):
 		battle.reduced_effects = on
-		Session.set_meta("blankkitten_reduced_effects",on))
+		Session.set_meta("blankkitten_reduced_effects",on)
+		get_node("/root/VisualSettings").set_reduced(on))
 	root.add_child(effects_toggle)
+	get_node("/root/VisualSettings").changed.connect(_sync_visual_settings)
+	_sync_visual_settings.call_deferred()
+
+func _sync_visual_settings() -> void:
+	var reduced: bool = get_node("/root/VisualSettings").reduced
+	battle.reduced_effects = reduced
+	Session.set_meta("blankkitten_reduced_effects",reduced)
+	effects_toggle.set_pressed_no_signal(reduced)
 
 func action(stack: VBoxContainer, text: String, callback: Callable) -> Button:
 	var button := Button.new()
@@ -126,8 +135,9 @@ func update_clock(clock: float) -> void:
 	stage_label.text = Cue.NAMES[battle.stage]
 	controls_label.text = "← / →  Move    Z  Jump (hold for height)" if Cue.GRAVITY[battle.stage] else "↑ / ↓ / ← / →  Move"
 	progress.value = clock
-	phase_title.flash_strength = .025 if battle.reduced_effects else .08
+	phase_title.flash_strength = .015 if battle.reduced_effects or get_node("/root/VisualSettings").reduced else .06
 	phase_title.update_clock(clock)
+	stage_label.visible = battle.practice_mode or battle.development_run or not phase_title.visible
 	timer_label.modulate = Color(.83,.86,.92).lerp(Color.WHITE,(1-smoothstep(0,.13,fposmod(clock,Cue.MEASURE)))*.4)
 	health_label.add_theme_color_override("font_color",Color("#FFF2F4") if health > 2 else Color("#FF6D93"))
 	if battle.practice_mode: stage_label.text = "PRACTICE // "+Cue.NAMES[battle.stage]
@@ -147,7 +157,7 @@ func stage_changed(stage: int, clock: float) -> void:
 
 func show_result(won: bool, reason := "") -> void:
 	result_label.text = "VICTORY()" if won else "GAME OVER()"
-	result.get_child(0).get_node("Subtitle").text = "// survived" if won else ("// signal lost" if reason.is_empty() else reason)
+	result.get_child(0).get_node("Subtitle").text = "" if won or reason.is_empty() else reason
 	return_button.visible = won
 	practice_choice.clear()
 	var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})

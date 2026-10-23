@@ -92,6 +92,7 @@ func _draw() -> void:
 		if p.has("dissolve_radius"):
 			draw_arc(p.point,p.dissolve_radius*(1+(1-fade)*0.6),0,TAU,16,Color(p.tint,fade*fade),1.2,true)
 		elif p.shard:
+			preload("res://scripts/ui/human_effects.gd").draw_impact(self,p.point,p.age,p.life,9,p.tint)
 			draw_set_transform(p.point,p.spin+p.age*6)
 			draw_colored_polygon(PackedVector2Array([Vector2(-3,-2),Vector2(4,0),Vector2(-1,4)]),Color(p.tint,fade))
 		else:

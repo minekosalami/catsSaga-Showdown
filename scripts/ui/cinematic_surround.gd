@@ -29,8 +29,6 @@ func _draw() -> void:
 		var heading: String = "catsSaga()" if side == 0 else look.boss_name.to_upper()
 		var width := FONT.get_string_size(heading,HORIZONTAL_ALIGNMENT_LEFT,-1,16).x
 		draw_string(FONT,center+Vector2(-width*0.5,-8),heading,HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#9598A5"))
-		var subtitle: String = "// SHOWDOWN" if side == 0 else ("SURVIVE THE SIGNAL" if look.flooded else "BREAK THE SIGNAL")
-		width = FONT.get_string_size(subtitle,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x
-		draw_string(FONT,center+Vector2(-width*0.5,16),subtitle,HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color(look.accent,0.5))
+
 	for edge in [left-7,right+7]:
 		draw_line(Vector2(edge,18),Vector2(edge,size.y-18),Color(look.accent,0.24),1,true)

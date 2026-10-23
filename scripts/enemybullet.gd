@@ -14,6 +14,7 @@ var travel_time := 0.0
 var body_radius := 6.5
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	visual_style = clampi(visual_style, 0, 3)
 	body_radius = RADII[visual_style]
 	$CollisionShape2D.shape = $CollisionShape2D.shape.duplicate()

@@ -15,6 +15,8 @@ var ink_material: ShaderMaterial
 var water_point := Vector2.ZERO
 var water_nearby := false
 var sample_clock := 0.0
+var water_map_id := 0
+var water_layers: Array[Node] = []
 func _ready() -> void:
  ink_material = ShaderMaterial.new()
  ink_material.shader = preload("res://shaders/human_icon_mask.gdshader")
@@ -35,7 +37,10 @@ func _exit_tree() -> void:
 func sample_water() -> bool:
  var world := get_parent().get_parent()
  if world.get("map") == null:return false
- for layer in world.map.find_children("*Water*","TileMapLayer",true,false):
+ if water_map_id!=world.map.get_instance_id():
+  water_map_id = world.map.get_instance_id()
+  water_layers = world.map.find_children("*Water*","TileMapLayer",true,false)
+ for layer in water_layers:
   for offset in [Vector2.ZERO,Vector2(32,0),Vector2(-32,0),Vector2(0,32),Vector2(0,-32)]:
    var cell: Vector2i = layer.local_to_map(layer.to_local(get_parent().global_position+offset))
    if layer.get_cell_source_id(cell)>=0:

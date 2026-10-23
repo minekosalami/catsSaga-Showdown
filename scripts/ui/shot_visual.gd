@@ -1,5 +1,7 @@
 extends Node2D
 const Energy = preload("res://scripts/ui/projectile_energy.gd")
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 func _process(_delta: float) -> void:
 	queue_redraw()
 func _draw() -> void:

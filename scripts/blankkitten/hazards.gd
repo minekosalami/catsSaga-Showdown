@@ -41,6 +41,8 @@ func _ready() -> void:
 	ball_quad.z_index = 1
 	ball_material = ShaderMaterial.new()
 	ball_material.shader = preload("res://shaders/blankkitten_fireball.gdshader")
+	ball_material.set_shader_parameter("human_core",preload("res://assets/overhaul_human/ninja/nova_00.png"))
+	ball_material.set_shader_parameter("human_flame",preload("res://assets/overhaul_human/ninja/flame_00.png"))
 	ball_quad.material = ball_material
 	add_child(ball_quad)
 	ball_quad.hide()

@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7")
 Music="*res://scripts/systems/music.gd"
 Session="*res://scripts/systems/session.gd"
 Ambience="*res://scripts/systems/ambience.gd"
+VisualSettings="*res://scripts/systems/visual_settings.gd"
 
 [display]
 

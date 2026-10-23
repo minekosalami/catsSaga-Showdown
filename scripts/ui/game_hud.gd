@@ -118,7 +118,7 @@ func _ready() -> void:
 	content.custom_minimum_size.x = 320
 	content.add_theme_constant_override("separation", 18)
 	card.add_child(content)
-	_label(content, "// SIGNAL LOST", 12, SketchTheme.ACCENT).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(content, "", 12, SketchTheme.ACCENT).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var game_over: Label = get_node("GameOverLabel")
 	game_over.reparent(content)
 	game_over.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -167,6 +167,7 @@ func _ignore_pointer(node: Node) -> void:
 		_ignore_pointer(child)
 
 func _process(_delta: float) -> void:
+	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
 	var game := get_parent()
 	var player: Node = game.get_node_or_null("Player")
 	if player != null:
@@ -222,7 +223,7 @@ func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
 
 func show_boss_entrance() -> void:
 	# One short pulse, called only by the guarded boss spawn at the music drop.
-	entrance_flash.modulate.a = phase_flash_strength
+	entrance_flash.modulate.a = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
 	entrance_tween = create_tween()
 	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.10)
 

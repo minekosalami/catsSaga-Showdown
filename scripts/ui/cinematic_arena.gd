@@ -33,12 +33,14 @@ func _ready() -> void:
 	environment.set_script(preload("res://scripts/ui/cinematic_environment.gd"))
 	environment.look = look
 	environment.show_behind_parent = true
+	environment.visible = not battle.has_node("SurrealDirector")
 	add_child(environment)
 	var veil := ColorRect.new()
 	veil.name = "Atmosphere"
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	veil.size = SIZE
 	veil.show_behind_parent = true
+	veil.visible = not battle.has_node("SurrealDirector")
 	add_child(veil)
 	atmosphere = ShaderMaterial.new()
 	atmosphere.shader = preload("res://shaders/cinematic_atmosphere.gdshader")
@@ -126,6 +128,7 @@ func update_clock(playback: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if is_instance_valid(battle) and battle.has_node("SurrealDirector"): return
 	if look == null:
 		return
 	# Drawn on the same background canvas, below every gameplay object.
