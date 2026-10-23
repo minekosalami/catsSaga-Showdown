@@ -10,7 +10,8 @@ func return_to_forest() -> void:
 	Session.return_from_blankkitten()
 
 func retry() -> void:
-	Session.transition_to("res://scenes/blankkitten/combat_host.tscn",true)
+	if battle.game_over and Session.encounter_active:Session.retry_last_save()
+	else:Session.transition_to("res://scenes/blankkitten/combat_host.tscn",true)
 
 func finish_entry() -> void:
 	if battle.game_over:
@@ -25,4 +26,4 @@ func practice(index: int) -> void:
 	var seen: Dictionary = Session.get_meta("blankkitten_seen_stages",{})
 	if not seen.has(index): return
 	Session.set_meta("blankkitten_launch",{"time":battle.Cue.STARTS[index],"practice":true})
-	retry()
+	Session.transition_to("res://scenes/blankkitten/combat_host.tscn",true)

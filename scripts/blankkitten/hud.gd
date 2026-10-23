@@ -133,7 +133,10 @@ func update_clock(clock: float) -> void:
 	health_label.text = "HP  " + "● ".repeat(health) + "○ ".repeat(5-health)
 	timer_label.text = "%02d:%02d / 02:25" % [int(clock)/60,int(clock)%60]
 	stage_label.text = Cue.NAMES[battle.stage]
-	controls_label.text = "← / →  Move    Z  Jump (hold for height)" if Cue.GRAVITY[battle.stage] else "↑ / ↓ / ← / →  Move"
+	var settings := get_node("/root/GameSettings")
+	var horizontal: String=settings.binding_label("move_left").split(" / ")[0]+" / "+settings.binding_label("move_right").split(" / ")[0]
+	var vertical: String=settings.binding_label("move_up").split(" / ")[0]+" / "+settings.binding_label("move_down").split(" / ")[0]
+	controls_label.text = horizontal+"  Move    "+settings.binding_label("attack")+"  Jump (hold for height)" if Cue.GRAVITY[battle.stage] else horizontal+" / "+vertical+"  Move"
 	progress.value = clock
 	phase_title.flash_strength = .015 if battle.reduced_effects or get_node("/root/VisualSettings").reduced else .06
 	phase_title.update_clock(clock)
@@ -157,6 +160,7 @@ func stage_changed(stage: int, clock: float) -> void:
 
 func show_result(won: bool, reason := "") -> void:
 	result_label.text = "VICTORY()" if won else "GAME OVER()"
+	retry_button.text="RETRY()" if won else "LOAD LAST SAVE"
 	result.get_child(0).get_node("Subtitle").text = "" if won or reason.is_empty() else reason
 	return_button.visible = won
 	practice_choice.clear()

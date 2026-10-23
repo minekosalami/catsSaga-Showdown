@@ -101,7 +101,7 @@ func _process(delta: float) -> void:
 		candidate.health_changed.connect(_boss_health_changed)
 	if is_instance_valid(boss_sprite) and is_instance_valid(observed_boss) and not observed_boss.defeated_already:
 		boss_flash = maxf(0,boss_flash-delta/0.12)
-		boss_sprite.self_modulate = Color.WHITE.lerp(Color(1.65,1.35,1.45),boss_flash)
+		boss_sprite.self_modulate = Color.WHITE.lerp(Color(1.65,1.35,1.45),0.0 if get_node("/root/GameSettings").values.flashing else boss_flash)
 		if clock > 7.45:
 			if observed_boss.attack_index!=boss_attack:
 				boss_attack = observed_boss.attack_index

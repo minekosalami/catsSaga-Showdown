@@ -22,7 +22,7 @@ var streams: Dictionary = {}
 var fade: Tween
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	player = AudioStreamPlayer.new()
 	player.name = "ThemePlayer"
 	player.volume_db = 0.0
@@ -78,7 +78,7 @@ func play_theme(theme: String) -> void:
 		elif stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
 			stream.loop = true
 		streams[theme] = stream
-	player.bus = "Overworld" if theme == "overworld" else "Master"
+	player.bus = "Overworld" if theme == "overworld" else "Music"
 	player.stream = streams[theme]
 	player.volume_db = -60.0
 	player.play()
@@ -90,6 +90,7 @@ func gain_for_path(path: String) -> float:
 
 func apply_gain(audio: AudioStreamPlayer) -> void:
 	# Apply before play(), leaving each encounter's clock, seek and fades intact.
+	audio.bus = "Music"
 	if audio.stream != null:
 		audio.volume_db = gain_for_path(audio.stream.resource_path)
 

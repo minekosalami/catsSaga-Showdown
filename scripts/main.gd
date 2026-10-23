@@ -233,7 +233,7 @@ func _update_screen_shake(delta: float) -> void:
 			randf_range(-shake_strength, shake_strength)
 		)
 
-		presentation.apply_shake(offset)
+		presentation.apply_shake(offset if get_node("/root/GameSettings").values.shake else Vector2.ZERO)
 	else:
 		presentation.apply_shake(Vector2.ZERO)
 		shake_strength = 0.0

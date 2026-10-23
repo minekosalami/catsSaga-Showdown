@@ -5,7 +5,7 @@ var display_radius := 7.0
 
 func _process(_delta: float) -> void:
 	var player: Node = get_parent()
-	visible = player.health > 0 and (Input.is_key_pressed(KEY_SHIFT) or player.debug_hitbox_enabled)
+	visible = player.health > 0 and (Input.is_action_pressed("focus") or player.debug_hitbox_enabled)
 	if visible:
 		position = get_parent().get_node("CollisionShape2D").position
 		display_radius = get_parent().get_node("CollisionShape2D").shape.radius

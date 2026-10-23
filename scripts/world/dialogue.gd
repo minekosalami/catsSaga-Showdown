@@ -130,7 +130,8 @@ func _process(delta: float) -> void:
 		last_sound_character = text_label.visible_characters
 		sound_clock = 0.0
 	cursor_clock += delta
-	prompt_label.text = ("UP / DOWN  Select   Z  Confirm" if not choices.is_empty() else "Z  " + ("advance" if is_revealed() else "reveal")) + ("  _" if fmod(cursor_clock, 1.0) < 0.5 else "   ")
+	var confirm: String=get_node("/root/GameSettings").binding_label("interact")+" / Enter"
+	prompt_label.text = ("UP / DOWN  Select   "+confirm+"  Confirm" if not choices.is_empty() else confirm+"  " + ("advance" if is_revealed() else "reveal")) + ("  _" if fmod(cursor_clock, 1.0) < 0.5 else "   ")
 
 func is_revealed() -> bool:
 	return text_label.visible_characters >= text_label.get_total_character_count()
@@ -160,21 +161,19 @@ func advance() -> void:
 		_show_line()
 
 func _input(event: InputEvent) -> void:
-	if not active or not event is InputEventKey or not event.pressed:
-		return
-	if event.keycode not in [KEY_Z, KEY_UP, KEY_DOWN]:
-		return
+	if not active:return
+	var confirm := event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")
+	var up := event.is_action_pressed("ui_up")
+	var down := event.is_action_pressed("ui_down")
+	if not (confirm or up or down):return
 	get_viewport().set_input_as_handled()
-	if event.echo:
-		return
+	if event.is_echo():return
 	if not choices.is_empty():
-		if event.keycode == KEY_Z:
-			_choose(selected_choice)
+		if confirm:_choose(selected_choice)
 		else:
-			selected_choice = posmod(selected_choice + (1 if event.keycode == KEY_DOWN else -1), choices.size())
+			selected_choice=posmod(selected_choice+(1 if down else -1),choices.size())
 			choice_buttons[selected_choice].grab_focus()
-	elif event.keycode == KEY_Z:
-		advance()
+	elif confirm:advance()
 
 func _rich_label(font_size: int) -> RichTextLabel:
 	var label := RichTextLabel.new()

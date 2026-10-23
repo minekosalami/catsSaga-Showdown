@@ -66,18 +66,18 @@ func _physics_process(delta: float) -> void:
 	elif timeline.phase == 4:
 		intensity = 0.75
 	hit_effect_time = maxf(0,hit_effect_time-delta)
-	background_material.set_shader_parameter("hit_glitch",hit_effect_time/0.16)
+	background_material.set_shader_parameter("hit_glitch",0.0 if get_node("/root/GameSettings").values.flashing else hit_effect_time/0.16)
 	background_material.set_shader_parameter("clock",elapsed_time)
 	visual_intensity = move_toward(visual_intensity,intensity * effect_intensity,delta * 0.3)
 	background_material.set_shader_parameter("intensity",visual_intensity)
 	background_material.set_shader_parameter("atmosphere",Color("#5099C9"))
 	shake_time = maxf(0,shake_time-delta)
 	# Shake only background scenery; actors and lasers retain exact coordinates.
-	$Background.position = Vector2(270,450) + (Vector2(randf_range(-1,1),randf_range(-1,1)) * minf(4,shake_strength) if shake_time > 0 else Vector2.ZERO)
+	$Background.position = Vector2(270,450) + (Vector2(randf_range(-1,1),randf_range(-1,1)) * minf(4,shake_strength) if shake_time > 0 and get_node("/root/GameSettings").values.shake else Vector2.ZERO)
 
 func notify_hit(point: Vector2) -> void:
 	hit_effect_time = 0.16
-	background_material.set_shader_parameter("hit_glitch",1.0)
+	background_material.set_shader_parameter("hit_glitch",0.0 if get_node("/root/GameSettings").values.flashing else 1.0)
 	shake_time = 0.18
 	shake_strength = 4.0
 	effects.burst(point,Color("#FFEAF4"),20,210,0.4)

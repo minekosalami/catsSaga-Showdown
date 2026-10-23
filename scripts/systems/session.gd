@@ -33,10 +33,20 @@ var suspended_modes: Dictionary = {}
 var last_save_message: String = ""
 var curtain: ColorRect
 var battle_transition: Control
+var active_slot := 1
+var playtime := 0.0
+var manual_checkpoint: Dictionary = {}
+var fresh_run := false
+var save_point_active := false
+var standalone_settings_pause := false
+var migration_message := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
+	migration_message = saves.migrate_legacy()
+	active_slot = maxi(1,saves.most_recent_slot())
+	saves.select_slot(active_slot)
 	curtain = ColorRect.new()
 	curtain.color = Color.BLACK
 	add_child(curtain)
@@ -68,7 +78,9 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu_back") and not event.is_echo() and back_outside_battle():
 		get_viewport().set_input_as_handled()
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+	var pause_pressed: bool = (event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE) or (event is InputEventJoypadButton and event.pressed and event.button_index==JOY_BUTTON_START)
+	# B remains the combat ability. It backs out only while a menu is open.
+	if (pause_pressed or (pause_menu.opened and event.is_action_pressed("ui_cancel"))) and not event.is_echo():
 		if pause_menu.opened:
 			if not is_instance_valid(confirmation) and not (is_instance_valid(options_dialog) and options_dialog.visible):
 				close_pause()
@@ -76,9 +88,6 @@ func _input(event: InputEvent) -> void:
 		elif can_pause():
 			open_pause()
 			get_viewport().set_input_as_handled()
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
-		toggle_fullscreen()
-		get_viewport().set_input_as_handled()
 
 func back_outside_battle() -> bool:
 	var scene := get_tree().current_scene
@@ -94,14 +103,13 @@ func back_outside_battle() -> bool:
 		if pause_menu.opened:
 			pause_menu.buttons.Options.grab_focus()
 		elif scene.name == "Mainmenu":
-			scene.menu_container.get_node("OptionsButton").grab_focus()
+			scene.menu_container.get_node("SettingsButton").grab_focus()
 		return true
 	if pause_menu.opened:
 		close_pause()
 		return true
-	if scene.name == "Mainmenu" and scene.info_container.visible:
-		scene._back_to_menu()
-		return true
+	if scene.name == "Mainmenu" and scene.has_method("go_back"):
+		return scene.go_back()
 	# Branching dialogue has no safe history/back operation; never skip it.
 	return false
 
@@ -111,12 +119,21 @@ func _attach_menu_back(window: Window) -> void:
 	window.add_child(input_handler)
 
 func toggle_fullscreen() -> void:
-	var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
+	get_node("/root/GameSettings").toggle_fullscreen()
 
-func new_game() -> void:
+func _process(delta: float) -> void:
+	var scene := get_tree().current_scene
+	if not get_tree().paused and not busy and scene!=null and (scene.name=="Overworld" or encounter_active):playtime+=delta
+
+func new_game(slot: int = 1) -> void:
 	if busy:
 		return
+	if slot<1 or slot>3:return
+	active_slot=slot
+	saves.select_slot(slot)
+	playtime=0.0
+	fresh_run=true
+	manual_checkpoint={}
 	area_id = "entrance"
 	entry_marker = "Start"
 	restore_position = false
@@ -127,8 +144,7 @@ func new_game() -> void:
 	map_reveal_cheat = false
 	key_notification_pending = false
 	encounter_active = false
-	if await transition_to("res://scenes/world/overworld.tscn"):
-		save_current()
+	await transition_to("res://scenes/world/overworld.tscn")
 
 func travel(destination: String, marker: String, cave_motion: bool = false) -> void:
 	if not preload("res://scripts/journey/layout.gd").active(destination): return
@@ -140,7 +156,6 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
 		if destination == "underground_cave":
 			story_flags["underground_cave_discovered"] = true
-		save_current()
 
 func region_access_allowed(normal_access: bool) -> bool:
 	return unrestricted_region_access or normal_access
@@ -189,8 +204,7 @@ func return_from_blankkitten() -> void:
 		return
 	restore_position = true
 	encounter_active = false
-	if await transition_to("res://scenes/world/overworld.tscn"):
-		save_current()
+	await transition_to("res://scenes/world/overworld.tscn")
 
 func return_to_flooded_forest() -> void:
 	if busy or not story_flags.get("boss2_defeated", false):
@@ -198,16 +212,14 @@ func return_to_flooded_forest() -> void:
 	area_id = "flooded_forest"
 	restore_position = true
 	encounter_active = false
-	if await transition_to("res://scenes/world/overworld.tscn"):
-		save_current()
+	await transition_to("res://scenes/world/overworld.tscn")
 
 func return_to_forest() -> void:
 	if busy or not evil_bart_defeated:
 		return
 	restore_position = true
 	encounter_active = false
-	if await transition_to("res://scenes/world/overworld.tscn"):
-		save_current()
+	await transition_to("res://scenes/world/overworld.tscn")
 
 func main_menu() -> void:
 	if busy:
@@ -329,52 +341,83 @@ func return_to_cave() -> void:
 	await transition_to("res://scenes/world/overworld.tscn")
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return saves.validate({"version": 1, "area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "exploration": exploration.snapshot()})
+	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "exploration": exploration.snapshot()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
-	if busy or world == null or world.name != "Overworld" or world.dialogue.active:
-		saves.last_error = "Save unavailable during dialogue, transitions or combat."
+	if not save_point_active or busy or encounter_active or world==null or world.name!="Overworld" or world.dialogue.active:
+		saves.last_error="Save only at a cat statue, outside combat and dialogue."
 		return false
 	world.update_map_exploration()
-	var ok := saves.write_save(snapshot(area_id, world.player.position))
-	last_save_message = "Saved." if ok else saves.last_error
+	var data := snapshot(area_id,world.player.position)
+	var ok := saves.write_save(data)
+	if ok:
+		manual_checkpoint=data.duplicate(true)
+		fresh_run=false
+		saves.mark_used(active_slot)
+	last_save_message="Saved to Slot %d."%active_slot if ok else saves.last_error
 	return ok
 
 func save_boss_victory() -> void:
-	# Save only the known overworld return point, never combat runtime objects.
-	var completed: bool = evil_bart_defeated if encounter_id == "bart" else story_flags.get(encounter_id + "_defeated", false)
-	if encounter_active and completed:
-		var ok := saves.write_save(snapshot(area_id, return_position))
-		last_save_message = "Progress saved." if ok else saves.last_error
+	# Compatibility entry point for existing hosts. Victories remain in memory
+	# until the player deliberately saves at a statue; never write from combat.
+	pass
 
 func has_unsaved_progress() -> bool:
-	var world := get_tree().current_scene
-	if world == null:
-		return false
-	if world.name == "Overworld":
-		return snapshot(area_id, world.player.position) != saves.read_save()
-	if encounter_active:
-		return snapshot(area_id, return_position) != saves.read_save()
-	return false
+	var scene := get_tree().current_scene
+	if scene==null or scene.name=="Mainmenu":return false
+	return true if manual_checkpoint.is_empty() else snapshot(area_id,scene.player.position if scene.name=="Overworld" else return_position)!=manual_checkpoint
 
-func load_game() -> bool:
-	if busy:
-		return false
-	var data := saves.read_save()
+func load_game(slot: int = 0) -> bool:
+	if busy:return false
+	if slot==0:slot=saves.most_recent_slot()
+	var data := saves.read_slot(slot)
 	if data.is_empty():
-		if pause_menu.opened:
-			pause_menu.status.text = saves.last_error
+		last_save_message="No valid save in Slot %d. No new game was started."%slot
+		show_notification(last_save_message)
 		return false
-	area_id = data.area
-	return_position = Vector2(data.position[0], data.position[1])
-	restore_position = true
-	evil_bart_defeated = data.evil_bart_defeated
-	story_flags = data.story_flags.duplicate()
+	var recovery_message: String=saves.last_error
+	active_slot=slot
+	saves.select_slot(slot)
+	area_id=data.area
+	return_position=Vector2(data.position[0],data.position[1])
+	restore_position=true
+	evil_bart_defeated=data.evil_bart_defeated
+	story_flags=data.story_flags.duplicate()
 	exploration.restore(data.exploration)
-	map_reveal_cheat = false
-	encounter_active = false
-	return await transition_to("res://scenes/world/overworld.tscn")
+	playtime=data.playtime
+	manual_checkpoint=data.duplicate(true)
+	fresh_run=false
+	map_reveal_cheat=false
+	key_notification_pending=false
+	encounter_active=false
+	var ok := await transition_to("res://scenes/world/overworld.tscn")
+	if ok:
+		saves.mark_used(slot)
+		if not recovery_message.is_empty():show_notification(recovery_message)
+	return ok
+
+func retry_last_save() -> void:
+	if busy:return
+	if fresh_run:
+		await new_game(active_slot)
+	else:
+		await load_game(active_slot)
+
+func open_save_point(statue: Node2D) -> void:
+	var world := get_tree().current_scene
+	if busy or encounter_active or get_tree().paused or world==null or world.name!="Overworld" or world.dialogue.active or world.checking_spawn or world_menu_open() or statue.global_position.distance_to(world.player.global_position)>statue.interaction_radius:return
+	world.hide_interaction()
+	save_point_active=true
+	get_tree().paused=true
+	confirm_action("Save current progress to Slot %d?"%active_slot,func():
+		var ok := save_current()
+		save_point_active=false
+		get_tree().paused=false
+		show_notification(last_save_message if ok else saves.last_error)
+	)
+	confirmation.get_ok_button().text="Save"
+	confirmation.canceled.connect(func():save_point_active=false;get_tree().paused=false)
 
 func world_menu_open() -> bool:
 	var world := get_tree().current_scene
@@ -412,6 +455,10 @@ func _suspend_always(node: Node) -> void:
 
 func close_pause() -> void:
 	if pause_menu != null:
+		# Confirm/cancel buttons must not carry into attack/sprint after resuming.
+		if pause_menu.opened:
+			for action in ["attack","interact","ability"]:
+				if InputMap.has_action(action):Input.action_release(action)
 		pause_menu.hide_menu()
 	restore_suspended_modes()
 	get_tree().paused = false
@@ -424,11 +471,20 @@ func restore_suspended_modes() -> void:
 	suspended_modes.clear()
 
 func open_options() -> void:
+	if battle_entry_pending:return
+	if not pause_menu.opened and can_pause():
+		open_pause()
+		standalone_settings_pause=true
 	if not is_instance_valid(options_dialog):
 		options_dialog = AcceptDialog.new()
 		options_dialog.set_script(preload("res://scripts/ui/options_dialog.gd"))
 		add_child(options_dialog)
 		_attach_menu_back(options_dialog)
+		options_dialog.visibility_changed.connect(func():
+			if not options_dialog.visible and standalone_settings_pause:
+				standalone_settings_pause=false
+				close_pause()
+		)
 	options_dialog.open()
 
 func confirm_action(message: String, action: Callable) -> void:
@@ -436,12 +492,13 @@ func confirm_action(message: String, action: Callable) -> void:
 		return
 	confirmation = ConfirmationDialog.new()
 	confirmation.process_mode = Node.PROCESS_MODE_ALWAYS
-	confirmation.theme = preload("res://scripts/ui/sketch_theme.gd").create()
+	confirmation.theme = preload("res://scripts/ui/menu/theme.gd").create()
 	confirmation.title = "Confirm"
 	confirmation.dialog_text = message
-	add_child(confirmation)
+	var modal_parent: Node=options_dialog if is_instance_valid(options_dialog) and options_dialog.visible else self
+	modal_parent.add_child(confirmation)
 	var dialog := confirmation
-	var return_focus := get_viewport().gui_get_focus_owner()
+	var return_focus: Control=options_dialog.gui_get_focus_owner() if modal_parent==options_dialog else get_viewport().gui_get_focus_owner()
 	_attach_menu_back(dialog)
 	dialog.confirmed.connect(func():
 		confirmation = null
@@ -454,7 +511,7 @@ func confirm_action(message: String, action: Callable) -> void:
 		if is_instance_valid(return_focus):
 			return_focus.grab_focus()
 	)
-	dialog.popup_centered(Vector2i(440, 180))
+	dialog.popup_centered(Vector2i(480, 200))
 
 func request_main_menu() -> void:
 	if cave_event_active: return

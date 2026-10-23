@@ -4,6 +4,8 @@ const VERSION := 1
 const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(preload("res://scripts/world/cave_layout.gd").SIZE*32)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
+const SLOT_INDEX := "user://save-slots.cfg"
+const LEGACY := "user://save.json"
 
 func validate(value: Variant) -> Dictionary:
 	if not value is Dictionary or value.get("version") != VERSION:
@@ -87,7 +89,9 @@ func validate(value: Variant) -> Dictionary:
 	elif not flags.get(journey.REVISION,false):
 		point = journey.SPAWNS[area]
 	flags[journey.REVISION] = true
-	return {"version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "exploration": exploration.snapshot()}
+	var playtime: Variant = value.get("playtime",0.0)
+	if not (playtime is float or playtime is int) or not is_finite(float(playtime)) or playtime<0:return {}
+	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
@@ -129,6 +133,10 @@ func write_save(snapshot: Dictionary) -> bool:
 	if error != OK or read_file(temporary).is_empty():
 		last_error = "The temporary save could not be verified."
 		return false
+	if FileAccess.file_exists(save_path) and read_file(save_path).is_empty() and not FileAccess.file_exists(save_path+".invalid.bak"):
+		if DirAccess.copy_absolute(save_path,save_path+".invalid.bak")!=OK:
+			last_error="Could not preserve the unreadable save; replacement cancelled."
+			return false
 	if not read_file(save_path).is_empty():
 		error = DirAccess.copy_absolute(save_path, save_path + ".bak")
 		if error != OK:
@@ -139,3 +147,64 @@ func write_save(snapshot: Dictionary) -> bool:
 		last_error = "Could not replace the save file (error %d)." % error
 		return false
 	return true
+
+func slot_path(slot: int) -> String:
+	return "user://save-slot-%d.json"%slot
+func read_slot(slot: int) -> Dictionary:
+	if slot<1 or slot>3:return {}
+	last_error=""
+	var data := read_file(slot_path(slot))
+	if data.is_empty():
+		data=read_file(slot_path(slot)+".bak")
+		if not data.is_empty():last_error="Recovered the previous valid save for Slot %d."%slot
+	return data
+func slot_exists(slot: int) -> bool:
+	return FileAccess.file_exists(slot_path(slot)) or FileAccess.file_exists(slot_path(slot)+".bak")
+func select_slot(slot: int) -> void:
+	save_path=slot_path(slot)
+func mark_used(slot: int) -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(SLOT_INDEX)
+	cfg.set_value("slots","last_used",slot)
+	var error := cfg.save(SLOT_INDEX+".tmp")
+	if error==OK:error=DirAccess.rename_absolute(SLOT_INDEX+".tmp",SLOT_INDEX)
+	if error!=OK:push_warning("Could not remember the last-used save slot.")
+func most_recent_slot() -> int:
+	var cfg := ConfigFile.new()
+	cfg.load(SLOT_INDEX)
+	var last: int=int(cfg.get_value("slots","last_used",0))
+	if not read_slot(last).is_empty():return last
+	var selected := 0
+	var newest := -1
+	for slot in range(1,4):
+		if read_slot(slot).is_empty():continue
+		var modified := int(FileAccess.get_modified_time(slot_path(slot)))
+		if modified>newest:selected=slot;newest=modified
+	return selected
+func migrate_legacy() -> String:
+	# Never replace an occupied slot or alter/delete the source single-save file.
+	var backup := LEGACY+".pre-slots.bak"
+	var index := ConfigFile.new()
+	index.load(SLOT_INDEX)
+	if index.get_value("slots","legacy_migrated",false):return ""
+	if not FileAccess.file_exists(LEGACY) and not FileAccess.file_exists(LEGACY+".bak"):return ""
+	var data := read_file(LEGACY)
+	var source := LEGACY
+	if data.is_empty():data=read_file(LEGACY+".bak");source=LEGACY+".bak"
+	if data.is_empty():return "The old save is unreadable. It has been preserved at user://save.json."
+	for slot in range(1,4):
+		if slot_exists(slot):continue
+		if not FileAccess.file_exists(backup) and DirAccess.copy_absolute(source,backup)!=OK:return "Could not back up the old save. It was left untouched."
+		var previous := save_path
+		select_slot(slot)
+		var ok := write_save(data)
+		save_path=previous
+		if ok:
+			mark_used(slot)
+			index.load(SLOT_INDEX)
+			index.set_value("slots","legacy_migrated",true)
+			index.save(SLOT_INDEX)
+			return "Previous progress copied to Slot %d; the original save and migration backup are preserved."%slot
+		# The immutable backup is also an explicit recovery source if migration fails.
+		return "Migration could not write a slot. Original progress and backup are preserved."
+	return "All three slots are occupied. The previous single-save file was preserved."

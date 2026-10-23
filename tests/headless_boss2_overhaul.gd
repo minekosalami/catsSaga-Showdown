@@ -183,6 +183,8 @@ func run() -> void:
 	current_scene.retry()
 	while session.busy: await process_frame
 	await process_frame
+	check(current_scene.name=="Overworld" and not session.encounter_active,"death Retry restores manual save or fresh entrance when not yet saved")
+	await session.transition_to("res://scenes/boss2/combat_host.tscn",true)
 	battle = current_scene.battle
 	check(battle.player.health == 3 and battle.player.stamina == 1 and battle.player.sprint_cooldown == 0 and battle.elapsed_time < 1,"Retry resets HP, stamina, protection cooldown and audio clock")
 	check(battle.timeline.phase == 0 and battle.effects.particles.is_empty() and battle.timeline.cross.fragments.is_empty(),"Retry starts at introduction without leftover attacks or effects")

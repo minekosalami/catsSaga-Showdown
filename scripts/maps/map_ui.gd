@@ -178,19 +178,19 @@ func handle_input(event: InputEvent) -> bool:
 		sequence = ""
 		debug_sequence = ""
 		return false
-	if event is InputEventKey and event.pressed and not event.echo:
-		if _handle_debug_code(event): return true
+	if (event is InputEventKey or event is InputEventJoypadButton) and event.is_pressed() and not event.is_echo():
+		if event is InputEventKey and _handle_debug_code(event): return true
 		if modal_open():
-			if event.keycode in [KEY_ESCAPE,KEY_X] or (opened and event.keycode == KEY_M) or (inventory_opened and event.keycode == KEY_SPACE): close_modals()
+			if event.is_action_pressed("ui_cancel") or event.is_action_pressed("menu_back") or (opened and event.is_action_pressed("world_map")) or (inventory_opened and event.is_action_pressed("inventory")): close_modals()
 			# All keyboard gameplay input stays inside the active map/inventory modal.
 			return true
 		if not normal_exploration():
 			sequence = ""
 			return false
-		if event.keycode == KEY_M:
+		if event.is_action_pressed("world_map"):
 			open_map()
 			return true
-		if event.keycode == KEY_SPACE:
+		if event.is_action_pressed("inventory"):
 			sequence = ""
 			inventory_opened = true
 			var items: Array[String] = []
@@ -203,6 +203,7 @@ func handle_input(event: InputEvent) -> bool:
 			world.player.movement_locked = true
 			world.hide_interaction()
 			return true
+		if not event is InputEventKey:return false
 		var code: int = event.keycode
 		if code >= KEY_A and code <= KEY_Z:
 			var letter := char(code).to_lower()

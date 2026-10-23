@@ -129,11 +129,16 @@ func _ready() -> void:
 	retry.reparent(content)
 	retry.set_script(SketchButton)
 	retry._ready()
-	retry.text = "TRY AGAIN"
+	retry.text = "LOAD LAST SAVE"
 	retry.custom_minimum_size.y = 52
 	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.INK, SketchTheme.MUTED))
 	_ignore_pointer(root)
 	retry.mouse_filter = Control.MOUSE_FILTER_STOP
+	var death_menu := Button.new()
+	death_menu.text="MAIN MENU"
+	death_menu.custom_minimum_size.y=48
+	content.add_child(death_menu)
+	death_menu.pressed.connect(func():get_tree().current_scene.main_menu())
 	var defeat_background := Control.new()
 	defeat_backdrop = defeat_background
 	defeat_background.name = "DefeatBackdrop"
@@ -167,7 +172,7 @@ func _ignore_pointer(node: Node) -> void:
 		_ignore_pointer(child)
 
 func _process(_delta: float) -> void:
-	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
+	phase_transition.flash_strength = .015 if get_node("/root/VisualSettings").reduced or get_node("/root/GameSettings").values.flashing else phase_flash_strength
 	var game := get_parent()
 	var player: Node = game.get_node_or_null("Player")
 	if player != null:
@@ -181,7 +186,7 @@ func _process(_delta: float) -> void:
 			health_tween.tween_property(health_card, "modulate", Color.WHITE, 0.3)
 		last_health = player.health
 		var ability_state := "[ UNLIMITED ]" if player.unlimited_saturate else ("[ USED ]" if player.saturate_used else "[ READY ]")
-		saturate_label.text = "X  /  SATURATE     " + ability_state
+		saturate_label.text = get_node("/root/GameSettings").binding_label("ability")+"  /  SATURATE     " + ability_state
 		saturate_label.modulate = SketchTheme.MUTED if player.saturate_used and not player.unlimited_saturate else SketchTheme.ACCENT
 	phase_transition.update_clock(game.elapsed_time)
 	if phase_label.text == "Introduction()":
@@ -223,7 +228,7 @@ func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
 
 func show_boss_entrance() -> void:
 	# One short pulse, called only by the guarded boss spawn at the music drop.
-	entrance_flash.modulate.a = .015 if get_node("/root/VisualSettings").reduced else phase_flash_strength
+	entrance_flash.modulate.a = .015 if get_node("/root/VisualSettings").reduced or get_node("/root/GameSettings").values.flashing else phase_flash_strength
 	entrance_tween = create_tween()
 	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.10)
 
@@ -237,7 +242,7 @@ func show_phase(title: String, color: Color, dramatic: bool = false) -> void:
 func show_impact_flash() -> void:
 	if is_instance_valid(entrance_tween):
 		entrance_tween.kill()
-	entrance_flash.modulate.a = minf(phase_flash_strength, 0.12)
+	entrance_flash.modulate.a = 0.0 if get_node("/root/GameSettings").values.flashing else minf(phase_flash_strength, 0.12)
 	entrance_tween = create_tween()
 	entrance_tween.tween_property(entrance_flash, "modulate:a", 0.0, 0.18)
 

@@ -52,7 +52,7 @@ func _input(event: InputEvent) -> void:
 			if cheat_progress == CHEAT_CODE.length():
 				toggle_invincibility()
 				cheat_progress = 0
-	if event is InputEventKey and event.keycode == KEY_Z and not event.echo:
+	if event.is_action("attack") and not event.is_echo():
 		jump_held = event.pressed
 		if event.pressed and not movement_locked:
 			jump_requested = true
@@ -98,7 +98,7 @@ func _physics_process(delta: float) -> void:
 	clock = battle.elapsed_time
 	if battle.game_over or battle.victory_started:
 		return
-	var direction := Vector2(float(Input.is_key_pressed(KEY_RIGHT))-float(Input.is_key_pressed(KEY_LEFT)), float(Input.is_key_pressed(KEY_DOWN))-float(Input.is_key_pressed(KEY_UP)))
+	var direction := Input.get_vector("move_left","move_right","move_up","move_down")
 	step(delta,direction)
 	queue_redraw()
 

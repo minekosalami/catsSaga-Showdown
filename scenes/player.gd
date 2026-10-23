@@ -74,6 +74,9 @@ func _collect_visual_nodes(node: Node) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ability") and not event.is_echo():
+		activate_saturate()
+		return
 	if not event is InputEventKey:
 		return
 
@@ -84,10 +87,6 @@ func _input(event: InputEvent) -> void:
 		toggle_debug_hitbox()
 		return
 
-	# Press X to activate SATURATE.
-	if event.keycode == KEY_X:
-		activate_saturate()
-		return
 
 	# Secret CATA cheat.
 	var key_text := OS.get_keycode_string(event.keycode).to_upper()
@@ -130,7 +129,7 @@ func toggle_unlimited_saturate() -> void:
 
 func toggle_debug_hitbox() -> void:
 	debug_hitbox_enabled = not debug_hitbox_enabled
-	$HitboxDebug.visible = debug_hitbox_enabled or Input.is_key_pressed(KEY_SHIFT)
+	$HitboxDebug.visible = debug_hitbox_enabled or Input.is_action_pressed("focus")
 
 
 func _process(delta: float) -> void:
@@ -153,7 +152,7 @@ func _process(delta: float) -> void:
 	# Normal shooting with Z.
 	shoot_timer -= delta
 
-	if Input.is_key_pressed(KEY_Z) and shoot_timer <= 0.0:
+	if Input.is_action_pressed("attack") and shoot_timer <= 0.0:
 		shoot()
 		shoot_timer = SHOOT_INTERVAL
 
@@ -163,27 +162,12 @@ func _physics_process(delta: float) -> void:
 	if health <= 0:
 		return
 	# Movement uses the same fixed step as enemy-projectile collisions.
-	var direction := Vector2.ZERO
-
-	if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
-		direction.x -= 1.0
-
-	if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
-		direction.x += 1.0
-
-	if Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
-		direction.y -= 1.0
-
-	if Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
-		direction.y += 1.0
-
-	if direction.length() > 0.0:
-		direction = direction.normalized()
+	var direction := Input.get_vector("move_left","move_right","move_up","move_down")
 
 	# Hold Shift for precision movement.
 	var current_speed := speed
 
-	if Input.is_key_pressed(KEY_SHIFT):
+	if Input.is_action_pressed("focus"):
 		current_speed = focus_speed
 
 	# Smooth acceleration and deceleration.
@@ -253,7 +237,9 @@ func _update_visual_effects() -> void:
 
 	var alpha := 1.0
 
-	if blinking:
+	if blinking and get_node("/root/GameSettings").values.flashing:
+		alpha=.65
+	elif blinking:
 		alpha = (
 			0.25
 			if int(Time.get_ticks_msec() / 75.0) % 2 == 0
@@ -262,7 +248,7 @@ func _update_visual_effects() -> void:
 
 	var effect_color := Color(1.0, 1.0, 1.0, alpha)
 
-	if flash_active:
+	if flash_active and not get_node("/root/GameSettings").values.flashing:
 		effect_color = Color(3.0, 3.0, 3.0, 1.0)
 
 	for visual in visual_nodes:

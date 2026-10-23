@@ -36,15 +36,12 @@ func _physics_process(delta: float) -> void:
 	if movement_locked or Session.busy:
 		velocity = Vector2.ZERO
 		return
-	var direction := Vector2(
-		float(Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT)) - float(Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT)),
-		float(Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN)) - float(Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP))
-	).normalized()
+	var direction := Input.get_vector("move_left","move_right","move_up","move_down")
 	if direction != Vector2.ZERO:
 		facing_direction = direction
 	if direction.x != 0:
 		facing_left = direction.x < 0
 		sprite.flip_h = facing_left != artwork_faces_left
-	var current_speed := speed * (sprint_multiplier if Input.is_key_pressed(KEY_SHIFT) else 1.0)
+	var current_speed := speed * (sprint_multiplier if Input.is_action_pressed("focus") else 1.0)
 	velocity = velocity.move_toward(direction * current_speed, (acceleration if direction != Vector2.ZERO else deceleration) * delta)
 	move_and_slide()

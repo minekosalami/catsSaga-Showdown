@@ -35,8 +35,8 @@ func try_protected_activation(focused: bool) -> bool:
 
 func _input(event: InputEvent) -> void:
 	super._input(event)
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_X and not get_tree().paused:
-		try_protected_activation(Input.is_key_pressed(KEY_SHIFT))
+	if event.is_action_pressed("ability") and not event.is_echo() and not get_tree().paused:
+		try_protected_activation(Input.is_action_pressed("focus"))
 
 func update_sprint(delta: float, held: bool, focused: bool) -> void:
 	sprint_protection = maxf(0,sprint_protection-delta)
@@ -55,8 +55,8 @@ func update_sprint(delta: float, held: bool, focused: bool) -> void:
 
 func _physics_process(delta: float) -> void:
 	previous_hit_center = hit_center()
-	var focused := Input.is_key_pressed(KEY_SHIFT)
-	update_sprint(delta,Input.is_key_pressed(KEY_X),focused)
+	var focused := Input.is_action_pressed("focus")
+	update_sprint(delta,Input.is_action_pressed("ability"),focused)
 	var normal_speed := speed
 	if sprinting:
 		speed *= sprint_multiplier
@@ -70,8 +70,8 @@ func _physics_process(delta: float) -> void:
 	if sprinting and velocity.length() > 30 and afterimage_clock <= 0 and effects != null:
 		afterimage_clock = 0.065
 		effects.afterimage($Sprite2D)
-	$Sprite2D.material.set_shader_parameter("protected_flash",sprint_protection > 0)
-	$Sprite2D.material.set_shader_parameter("hit_flash",hit_flash_timer/HIT_FLASH_DURATION)
+	$Sprite2D.material.set_shader_parameter("protected_flash",sprint_protection > 0 and not get_node("/root/GameSettings").values.flashing)
+	$Sprite2D.material.set_shader_parameter("hit_flash",0.0 if get_node("/root/GameSettings").values.flashing else hit_flash_timer/HIT_FLASH_DURATION)
 
 func take_damage(amount: int) -> void:
 	if sprint_protection > 0:
@@ -80,7 +80,7 @@ func take_damage(amount: int) -> void:
 	super.take_damage(amount)
 	if health < before:
 		invulnerability_timer = damage_protection_seconds
-		$Sprite2D.material.set_shader_parameter("hit_flash",1.0)
+		$Sprite2D.material.set_shader_parameter("hit_flash",0.0 if get_node("/root/GameSettings").values.flashing else 1.0)
 		get_parent().notify_hit(hit_center())
 
 func notify_laser_contact(point: Vector2) -> void:
