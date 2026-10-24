@@ -19,33 +19,4 @@ static func box(fill: Color, edge: Color, width: int = 1) -> StyleBoxFlat:
 	return style
 
 static func create() -> Theme:
-	var result := Theme.new()
-	result.default_font = UI_FONT
-	result.default_font_size = 16
-	result.set_color("font_color", "Label", PAPER)
-	result.set_color("font_shadow_color", "Label", INK)
-	result.set_constant("shadow_offset_x", "Label", 1)
-	result.set_constant("shadow_offset_y", "Label", 1)
-	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var fill := Color.TRANSPARENT
-		var edge := Color.TRANSPARENT
-		if state == "hover" or state == "pressed":
-			fill = Color("#23242a")
-			edge = Color.TRANSPARENT
-		if state == "focus":
-			fill = Color.TRANSPARENT
-			edge = Color.TRANSPARENT
-		result.set_stylebox(state, "Button", box(fill, edge, 2 if state == "focus" else 1))
-	result.set_color("font_color", "Button", PAPER)
-	result.set_color("font_hover_color", "Button", PAPER)
-	result.set_color("font_pressed_color", "Button", PAPER)
-	result.set_color("font_focus_color", "Button", PAPER)
-	result.set_color("font_disabled_color", "Button", MUTED)
-	result.set_stylebox("panel", "PanelContainer", box(Color("#18181bf0"), MUTED))
-	var track := box(Color("#37373b"), MUTED)
-	var fill := box(PAPER, PAPER, 0)
-	track.set_content_margin_all(0)
-	fill.set_content_margin_all(0)
-	result.set_stylebox("background", "ProgressBar", track)
-	result.set_stylebox("fill", "ProgressBar", fill)
-	return result
+	return preload("res://scripts/ui/presentation/style.gd").theme()

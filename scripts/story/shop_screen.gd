@@ -7,6 +7,9 @@ var price: Label
 var close_button: Button
 var animating := false
 var keeper_home := Vector2.ZERO
+var balance_label: Label
+var last_balance := -1
+var styled_choices: Array=[]
 
 func _ready() -> void:
 	layer=9
@@ -19,10 +22,18 @@ func _ready() -> void:
 	wall.region_rect=Rect2(17*27,17*14,16,16)
 	wall.axis_stretch_horizontal=NinePatchRect.AXIS_STRETCH_MODE_TILE
 	wall.axis_stretch_vertical=NinePatchRect.AXIS_STRETCH_MODE_TILE
-	wall.modulate=Color(.65,.60,.55)
+	wall.modulate=Color(.25,.36,.42)
 	wall.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
 	root.add_child(wall)
 	wall.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var ambient:=preload("res://scripts/ui/presentation/ambient.gd").new()
+	root.add_child(ambient);ambient.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var heading:=preload("res://scripts/ui/presentation/style.gd").label(root,"PAWn SHOP",30,Color("#ffda7e"))
+	heading.position=Vector2(36,22)
+	balance_label=preload("res://scripts/ui/presentation/style.gd").label(root,"",21,Color("#ffda7e"))
+	balance_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	balance_label.anchor_left=.44;balance_label.anchor_right=.64
+	balance_label.offset_left=0;balance_label.offset_right=0;balance_label.offset_top=28
 	keeper=_picture(preload("res://assets/npc textures/SHOPKEEPER (1).png"),Rect2(.08,.06,.34,.40))
 	merchandise=_picture(preload("res://assets/npc textures/wand.png"),Rect2(.65,.16,.16,.28))
 	price=Label.new()
@@ -44,6 +55,27 @@ func _ready() -> void:
 	world.hide_interaction()
 	world.player.movement_locked=true
 	welcome()
+func _process(_delta: float) -> void:
+	if last_balance!=Session.story_progress.necoins:
+		var increased:=last_balance>=0
+		last_balance=Session.story_progress.necoins
+		balance_label.text="%d NeCoins"%last_balance
+		if increased:
+			preload("res://scripts/ui/presentation/style.gd").pop(balance_label,1.1)
+			preload("res://scripts/ui/presentation/style.gd").burst(root,balance_label.position+Vector2(70,18),Color("#ffda7e"),14)
+	# Style existing choice buttons; no second purchase menu or input handler.
+	for i in world.dialogue.choice_buttons.size():
+		var button: Button=world.dialogue.choice_buttons[i]
+		if button.get_instance_id() in styled_choices:continue
+		styled_choices.append(button.get_instance_id())
+		if i<world.dialogue.choices.size() and world.dialogue.choices[i].get("end","").begins_with("shop_item_"):
+			button.add_theme_stylebox_override("normal",preload("res://scripts/ui/presentation/style.gd").box(Color("#1b3044"),Color("#74e7cf")))
+			button.custom_minimum_size.y=58
+			var id: String=world.dialogue.choices[i].end.trim_prefix("shop_item_")
+			var description:=preload("res://scripts/ui/presentation/style.gd").label(button,Session.rpg.ITEMS[id].effect,11,Color("#9aaac2"))
+			description.mouse_filter=Control.MOUSE_FILTER_IGNORE;description.position=Vector2(48,34)
+	# Free stale references when dialogue pages replace their button nodes.
+	if world.dialogue.choice_buttons.is_empty():styled_choices.clear()
 func _picture(texture: Texture2D, anchors: Rect2) -> TextureRect:
 	var rect:=TextureRect.new()
 	rect.texture=texture
@@ -59,6 +91,7 @@ func _refresh() -> void:
 	price.text="Cupid's Wand — 9,999 NeCoins" if merchandise.visible else "Cupid's Wand — Acquired"
 func _graph(lines: Array, options: Array, speaker := "SHOPKEEPER") -> void:
 	world.dialogue.start_graph({"start":"shop","nodes":{"shop":{"speaker":speaker,"lines":lines,"choices":options}}})
+	world.dialogue.text_label.custom_minimum_size.y=28 if options.any(func(option):return option.get("end","").begins_with("shop_item_")) else 80
 func welcome() -> void:
 	_buy_layout(false)
 	_graph(["Welcome to the PAWn shop! Where one cat's trash is another cat's treasure!"],[{"text":"BUY","end":"shop_buy"},{"text":"TALK","end":"shop_talk"}])
@@ -77,10 +110,12 @@ func buy_menu() -> void:
 		var item: Dictionary=Session.rpg.ITEMS[id]
 		options.append({"text":"%s — %d NeCoins (×%d)"%[item.name,item.price,Session.rpg.inventory[id]],"end":"shop_item_"+id})
 	options.append({"text":"Back","end":"shop_welcome"})
-	_graph(["BUY · %d NeCoins"%Session.story_progress.necoins],options,"")
+	_graph(["BUY"],options,"")
 func _finished() -> void:
 	if world.dialogue.outcome.begins_with("shop_item_"):
-		if not Session.rpg.purchase(world.dialogue.outcome.trim_prefix("shop_item_"),Session.story_progress):Session.show_notification("Insufficient NeCoins.")
+		var id: String=world.dialogue.outcome.trim_prefix("shop_item_")
+		if not Session.rpg.purchase(id,Session.story_progress):Session.show_notification("Insufficient NeCoins.")
+		else:Session.show_notification(Session.rpg.ITEMS[id].name+" purchased.","PurchaseNotification")
 		buy_menu.call_deferred()
 		return
 	match world.dialogue.outcome:

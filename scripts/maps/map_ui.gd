@@ -58,7 +58,7 @@ func setup(host: Node2D) -> void:
 	map_frame.theme = preload("res://scripts/ui/sketch_theme.gd").create()
 	map_frame.theme.set_stylebox("panel","TooltipPanel",preload("res://scripts/ui/sketch_theme.gd").box(Color("#18181b"),Color("#999890")))
 	var paper := ColorRect.new()
-	paper.color = Color("#101410")
+	paper.color = preload("res://scripts/ui/presentation/style.gd").DEEP
 	map_frame.add_child(paper)
 	paper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var title := Label.new()
@@ -102,10 +102,10 @@ func _build_inventory() -> void:
 	var center := CenterContainer.new()
 	inventory.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var panel := PanelContainer.new()
+	var panel := preload("res://scripts/ui/presentation/surface.gd").new()
 	center.add_child(panel)
 	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(430,230)
+	column.custom_minimum_size = Vector2(560,330)
 	column.add_theme_constant_override("separation",24)
 	panel.add_child(column)
 	var title := Label.new()
@@ -117,7 +117,7 @@ func _build_inventory() -> void:
 	inventory_contents.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	inventory_contents.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(inventory_contents)
-	var close := Button.new()
+	var close := preload("res://scripts/ui/presentation/button.gd").new()
 	close.text = "CLOSE()  [SPACE / ESC]"
 	close.pressed.connect(close_modals)
 	column.add_child(close)
@@ -196,6 +196,7 @@ func handle_input(event: InputEvent) -> bool:
 			var items: Array[String] = []
 			items.append("%d NeCoins"%Session.story_progress.necoins)
 			items.append("Feathers: %d/10"%Session.story_progress.feathers.size())
+			for id in Session.rpg.ITEMS:items.append("%s  ×%d"%[Session.rpg.ITEMS[id].name,Session.rpg.inventory[id]])
 			if Session.story_progress.wand_owned:items.append("Cupid's Wand")
 			if Session.story_progress.cat_toy:items.append("Completed cat toy")
 			if Session.story_flags.get("flooded_forest_key_obtained",false): items.append("Flooded Forest Key")
@@ -203,6 +204,7 @@ func handle_input(event: InputEvent) -> bool:
 			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get(Layout.Wonderland.PINK_KEY,false): items.append("Pink Wonderland Key")
 			inventory_contents.text = "\n".join(items) if not items.is_empty() else "No items collected."
 			inventory.show()
+			preload("res://scripts/ui/presentation/style.gd").pop(inventory.get_child(1),1.025)
 			world.player.velocity = Vector2.ZERO
 			world.player.movement_locked = true
 			world.hide_interaction()

@@ -53,17 +53,20 @@ func _ready() -> void:
 	margin.offset_bottom = -24
 	margin.offset_left = 48
 	margin.offset_right = -48
-	panel = PanelContainer.new()
+	panel = preload("res://scripts/ui/presentation/surface.gd").new()
 	margin.add_child(panel)
 	var padding := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
 		padding.add_theme_constant_override("margin_" + side, 16)
 	panel.add_child(padding)
+	panel.accent=preload("res://scripts/ui/presentation/style.gd").LILAC
 	var stack := VBoxContainer.new()
 	stack.add_theme_constant_override("separation", 12)
 	padding.add_child(stack)
 	speaker_label = Label.new()
 	speaker_label.add_theme_font_size_override("font_size", 18)
+	speaker_label.add_theme_color_override("font_color",preload("res://scripts/ui/presentation/style.gd").MINT)
+	speaker_label.add_theme_font_override("font",preload("res://scripts/ui/presentation/style.gd").BOLD)
 	stack.add_child(speaker_label)
 	text_label = _rich_label(22)
 	text_label.custom_minimum_size.y = 80
@@ -107,6 +110,7 @@ func start_lines(content: Array, voice: AudioStream = null) -> void:
 
 func _show_line() -> void:
 	speaker_label.text = "> " + lines[line_index]["speaker"]
+	speaker_label.visible=not lines[line_index]["speaker"].is_empty()
 	_clear_choices()
 	var raw: String = lines[line_index]["text"]
 	text_label.text = Formatter.format_text(raw)
@@ -116,6 +120,8 @@ func _show_line() -> void:
 	last_sound_character = 0
 	revealed = 0.0
 	text_label.visible_characters = 0
+	text_label.modulate.a=.65
+	text_label.create_tween().tween_property(text_label,"modulate:a",1.0,.16)
 
 func _process(delta: float) -> void:
 	if not active:
