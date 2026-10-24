@@ -11,7 +11,7 @@
     },
     "apology": {
       "speaker": "Boss 2",
-      "lines": ["get out of my sight"],
+      "lines": ["Get out of my sight!"],
       "end": "declined"
     }
   }

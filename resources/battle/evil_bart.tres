@@ -2,7 +2,7 @@
 [ext_resource type="Script" path="res://scripts/ui/battle_look.gd" id="look"]
 [resource]
 script = ExtResource("look")
-boss_name = "Evil Bart"
+boss_name = "Smoki"
 accent = Color(0.96, 0.23, 0.38, 1)
 secondary = Color(0.51, 0.23, 0.65, 1)
 angular = true

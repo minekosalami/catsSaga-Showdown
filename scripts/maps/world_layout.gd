@@ -9,7 +9,7 @@ const SIZE := Vector2i(976,192)
 const REGIONS := {
 	"entrance": {"scene":"forest_entrance", "name":"Forest Entrance", "offset":Vector2i(0,0), "size":Vector2i(200,114)},
 	"deep_forest": {"scene":"deep_forest", "name":"Deep Forest", "offset":Vector2i(200,0), "size":Vector2i(320,180)},
-	"bart_area": {"scene":"bart_area", "name":"Evil Bart's Area", "offset":Vector2i(520,0), "size":Vector2i(200,114)},
+	"bart_area": {"scene":"bart_area", "name":"Fluffy Forest", "offset":Vector2i(520,0), "size":Vector2i(200,114)},
 	"flooded_forest": {"scene":"flooded_forest", "name":"Flooded Forest", "offset":Vector2i(720,0), "size":Vector2i(256,192)},
 }
 

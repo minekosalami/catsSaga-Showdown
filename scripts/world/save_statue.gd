@@ -1,6 +1,6 @@
 extends "res://scripts/world/npc.gd"
 ## Shared visual/interaction component; no autosave triggers or boss instances.
-const LOCATIONS := {"entrance":[Vector2(640,1168)],"deep_forest":[Vector2(640,560),Vector2(1472,416)],"bart_area":[Vector2(1568,1040)],"flooded_forest":[Vector2(3008,1120)]}
+const LOCATIONS := {"entrance":[Vector2(640,1168)],"deep_forest":[Vector2(2600,1000)],"bart_area":[Vector2(1568,1040)],"flooded_forest":[Vector2(3008,1120)]}
 var idle_time := 0.0
 static func install(map: Node2D) -> void:
 	# Runtime load avoids a packed-scene ↔ script preload reference cycle.

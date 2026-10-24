@@ -89,9 +89,11 @@ func validate(value: Variant) -> Dictionary:
 	elif not flags.get(journey.REVISION,false):
 		point = journey.SPAWNS[area]
 	flags[journey.REVISION] = true
+	var progress := preload("res://scripts/story/progress.gd").validate(value.get("story_progress",{}))
+	if progress.is_empty(): return {}
 	var playtime: Variant = value.get("playtime",0.0)
 	if not (playtime is float or playtime is int) or not is_finite(float(playtime)) or playtime<0:return {}
-	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "exploration": exploration.snapshot()}
+	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "story_progress":progress, "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):

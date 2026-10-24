@@ -194,6 +194,10 @@ func handle_input(event: InputEvent) -> bool:
 			sequence = ""
 			inventory_opened = true
 			var items: Array[String] = []
+			items.append("%d NeCoins"%Session.story_progress.necoins)
+			items.append("Feathers: %d/10"%Session.story_progress.feathers.size())
+			if Session.story_progress.wand_owned:items.append("Cupid's Wand")
+			if Session.story_progress.cat_toy:items.append("Completed cat toy")
 			if Session.story_flags.get("flooded_forest_key_obtained",false): items.append("Flooded Forest Key")
 			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get("cave_red_key_obtained",false): items.append("Red Key")
 			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get(Layout.Wonderland.PINK_KEY,false): items.append("Pink Wonderland Key")
@@ -304,7 +308,7 @@ func visible_boss_markers() -> Array:
 		var defeated: bool = Session.evil_bart_defeated if id == "bart" else Session.story_flags.get(id+"_defeated",false)
 		var discovered: bool = defeated or Session.exploration.visited(boss.area,cell)
 		if not discovered and not Session.reveal_all_locations: continue
-		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":{"bart":"Evil Bart","boss2":"Boss 2","blankkitten":"BlankKitten"}.get(id,id),"color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
+		markers.append({"id":id,"area":boss.area,"local_position":boss.local_position,"point":Layout.world_point(boss.area,boss.local_position),"defeated":defeated,"discovered":discovered,"label":{"bart":"Smoki","boss2":"Boss 2","blankkitten":"BlankKitten"}.get(id,id),"color":Color("#E4B765") if not discovered else (Color("#5DEA87") if defeated else Color("#FF5166"))})
 	if preload("res://scripts/journey/layout.gd").active(Session.area_id):
 		# Save points follow the same saved fog discovery as existing boss markers.
 		# Their positions come from the interaction component, never a second map list.

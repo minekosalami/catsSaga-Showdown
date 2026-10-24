@@ -6203,11 +6203,6 @@ texture = ExtResource("4_a216q")
 [node name="VisualPose" type="Node" parent="Characters/ForestNPC" unique_id=1354984767]
 script = ExtResource("5_tulqw")
 
-[node name="BlankKitten" type="Node2D" parent="Characters" unique_id=1754325501 instance=ExtResource("6_u3qpl")]
-position = Vector2(1344, 600)
-script = ExtResource("7_y7m2u")
-interaction_radius = 112.0
-
 [node name="Discoveries" type="Node2D" parent="." unique_id=776896055]
 
 [node name="ScenicClearing0" type="Marker2D" parent="Discoveries" unique_id=492118409]
@@ -19190,68 +19185,6 @@ position = Vector2(0, -15.311398)
 scale = Vector2(0.95696235, 0.95696235)
 texture = SubResource("AtlasTexture_xtd0y")
 
-[node name="Tree415" type="StaticBody2D" parent="." unique_id=1103386188 groups=["journey_trees"]]
-position = Vector2(2495.557, 810.4428)
-collision_mask = 2
-script = ExtResource("18_38o2o")
-size_multiplier = 0.86031824
-
-[node name="GroundShadow" type="Sprite2D" parent="Tree415" unique_id=1859770882]
-visible = false
-modulate = Color(1, 1, 1, 0.35)
-z_index = -1
-texture_filter = 1
-scale = Vector2(3.2118547, 1.2044455)
-texture = ExtResource("19_7aal2")
-
-[node name="Sprite2D" type="Sprite2D" parent="Tree415" unique_id=800633221]
-texture_filter = 1
-position = Vector2(0, -63.66355)
-scale = Vector2(0.86031824, 0.86031824)
-texture = SubResource("AtlasTexture_tiekr")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Tree415" unique_id=1247997894]
-position = Vector2(0, -6.452387)
-shape = SubResource("CapsuleShape2D_uuifm")
-
-[node name="TrunkArt" type="Sprite2D" parent="Tree415" unique_id=1692587980]
-show_behind_parent = true
-texture_filter = 1
-position = Vector2(0, -13.765092)
-scale = Vector2(0.86031824, 0.86031824)
-texture = SubResource("AtlasTexture_bu0at")
-
-[node name="Tree416" type="StaticBody2D" parent="." unique_id=803252941 groups=["journey_trees"]]
-position = Vector2(2678.3936, 838.351)
-collision_mask = 2
-script = ExtResource("18_38o2o")
-size_multiplier = 0.9360938
-
-[node name="GroundShadow" type="Sprite2D" parent="Tree416" unique_id=227666965]
-visible = false
-modulate = Color(1, 1, 1, 0.35)
-z_index = -1
-texture_filter = 1
-scale = Vector2(3.4947503, 1.3105314)
-texture = ExtResource("19_7aal2")
-
-[node name="Sprite2D" type="Sprite2D" parent="Tree416" unique_id=775001351]
-texture_filter = 1
-position = Vector2(0, -84.24844)
-scale = Vector2(0.9360938, 0.9360938)
-texture = SubResource("AtlasTexture_qnj62")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Tree416" unique_id=744160236]
-position = Vector2(0, -7.0207033)
-shape = SubResource("CapsuleShape2D_qrbly")
-
-[node name="TrunkArt" type="Sprite2D" parent="Tree416" unique_id=1087901455]
-show_behind_parent = true
-texture_filter = 1
-position = Vector2(0, -14.977501)
-scale = Vector2(0.9360938, 0.9360938)
-texture = SubResource("AtlasTexture_xtd0y")
-
 [node name="Tree417" type="StaticBody2D" parent="." unique_id=1171050253 groups=["journey_trees"]]
 position = Vector2(3759.8457, 839.42163)
 collision_mask = 2
@@ -19499,37 +19432,6 @@ texture_filter = 1
 position = Vector2(0, -17.466583)
 scale = Vector2(1.0916615, 1.0916615)
 texture = SubResource("AtlasTexture_bu0at")
-
-[node name="Tree425" type="StaticBody2D" parent="." unique_id=528386688 groups=["journey_trees"]]
-position = Vector2(2617.6963, 908.9813)
-collision_mask = 2
-script = ExtResource("18_38o2o")
-size_multiplier = 1.0901635
-
-[node name="GroundShadow" type="Sprite2D" parent="Tree425" unique_id=198853111]
-visible = false
-modulate = Color(1, 1, 1, 0.35)
-z_index = -1
-texture_filter = 1
-scale = Vector2(4.069944, 1.5262289)
-texture = ExtResource("19_7aal2")
-
-[node name="Sprite2D" type="Sprite2D" parent="Tree425" unique_id=1079507706]
-texture_filter = 1
-position = Vector2(0, -80.6721)
-scale = Vector2(1.0901635, 1.0901635)
-texture = SubResource("AtlasTexture_fmtlf")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Tree425" unique_id=178834928]
-position = Vector2(0, -8.176227)
-shape = SubResource("CapsuleShape2D_slx03")
-
-[node name="TrunkArt" type="Sprite2D" parent="Tree425" unique_id=846733960]
-show_behind_parent = true
-texture_filter = 1
-position = Vector2(0, -17.442616)
-scale = Vector2(1.0901635, 1.0901635)
-texture = SubResource("AtlasTexture_xtd0y")
 
 [node name="Tree426" type="StaticBody2D" parent="." unique_id=792370052 groups=["journey_trees"]]
 position = Vector2(3292.7925, 923.5609)

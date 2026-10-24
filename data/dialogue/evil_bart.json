@@ -2,7 +2,7 @@
   "start": "BART_001",
   "nodes": {
     "BART_001": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "Hello... I didn't see you there! Wait... are you who I think you are..."
       ],
@@ -14,7 +14,7 @@
       ]
     },
     "BART_002": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "I heard you would be coming. Do you have a minute to listen?"
       ],
@@ -30,7 +30,7 @@
       ]
     },
     "BART_003": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "Are you familar with The Refraction? Well, probably not.",
         "The Refraction was an event that gave various cats the ability to SATURATE.",
@@ -48,14 +48,14 @@
       ]
     },
     "BART_004A": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "Okay, great. But I just need to do one thing..."
       ],
       "next": "BART_005"
     },
     "BART_004B": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "SATURATE() is a strength not many have...",
         "It lets you shoot a Rainbow Death Beam once per battle by pressing X!",
@@ -64,7 +64,7 @@
       "next": "BART_005"
     },
     "BART_005": {
-      "speaker": "EVIL BART",
+      "speaker": "SMOKI",
       "lines": [
         "I need to test your power. Get ready to SATURATE()"
       ],

@@ -16,6 +16,7 @@ var battle_entry_pending: bool = false
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 @export var region_fade_duration: float = 0.3
 var story_flags: Dictionary = {}
+var story_progress := preload("res://scripts/story/progress.gd").new()
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
 var unrestricted_region_access := false # Debug only; deliberately absent from saves.
@@ -139,6 +140,7 @@ func new_game(slot: int = 1) -> void:
 	restore_position = false
 	evil_bart_defeated = false
 	story_flags.clear()
+	story_progress.restore({})
 	story_flags[preload("res://scripts/journey/layout.gd").REVISION] = true
 	exploration.reset()
 	map_reveal_cheat = false
@@ -341,7 +343,7 @@ func return_to_cave() -> void:
 	await transition_to("res://scenes/world/overworld.tscn")
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "exploration": exploration.snapshot()})
+	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "story_progress": story_progress.snapshot(), "exploration": exploration.snapshot()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
@@ -384,6 +386,7 @@ func load_game(slot: int = 0) -> bool:
 	restore_position=true
 	evil_bart_defeated=data.evil_bart_defeated
 	story_flags=data.story_flags.duplicate()
+	story_progress.restore(data.story_progress)
 	exploration.restore(data.exploration)
 	playtime=data.playtime
 	manual_checkpoint=data.duplicate(true)

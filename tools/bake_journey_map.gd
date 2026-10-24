@@ -16,6 +16,7 @@ func run() -> void:
 		root.add_child(view)
 		var map: Node2D = load(Plan.scene(area)).instantiate()
 		view.add_child(map)
+		load("res://scripts/story/world_content.gd").install_map(map,area)
 		var camera := Camera2D.new()
 		camera.position = Plan.SIZES[area]*.5
 		camera.zoom = Vector2.ONE*.25
