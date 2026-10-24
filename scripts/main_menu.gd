@@ -114,6 +114,7 @@ func _show_credits() -> void:
 	text.add_theme_font_size_override("normal_font_size",15)
 	text.text="LLiosette — Creator\n\n"+preload("res://resources/ui/wonderland_asset_notices.tres").get_meta("text")+"\n\nBasic Caves & Dungeons — schwarnhild\nhttps://schwarnhild.itch.io\n\nDejaVu fonts — DejaVu contributors / Bitstream Vera license.\nFull font license: assets/ui/fonts/LICENSE.txt"
 	text.text+="\n\n"+preload("res://resources/ui/environment_asset_notices.tres").get_meta("text")
+	text.text+="\n\n"+preload("res://resources/ui/weather_asset_notices.tres").get_meta("text")
 	page.add_child(text)
 	Style.button(page,"Back",go_back).grab_focus()
 func go_back() -> bool:

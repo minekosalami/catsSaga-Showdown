@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/encounters/host.gd" id="host"]
+[node name="OrdinaryCombatHost" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("host")
+[node name="SideBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.018,0.025,0.024,1)
+[node name="ArenaContainer" type="SubViewportContainer" parent="."]
+layout_mode = 0
+offset_right = 540.0
+offset_bottom = 900.0
+stretch = false
+[node name="Arena" type="SubViewport" parent="ArenaContainer"]
+own_world_2d = true
+size = Vector2i(540,900)
+handle_input_locally = true
+render_target_update_mode = 4

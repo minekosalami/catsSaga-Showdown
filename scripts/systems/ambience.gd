@@ -49,6 +49,8 @@ func set_enabled(value: bool) -> void:
 func profile_for(area: String) -> String:
  if area == "underground_cave": return "cave"
  if area == "flooded_forest": return "wetland"
+ if area == "deep_forest": return "deep_forest"
+ if area == "bart_area": return "fluffy_forest"
  var plan := preload("res://scripts/wonderland/layout.gd")
  if plan.OUTDOORS.has(area): return "wonderland"
  if plan.regions().has(area): return "interior"
@@ -85,11 +87,12 @@ func _process(delta: float) -> void:
    times.bed = elapsed+maxf(3,voice.stream.get_length()/voice.pitch_scale-2.5)
   if elapsed >= times.bird and key != "cave":
    var birds := ["birdsongnl","robin2","bluejay"]
-   play_recording(birds[rng.randi_range(0,2)],-40 if key == "interior" else -25,key,rng.randf_range(.97,1.03))
-   times.bird = elapsed+rng.randf_range(9,19)
+   var bird := play_recording(birds[rng.randi_range(0,2)],-40 if key == "interior" else (-29 if key == "fluffy_forest" else -25),key,rng.randf_range(.93,.98) if key == "fluffy_forest" else rng.randf_range(.97,1.03))
+   bird.set_meta("ambient_bird",true)
+   times.bird = elapsed+rng.randf_range(20,35) if key == "deep_forest" else elapsed+rng.randf_range(9,19)
   if elapsed >= times.detail:
    if key == "cave":play_recording("drippingwater_drip_a" if rng.randf()<.5 else "drippingwater_drip_b",-23,key,rng.randf_range(.9,1.05))
-   elif key != "interior":play_recording("Crickets_At_NightCombo",-34 if key == "wonderland" else -32,key)
+   elif key != "interior":play_recording("Crickets_At_NightCombo",-34 if key == "wonderland" else (-28 if key == "deep_forest" else -32),key)
    times.detail = elapsed+rng.randf_range(8,14) if key == "cave" else elapsed+rng.randf_range(66,82)
   if elapsed >= times.water and (key == "wetland" or water_proximity>.1):
    var water := play_recording("small_waterfall" if water_proximity>.1 and key == "wonderland" else "lake_waves_2_calm",-29 if key == "wetland" else -28,key)
@@ -108,6 +111,8 @@ func _process(delta: float) -> void:
   var envelope := minf(1,minf(voice.age/maxf(.001,attack),(voice.length-voice.age)/maxf(.001,release)))
   var gain: float = float(weights.get(voice.profile,0.0))*maxf(0,envelope)
   if voice.player.has_meta("ambient_water") and voice.profile != "wetland":gain *= water_blend
+  if voice.player.has_meta("ambient_bed") and voice.profile != "cave":gain *= .55+Session.weather.wind*.65
+  if voice.player.has_meta("ambient_bird"):gain *= 1-Session.weather.rain*.65
   var quiet_db := -24*quietness if voice.profile == "cave" else 0.0
   voice.player.volume_db = maxf(-80,voice.base+linear_to_db(maxf(gain,.0001))+quiet_db)
 

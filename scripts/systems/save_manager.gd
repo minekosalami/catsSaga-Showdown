@@ -89,11 +89,18 @@ func validate(value: Variant) -> Dictionary:
 	elif not flags.get(journey.REVISION,false):
 		point = journey.SPAWNS[area]
 	flags[journey.REVISION] = true
+	var checkpoint: Variant=value.get("checkpoint", {"area":area,"position":[point.x,point.y]})
+	if not checkpoint is Dictionary or not checkpoint.get("area","") in journey.ORDER:return {}
+	var checkpoint_position: Variant=checkpoint.get("position")
+	if not checkpoint_position is Array or checkpoint_position.size()!=2:return {}
+	for axis in 2:
+		var coordinate: Variant=checkpoint_position[axis]
+		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)) or coordinate<44 or coordinate>journey.SIZES[checkpoint.area][axis]-44:return {}
 	var progress := preload("res://scripts/story/progress.gd").validate(value.get("story_progress",{}))
 	if progress.is_empty(): return {}
 	var playtime: Variant = value.get("playtime",0.0)
 	if not (playtime is float or playtime is int) or not is_finite(float(playtime)) or playtime<0:return {}
-	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "story_progress":progress, "exploration": exploration.snapshot()}
+	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "story_progress":progress, "checkpoint":checkpoint.duplicate(true), "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):

@@ -1,0 +1,23 @@
+Weather and bridge audio attribution
+
+weather_rain.ogg: Arctura, CC BY 3.0.
+Original recording: https://freesound.org/people/Arctura/sounds/34065/
+weather_rain_heavy.ogg: Q.K., CC0.
+Original collection: https://github.com/minetest-mods/mymonths/tree/master/sounds
+Archived by t-affeldt / regional_weather:
+https://github.com/t-affeldt/regional_weather
+Original per-file notices retained in SOURCE-NOTICES.md.
+
+wood_creak.ogg: CGEffex, modified by BlockMen, CC BY 3.0.
+Original file: mods/doors/sounds/doors_door_open.ogg
+https://github.com/luanti-org/minetest_game
+Original notice retained in WOOD-SOURCE-NOTICES.md.
+Used as a quiet localized wooden creak at bridges.
+
+CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+All encoded recordings unchanged. wood_creak.ogg is renamed only; playback
+volume and placement are runtime settings. No mod code or textures imported.
+provenance.json records exact archive revisions, file hashes and human
+recording/creator evidence. Credits are also in the exported main-menu Credits.

@@ -1,0 +1,151 @@
+{
+  "source": "assets/npc textures/ENCOUNTERS-SHEET.png",
+  "source_sha256": "bcfaa3cf677fd20a9d9f2556596b133d68f1df1ad6190f5e5848150663550adf",
+  "method": "Lossless crop; flood-fill only exact RGB(0,0,0) connected to cell perimeter to alpha zero. All retained RGB and alpha values unchanged. No thresholding, repainting or resampling.",
+  "sprites": [
+    {
+      "index": 0,
+      "name": "Purrrresents!",
+      "cell": [
+        12,
+        12,
+        643,
+        643
+      ],
+      "occupied_bbox": [
+        38,
+        54,
+        599,
+        581
+      ],
+      "file": "assets/encounters/enemy_0.png",
+      "sha256": "92a0bc7b327d1c0eabdd22847ae2419501cdad8cd2d79a5d7727afc94beb761a"
+    },
+    {
+      "index": 1,
+      "name": "FireKittens",
+      "cell": [
+        675,
+        12,
+        642,
+        643
+      ],
+      "occupied_bbox": [
+        71,
+        103,
+        591,
+        553
+      ],
+      "file": "assets/encounters/enemy_1.png",
+      "sha256": "6ac5354cb83b4c12b114f33b3f6cd346f610901940d656b6e02d8eecc0d458ea"
+    },
+    {
+      "index": 2,
+      "name": "TopCat",
+      "cell": [
+        1338,
+        12,
+        642,
+        643
+      ],
+      "occupied_bbox": [
+        91,
+        51,
+        615,
+        642
+      ],
+      "file": "assets/encounters/enemy_2.png",
+      "sha256": "65eebf8cf462e1ab3000d6b964d8145b944dd47c875beed262cce7ff24b1b287"
+    },
+    {
+      "index": 3,
+      "name": "Sharpurr",
+      "cell": [
+        12,
+        675,
+        643,
+        642
+      ],
+      "occupied_bbox": [
+        17,
+        28,
+        643,
+        578
+      ],
+      "file": "assets/encounters/enemy_3.png",
+      "sha256": "1c0e181ac5b13785a7934b4bea4359b0c84c2d4dda59f3e688ddfbfd78f646ec"
+    },
+    {
+      "index": 4,
+      "name": "BiNarty",
+      "cell": [
+        675,
+        675,
+        642,
+        642
+      ],
+      "occupied_bbox": [
+        29,
+        57,
+        583,
+        577
+      ],
+      "file": "assets/encounters/enemy_4.png",
+      "sha256": "89c80c32c80d236fdfb7854dffedd48a516af75648b1fa1362d8cdcd015c3dce"
+    },
+    {
+      "index": 5,
+      "name": "Toasters",
+      "cell": [
+        1338,
+        675,
+        642,
+        642
+      ],
+      "occupied_bbox": [
+        92,
+        57,
+        551,
+        531
+      ],
+      "file": "assets/encounters/enemy_5.png",
+      "sha256": "d948f6c9cc9d202c018f13b5475a5ddf2d6728d29459ff484e6edfcf55237f00"
+    },
+    {
+      "index": 6,
+      "name": "2kMEOWpH",
+      "cell": [
+        12,
+        1338,
+        643,
+        642
+      ],
+      "occupied_bbox": [
+        24,
+        12,
+        642,
+        585
+      ],
+      "file": "assets/encounters/enemy_6.png",
+      "sha256": "2484913cab4df5097cd6775ef5626b56b03119451ac68de0cc76cfbaa3da59da"
+    },
+    {
+      "index": 7,
+      "name": "Sir Swirlur",
+      "cell": [
+        675,
+        1338,
+        642,
+        642
+      ],
+      "occupied_bbox": [
+        59,
+        41,
+        603,
+        552
+      ],
+      "file": "assets/encounters/enemy_7.png",
+      "sha256": "485a455598c06346490b2a8665463dda23a17f62a9e73fca8943b8e18cdfcaad"
+    }
+  ]
+}
