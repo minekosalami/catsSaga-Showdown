@@ -39,6 +39,9 @@ var conversation_flag: String = ""
 var awaiting_victory_dialogue: bool = false
 var checking_spawn: bool = false
 var pending_encounter := "bart"
+var story_shop: CanvasLayer
+var automatic_encounter_pending := false
+var coin_label: Label
 var map_ui: CanvasLayer
 
 func _ready() -> void:
@@ -49,6 +52,7 @@ func _ready() -> void:
 		Session.restore_position = false
 	map = MAPS[Session.area_id].instantiate()
 	add_child(map)
+	preload("res://scripts/story/world_content.gd").install(self)
 	player = preload("res://scenes/world/player.tscn").instantiate()
 	player.position = Session.return_position if Session.restore_position else map.get_node("Entries/" + Session.entry_marker).position
 	checking_spawn = Session.restore_position
@@ -96,7 +100,7 @@ func _ready() -> void:
 	if checking_spawn:
 		player.movement_locked = true
 		call_deferred("_validate_saved_position")
-	awaiting_victory_dialogue = Session.area_id == "bart_area" and Session.evil_bart_defeated and Session.story_flags.get("bart_victory_dialogue_pending", false) and not Session.story_flags.get("bart_victory_dialogue_seen", false)
+	awaiting_victory_dialogue = Session.area_id == "entrance" and Session.evil_bart_defeated and Session.story_flags.get("bart_victory_dialogue_pending", false) and not Session.story_flags.get("bart_victory_dialogue_seen", false)
 	awaiting_victory_dialogue = awaiting_victory_dialogue or (Session.area_id == "flooded_forest" and Session.story_flags.get("boss2_defeated", false) and Session.story_flags.get("boss2_victory_dialogue_pending", false))
 	if awaiting_victory_dialogue:
 		player.movement_locked = true
@@ -104,6 +108,17 @@ func _ready() -> void:
 			Session.transition_finished.connect(_show_victory_dialogue, CONNECT_ONE_SHOT)
 		else:
 			call_deferred("_show_victory_dialogue")
+
+	if Session.area_id=="bart_area" and not Session.story_flags.get("blankkitten_defeated",false):
+		automatic_encounter_pending=true
+		_start_blankkitten.call_deferred()
+
+func _start_blankkitten() -> void:
+	while Session.busy or checking_spawn:
+		await get_tree().process_frame
+	var npc=map.get_node_or_null("Characters/BlankKitten")
+	if npc!=null and not Session.story_flags.get("blankkitten_defeated",false):npc.handle_interaction(self)
+	automatic_encounter_pending=false
 
 func _validate_saved_position() -> void:
 	# Wait until the new map's bodies are registered with the physics world.
@@ -147,11 +162,27 @@ func _build_hud() -> void:
 	title.text = "// " + map.display_name.to_upper()
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
+	var currency := VBoxContainer.new()
+	row.add_child(currency)
+	var balance := HBoxContainer.new()
+	currency.add_child(balance)
+	var icon := TextureRect.new()
+	icon.texture=preload("res://scripts/story/assets.gd").coin()
+	icon.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size=Vector2(24,24)
+	balance.add_child(icon)
+	coin_label=Label.new()
+	coin_label.add_theme_font_size_override("font_size",16)
+	balance.add_child(coin_label)
+	Session.story_progress.changed.connect(_refresh_currency)
+	_refresh_currency()
 	var back := Button.new()
 	back.text = "MAIN MENU"
 	back.focus_mode = Control.FOCUS_NONE
 	back.pressed.connect(Session.request_main_menu)
-	row.add_child(back)
+	currency.add_child(back)
 	interaction_hint = Label.new()
 	root.add_child(interaction_hint)
 	interaction_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -161,8 +192,11 @@ func _build_hud() -> void:
 	interaction_hint.add_theme_font_size_override("font_size",14)
 	interaction_hint.text = ""
 
+func _refresh_currency() -> void:
+	coin_label.text="%d NeCoins"%Session.story_progress.necoins
+
 func _process(_delta: float) -> void:
-	player.movement_locked = checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
+	player.movement_locked = automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):
@@ -176,17 +210,18 @@ func _process(_delta: float) -> void:
 	interaction_indicator.visible = nearest_npc != null and interaction_hint.visible
 	interaction_indicator.text="["+get_node("/root/GameSettings").binding_label("interact")+"]"
 	if nearest_npc != null:
-		interaction_indicator.global_position = nearest_npc.global_position + Vector2(-16, -96 if nearest_npc.has_meta("save_statue") else -62)
+		interaction_indicator.global_position = nearest_npc.global_position + nearest_npc.get_meta("interaction_offset", Vector2(-16, -96 if nearest_npc.has_meta("save_statue") else -62))
 	interaction_hint.text = get_node("/root/GameSettings").binding_label("interact")+"  "+("Save" if nearest_npc.has_meta("save_statue") else "Interact") if nearest_npc != null else ""
 
 func _input(event: InputEvent) -> void:
 	if map_ui.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return
-	if not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event.is_action_pressed("interact") and not event.is_echo():
+	if not automatic_encounter_pending and not checking_spawn and not get_tree().paused and not Session.world_menu_open() and not Session.busy and not dialogue.active and not awaiting_victory_dialogue and nearest_npc != null and event.is_action_pressed("interact") and not event.is_echo():
 		if nearest_npc.has_method("handle_interaction") and nearest_npc.handle_interaction(self):
 			get_viewport().set_input_as_handled()
 			return
+		if nearest_npc.starts_battle:Session.story_flags["smoki_interacted"]=true
 		pending_encounter = "boss2" if nearest_npc.has_meta("boss2") else "bart"
 		pending_battle = false
 		conversation_flag = nearest_npc.completion_flag
@@ -221,7 +256,10 @@ func _on_dialogue_finished() -> void:
 		Session.story_flags.erase("boss2_victory_dialogue_pending")
 
 func _travel(destination: String, entry: String) -> void:
-	if checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or get_tree().paused:
+	if automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or get_tree().paused:
+		return
+	if Session.area_id=="entrance" and destination=="deep_forest" and not Session.region_access_allowed(Session.story_flags.get("smoki_interacted",false) or Session.evil_bart_defeated):
+		Session.show_notification("Talk to Smoki first!")
 		return
 	player.movement_locked = true
 	player.velocity = Vector2.ZERO
@@ -236,7 +274,7 @@ func hide_interaction() -> void:
 	if map_ui != null: map_ui.minimap.hide()
 
 func map_modal_open() -> bool:
-	return (map_ui != null and map_ui.modal_open()) or (map != null and map.has_method("modal_open") and map.modal_open())
+	return is_instance_valid(story_shop) or (map_ui != null and map_ui.modal_open()) or (map != null and map.has_method("modal_open") and map.modal_open())
 
 func update_map_exploration() -> void:
 	if map_ui != null: map_ui.update_exploration()

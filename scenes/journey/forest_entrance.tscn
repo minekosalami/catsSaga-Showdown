@@ -21,6 +21,10 @@
 [ext_resource type="Texture2D" path="res://assets/environment_human/lpc/trunk.png" id="19_bu0at"]
 [ext_resource type="Texture2D" path="res://assets/environment_human/lpc/rock.png" id="20_fmtlf"]
 
+[ext_resource type="Script" path="res://scripts/world/npc.gd" id="story_npc"]
+[ext_resource type="Texture2D" path="res://assets/bartboss.png" id="story_bart"]
+[ext_resource type="Script" path="res://scripts/journey/npc_pose.gd" id="story_pose"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yhvwe"]
 size = Vector2(96, 224)
 
@@ -2053,6 +2057,20 @@ collision_mask = 2
 [node name="@CollisionShape2D@55" type="CollisionShape2D" parent="Characters/InspectableTree/Trunk" unique_id=1609241526]
 position = Vector2(0, -8)
 shape = SubResource("CapsuleShape2D_40bfn")
+
+[node name="EvilBart" type="Node2D" parent="Characters"]
+position = Vector2(336, 912)
+script = ExtResource("story_npc")
+dialogue_id = "bart_encounter"
+starts_battle = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Characters/EvilBart"]
+texture_filter = 1
+scale = Vector2(0.06130268, 0.06130268)
+texture = ExtResource("story_bart")
+
+[node name="VisualPose" type="Node" parent="Characters/EvilBart"]
+script = ExtResource("story_pose")
 
 [node name="Discoveries" type="Node2D" parent="." unique_id=2044651503]
 

@@ -1,0 +1,29 @@
+{
+  "start": "intro",
+  "nodes": {
+    "intro": {
+      "speaker": "CUPID THE CAT",
+      "lines": [
+        "Thank you SOO much! Now I can spread my love to all cats in the world!",
+        "Oh, you want a reward? Here you go!"
+      ],
+      "choices": [
+        {
+          "text": "Thanks!",
+          "end": "cupid_reward_50"
+        },
+        {
+          "text": "No thank you...",
+          "next": "decline"
+        }
+      ]
+    },
+    "decline": {
+      "speaker": "CUPID THE CAT",
+      "lines": [
+        "Fine... here you go. You deserve it."
+      ],
+      "end": "cupid_reward_75"
+    }
+  }
+}

@@ -32,7 +32,7 @@ func handle_interaction(world: Node) -> bool:
  world.player.movement_locked = true
  return true
 static func install(map: Node2D) -> void:
- var names := {"entrance":"Forest Entrance","deep_forest":"Deep Forest","bart_area":"Evil Bart's Area","flooded_forest":"Flooded Forest","underground_cave":"Underground Cave"}
+ var names := {"entrance":"Forest Entrance","deep_forest":"Deep Forest","bart_area":"Fluffy Forest","flooded_forest":"Flooded Forest","underground_cave":"Underground Cave"}
  for id in preload("res://scripts/wonderland/layout.gd").regions(): names[id] = preload("res://scripts/wonderland/layout.gd").regions()[id].name
  var sources: Array[Node] = []
  for portal in map.get_node("Portals").get_children():

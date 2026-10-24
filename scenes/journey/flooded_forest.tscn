@@ -4857,7 +4857,7 @@ shape = SubResource("RectangleShape2D_ueifa")
 y_sort_enabled = true
 
 [node name="Boss2NPC" type="Node2D" parent="Characters" unique_id=1652811660]
-position = Vector2(3200, 800)
+position = Vector2(1936, 816)
 script = ExtResource("3_uobee")
 metadata/boss2 = true
 

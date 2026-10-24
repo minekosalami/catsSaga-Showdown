@@ -53,7 +53,7 @@ func run() -> void:
 	for boss: Dictionary in ui.boss_locations.values():session.exploration.reveal(boss.area,boss.local_position)
 	session.reveal_all_locations=false
 	ui._refresh()
-	check(ui.full_map.boss_markers.size()==8,"all three bosses and five discovered saves use the existing marker collection")
+	check(ui.full_map.boss_markers.size()==7,"all three bosses and four discovered saves use the existing marker collection")
 	verify(ui.full_map,"default zoom with all markers discovered")
 	ui.full_map.zoom=.8
 	verify(ui.full_map,"zoomed out")

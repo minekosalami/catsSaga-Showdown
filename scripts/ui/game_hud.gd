@@ -269,7 +269,7 @@ func _build_victory(root: Control) -> void:
 	title.add_theme_font_override("font",preload("res://assets/ui/fonts/DejaVuSansMono-Bold.ttf"))
 	title.name = "VictoryTitle"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label(content, "Evil Bart defeated.", 18).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(content, "Smoki defeated.", 18).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 20
 	content.add_child(spacer)

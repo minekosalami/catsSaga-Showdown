@@ -21,6 +21,8 @@
 [ext_resource type="Texture2D" path="res://assets/environment_human/lpc/trunk.png" id="19_v7eo7"]
 [ext_resource type="Texture2D" path="res://assets/environment_human/lpc/rock.png" id="20_a16bo"]
 
+[ext_resource type="PackedScene" path="res://scenes/blankkitten/npc.tscn" id="story_blank"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p4n6y"]
 size = Vector2(96, 224)
 
@@ -2038,7 +2040,7 @@ height = 24.0
 y_sort_enabled = true
 script = ExtResource("1_a16bo")
 region_id = "bart_area"
-display_name = "Evil Bart's Area"
+display_name = "Fluffy Forest"
 map_size = Vector2(3200, 1824)
 metadata/bridge_rects = Array[Rect2i]([])
 metadata/journey_revision = 1
@@ -2118,20 +2120,6 @@ shape = SubResource("RectangleShape2D_fieyy")
 [node name="Characters" type="Node2D" parent="." unique_id=1596749968]
 y_sort_enabled = true
 
-[node name="EvilBart" type="Node2D" parent="Characters" unique_id=216597898]
-position = Vector2(1792, 896)
-script = ExtResource("3_fxxnh")
-dialogue_id = "bart_encounter"
-starts_battle = true
-
-[node name="Sprite2D" type="Sprite2D" parent="Characters/EvilBart" unique_id=1344207153]
-texture_filter = 1
-scale = Vector2(0.06130268, 0.06130268)
-texture = ExtResource("4_sbwhq")
-
-[node name="VisualPose" type="Node" parent="Characters/EvilBart" unique_id=1185329424]
-script = ExtResource("5_ojo8j")
-
 [node name="FloodedGate" type="Node2D" parent="Characters" unique_id=156932613]
 position = Vector2(2960, 816)
 script = ExtResource("6_t0wvh")
@@ -2146,6 +2134,9 @@ theme_override_constants/outline_size = 5
 text = "FLOODED FOREST
 [ Z / KEY REQUIRED ]"
 horizontal_alignment = 1
+
+[node name="BlankKitten" parent="Characters" instance=ExtResource("story_blank")]
+position = Vector2(320, 912)
 
 [node name="Discoveries" type="Node2D" parent="." unique_id=838805088]
 

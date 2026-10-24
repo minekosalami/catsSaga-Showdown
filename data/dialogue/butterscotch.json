@@ -1,0 +1,35 @@
+{
+  "start": "intro",
+  "nodes": {
+    "intro": {
+      "speaker": "BUTTERSCOTCH",
+      "lines": [
+        "Hey, how are you!?"
+      ],
+      "choices": [
+        {
+          "text": "I'm good...",
+          "next": "good"
+        },
+        {
+          "text": "What's wrong with you?",
+          "next": "wrong"
+        }
+      ]
+    },
+    "good": {
+      "speaker": "BUTTERSCOTCH",
+      "lines": [
+        "I'm good too!! I just ate a bunch of sugar... I was just in Wonderland, you should check it out!!!"
+      ],
+      "end": ""
+    },
+    "wrong": {
+      "speaker": "BUTTERSCOTCH",
+      "lines": [
+        "Nothing's wrong with me. What's wrong with you? I just had a lot of candy, that's all."
+      ],
+      "end": ""
+    }
+  }
+}

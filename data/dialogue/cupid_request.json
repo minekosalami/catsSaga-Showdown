@@ -1,0 +1,37 @@
+{
+  "start": "intro",
+  "nodes": {
+    "intro": {
+      "speaker": "CUPID THE CAT",
+      "lines": [
+        "Hello there, lovely lion! What can I do for you today?",
+        "Actually, can you do me a favor? I lost my wand around here somewhere...",
+        "I'd appreciate it if you could find it and bring it back to me."
+      ],
+      "choices": [
+        {
+          "text": "Yes",
+          "next": "yes"
+        },
+        {
+          "text": "No",
+          "next": "no"
+        }
+      ]
+    },
+    "yes": {
+      "speaker": "CUPID THE CAT",
+      "lines": [
+        "Oh, thank you so much. Good luck!"
+      ],
+      "end": "cupid_accept"
+    },
+    "no": {
+      "speaker": "CUPID THE CAT",
+      "lines": [
+        "That's okay then. I'm sure I can find it myself. :("
+      ],
+      "end": ""
+    }
+  }
+}
