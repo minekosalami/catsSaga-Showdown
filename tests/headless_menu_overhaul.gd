@@ -44,7 +44,7 @@ func run() -> void:
 	var texts: Array[String]=[]
 	for child in menu.menu_container.get_children():
 		if child is Button:texts.append(child.text)
-	check(texts==["Continue","New Game","Settings","Credits","Quit"],"exact requested main menu order")
+	check(texts==["Continue","New Game","Settings","Records","Credits","Quit"],"exact requested main menu order")
 	check(menu.menu_container.get_node("ContinueButton").disabled,"Continue disabled without valid slot")
 	check(root.get_node("Music").player.playing and root.get_node("Music").player.bus==&"Music","one looping menu music player routed to Music")
 	await shot("01-main-menu")
@@ -197,13 +197,10 @@ func run() -> void:
 	battle.player.invincible=false
 	for hit in range(3):battle.player.invulnerability_timer=0; battle.player.take_damage(1)
 	await create_timer(.8).timeout
-	check(battle.game_over,"actual player damage triggers defeat")
-	await shot("09-death")
-	host.retry()
-	await create_timer(.6).timeout
-	check(current_scene.name=="Overworld" and session.active_slot==1 and not session.story_flags.get("unsaved_victory",false),"death retry loads active manual save and discards unsaved progression")
-	check(session.story_flags==first.story_flags,"manual save progression restored exactly")
-	check(FileAccess.get_file_as_string(session.saves.slot_path(1))==first_bytes,"death does not write save data")
+	while session.busy:await process_frame
+	check(current_scene.name=="Overworld" and session.active_slot==1 and session.story_flags.get("unsaved_victory",false),"death returns to checkpoint while preserving earned progression")
+	check(session.saves.read_slot(1).story_flags.get("unsaved_victory",false),"death persists earned flags separately from manual checkpoint")
+	check(FileAccess.get_file_as_string(session.saves.slot_path(1))==first_bytes,"death preserves manual checkpoint file")
 	await session.main_menu()
 	menu=current_scene
 	menu._start_game()
@@ -223,6 +220,8 @@ func run() -> void:
 	check(message.contains("occupied") and FileAccess.file_exists("user://save.json"),"full-slot legacy migration preserves original and reports issue")
 	var before := FileAccess.get_file_as_string("user://save.json")
 	DirAccess.remove_absolute(session.saves.slot_path(3))
+	DirAccess.remove_absolute(session.saves.progress_path(3))
+	DirAccess.remove_absolute(session.saves.progress_path(3)+".bak")
 	message=session.saves.migrate_legacy()
 	check(not session.saves.read_slot(3).is_empty() and FileAccess.get_file_as_string("user://save.json")==before and FileAccess.file_exists("user://save.json.pre-slots.bak"),"legacy progress migrates with original and immutable backup intact")
 	check(session.saves.read_slot(3).playtime==0.0,"legacy saves gain safe missing playtime default")

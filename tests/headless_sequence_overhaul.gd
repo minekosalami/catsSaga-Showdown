@@ -65,16 +65,16 @@ func run() -> void:
 			check(is_equal_approx(game.player.position.y+game.player.RADIUS,game.arena_rect.end.y-1),"bottom silhouette rests on inner floor surface")
 	for wall_index in range(1,5):
 		game.rebuild_clock(36)
-		game.player.health = 5
+		game.player.health = 20
 		game.player.invulnerability = 0
 		var shape: Dictionary = game.hazards.shapes_at(36)[wall_index]
 		game.player.position = shape.rect.get_center()
 		game.player.previous_position = game.player.position
 		game.hazards.last_clock = 36
 		game.hazards.advance(36,true)
-		check(game.player.health == 4,"wall "+str(wall_index)+" contact deals immediate damage")
+		check(game.player.health == 16,"wall "+str(wall_index)+" contact deals immediate damage")
 		game.hazards.advance(36.016,true)
-		check(game.player.health == 4,"wall overlap shares standard post-hit invulnerability")
+		check(game.player.health == 16,"wall overlap shares standard post-hit invulnerability")
 	game.rebuild_clock(36)
 	game.player.position = game.hazards.ball_position(36)-Vector2(game.hazards.BALL_RADIUS+game.player.RADIUS+4,0)
 	game.player.previous_position = game.player.position
@@ -116,7 +116,7 @@ func run() -> void:
 	game.ui.practice_button.pressed.emit()
 	while current_scene == null or current_scene.get_instance_id() == old_id or session.busy: await process_frame
 	game = freeze()
-	check(game.practice_mode and game.stage == 4 and game.player.health == 5 and game.elapsed_time >= 68.57,"practice launches fresh full-health chosen stage")
+	check(game.practice_mode and game.stage == 4 and game.player.health == 20 and game.elapsed_time >= 68.57,"practice launches fresh full-health chosen stage")
 	check(game.ui.stage_label.text.begins_with("PRACTICE"),"practice is clearly marked")
 	check(not game.seek_timestamp(13.71,true),"practice refuses an unencountered stage")
 	game.advance_clock(game.practice_end)
@@ -128,7 +128,7 @@ func run() -> void:
 	game.ui.retry_button.pressed.emit()
 	while current_scene == null or current_scene.get_instance_id() == old_id or session.busy: await process_frame
 	game = freeze()
-	check(not game.practice_mode and not game.development_run and game.stage == 0 and game.player.health == 5,"Retry restores ordinary full fight")
+	check(not game.practice_mode and not game.development_run and game.stage == 0 and game.player.health == 20,"Retry restores ordinary full fight")
 	game.ui.effects_toggle.button_pressed = true
 	check(game.reduced_effects and bool(session.get_meta("blankkitten_reduced_effects",false)),"Reduced FX control updates encounter and session preference")
 	game.advance_clock(105)

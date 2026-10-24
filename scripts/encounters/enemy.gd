@@ -1,7 +1,7 @@
 extends Area2D
-signal health_changed(value: int)
+signal health_changed(value: float)
 const Catalog=preload("res://scripts/encounters/catalog.gd")
-var health =Catalog.ENEMY_HP
+var health: float =Catalog.ENEMY_HP
 var max_health =Catalog.ENEMY_HP
 var kind =0
 var battle: Node
@@ -12,7 +12,8 @@ var rng =RandomNumberGenerator.new()
 var sprite: Sprite2D
 func _ready() -> void:
 	add_to_group("enemies")
-	collision_layer=4;collision_mask=0
+	# Match Smoki's hurtbox layer, detected by the shared player bullet's mask.
+	collision_layer=1;collision_mask=0
 	monitoring=false
 	var hit =CollisionShape2D.new()
 	var shape =RectangleShape2D.new()
@@ -72,8 +73,8 @@ func shot(angle: float, velocity: float, turn:=0.0) -> void:
 	bullet.bullet_color=Catalog.COLORS[kind]
 	bullet.position=position+Vector2(0,44)
 	battle.add_child(bullet)
-func take_damage(amount: int) -> void:
+func take_damage(amount: float) -> void:
 	if health<=0 or battle.game_over or battle.victory_started:return
-	health=maxi(0,health-amount)
+	health=maxf(0,health-amount)
 	health_changed.emit(health)
 	if health==0:battle.finish("victory")

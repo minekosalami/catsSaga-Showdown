@@ -68,4 +68,5 @@ func finish(result: String) -> void:
 			node.set_deferred("monitoring",false);node.queue_free()
 	if music_player.playing:
 		create_tween().tween_property(music_player,"volume_db",-60.0,.18)
-	Session.forest_encounters.resolve.call_deferred(result)
+	if result=="victory": get_tree().current_scene.rpg_ui.complete()
+	else: Session.forest_encounters.resolve.call_deferred(result)

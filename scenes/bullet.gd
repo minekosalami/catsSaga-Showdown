@@ -3,6 +3,7 @@ extends Area2D
 
 @export var speed: float = 650.0
 
+var damage := 1.0
 var orb_visual: Node2D
 var animation_time: float = 0.0
 
@@ -53,7 +54,7 @@ func _process(delta: float) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemies"):
-		area.take_damage(1)
+		area.take_damage(damage)
 		_spawn_impact_spark()
 		queue_free()
 

@@ -129,7 +129,7 @@ func _ready() -> void:
 	retry.reparent(content)
 	retry.set_script(SketchButton)
 	retry._ready()
-	retry.text = "LOAD LAST SAVE"
+	retry.text = "RETURN TO CHECKPOINT"
 	retry.custom_minimum_size.y = 52
 	retry.add_theme_stylebox_override("normal", SketchTheme.box(SketchTheme.INK, SketchTheme.MUTED))
 	_ignore_pointer(root)
@@ -176,7 +176,7 @@ func _process(_delta: float) -> void:
 	var game := get_parent()
 	var player: Node = game.get_node_or_null("Player")
 	if player != null:
-		health_label.text = "● ".repeat(player.health) + "○ ".repeat(maxi(0, 3 - player.health)) + " %d / 3" % player.health
+		health_label.text = "HP %d / %d" % [player.health,player.max_health]
 		health_label.modulate = SketchTheme.ACCENT if player.health <= 1 else SketchTheme.PAPER
 		if last_health != -1 and player.health < last_health:
 			if is_instance_valid(health_tween):
@@ -217,7 +217,7 @@ func _process(_delta: float) -> void:
 		var retry := end_screen.find_child("RestartButton", true, false) as Button
 		retry.grab_focus()
 
-func _boss_health_changed(health: int, maximum: int, phase: int) -> void:
+func _boss_health_changed(health: float, maximum: int, phase: int) -> void:
 	boss_caption.text = get_parent().get_node("CinematicArena").look.boss_name.to_upper()+" / PHASE %d" % phase
 	boss_value.text = "%d / %d" % [health, maximum]
 	boss_bar.max_value = maximum

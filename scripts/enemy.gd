@@ -4,7 +4,7 @@ extends Area2D
 @export var speed: float = 100.0
 @export var enemy_bullet_scene: PackedScene = preload("res://scenes/enemybullet.tscn")
 
-var health: int = 3
+var health: float = 3
 var shoot_timer: float = 1.0
 
 func _ready() -> void:
@@ -41,7 +41,7 @@ func shoot_at_player() -> void:
 	bullet.global_position = global_position
 	bullet.direction = (player.get_node("CollisionShape2D").global_position - global_position).normalized()
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: float) -> void:
 	health -= amount
 	if health <= 0:
 		queue_free()

@@ -220,7 +220,7 @@ func _clear_choices() -> void:
 func _show_choices(content: Array) -> void:
 	choices = content
 	selected_choice = 0
-	dialogue_margin.offset_top = -360
+	dialogue_margin.offset_top = -maxf(360,230+content.size()*50)
 	choice_container.show()
 	for index in range(content.size()):
 		var button := Button.new()

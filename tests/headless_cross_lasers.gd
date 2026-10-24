@@ -27,7 +27,7 @@ func run() -> void:
 	battle.set_physics_process(false)
 	battle.player.set_physics_process(false)
 	battle.player.invincible = true
-	check(battle.music_player.bus == "Master","boss music bypasses overworld EQ")
+	check(battle.music_player.bus == "Music","boss music bypasses overworld EQ")
 	check(cross.start_time == 70.4 and cross.end_time == 89.6,"cross retains exact musical phase boundaries")
 	check(is_equal_approx(cross.activation_time(),72.0),"0.8-second warning and 0.8-second charge precede damage")
 	check(cross.beams.size() == 2 and is_equal_approx(cross.beams[1].rotation-cross.beams[0].rotation,PI/2),"two perpendicular beams form exactly four arms")
@@ -88,7 +88,7 @@ func run() -> void:
 	battle = current_scene.battle
 	check(not battle.timeline.cross.active and battle.timeline.cross.fragments.is_empty() and battle.elapsed_time < 1,"Retry has fresh cross state and music at zero")
 	await session.main_menu()
-	check(music.player.bus == "Master","menu still bypasses overworld EQ")
+	check(music.player.bus == "Music","menu still bypasses overworld EQ")
 	music.play_theme("")
 	await create_timer(0.2).timeout
 	print("CROSS LASER VALIDATION: ",checks," checks, ",failures," failures")

@@ -239,6 +239,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_dialogue_finished() -> void:
+	Session.schedule_progress_save()
 	var completed_victory := conversation_flag == "bart_victory_dialogue_seen"
 	var completed_boss2 := conversation_flag == "boss2_victory_dialogue_seen"
 	if not conversation_flag.is_empty():

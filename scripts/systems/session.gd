@@ -18,6 +18,11 @@ var battle_entry_pending: bool = false
 var story_flags: Dictionary = {}
 var forest_encounters := preload("res://scripts/encounters/service.gd").new()
 var weather := preload("res://scripts/journey/weather.gd").new()
+var rpg := preload("res://scripts/rpg/progress.gd").new()
+var records := preload("res://scripts/rpg/records.gd").new()
+var restoring_progress := false
+var progress_ready := false
+var persistence_scheduled := false
 var story_progress := preload("res://scripts/story/progress.gd").new()
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
@@ -47,6 +52,9 @@ var migration_message := ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
+	records.load_records()
+	rpg.changed.connect(schedule_progress_save)
+	story_progress.changed.connect(schedule_progress_save)
 	add_child(forest_encounters)
 	add_child(weather)
 	migration_message = saves.migrate_legacy()
@@ -80,6 +88,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if developer_menu.opened: return
+	var combat_host := get_tree().current_scene
+	if combat_host!=null and "rpg_ui" in combat_host and is_instance_valid(combat_host.rpg_ui) and combat_host.rpg_ui.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("menu_back") and not event.is_echo() and back_outside_battle():
 		get_viewport().set_input_as_handled()
 		return
@@ -143,6 +155,8 @@ func new_game(slot: int = 1) -> void:
 	entry_marker = "Start"
 	restore_position = false
 	evil_bart_defeated = false
+	restoring_progress=true
+	rpg.restore({})
 	story_flags.clear()
 	story_progress.restore({})
 	forest_encounters.reset()
@@ -152,6 +166,9 @@ func new_game(slot: int = 1) -> void:
 	key_notification_pending = false
 	encounter_active = false
 	await transition_to("res://scenes/world/overworld.tscn")
+	restoring_progress=false
+	progress_ready=true
+	persist_progress()
 
 func travel(destination: String, marker: String, cave_motion: bool = false) -> void:
 	if not preload("res://scripts/journey/layout.gd").active(destination): return
@@ -163,6 +180,7 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
 		if destination == "underground_cave":
 			story_flags["underground_cave_discovered"] = true
+		schedule_progress_save()
 
 func region_access_allowed(normal_access: bool) -> bool:
 	return unrestricted_region_access or normal_access
@@ -348,7 +366,7 @@ func return_to_cave() -> void:
 	await transition_to("res://scenes/world/overworld.tscn")
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "story_progress": story_progress.snapshot(), "checkpoint":forest_encounters.checkpoint.duplicate(true), "exploration": exploration.snapshot()})
+	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "story_progress": story_progress.snapshot(), "rpg":rpg.snapshot(), "checkpoint":forest_encounters.checkpoint.duplicate(true), "exploration": exploration.snapshot()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
@@ -358,6 +376,7 @@ func save_current() -> bool:
 	world.update_map_exploration()
 	var data := snapshot(area_id,world.player.position)
 	var ok := saves.write_save(data)
+	if ok: ok=saves.write_progress(data)
 	if ok:
 		manual_checkpoint=data.duplicate(true)
 		fresh_run=false
@@ -366,9 +385,7 @@ func save_current() -> bool:
 	return ok
 
 func save_boss_victory() -> void:
-	# Compatibility entry point for existing hosts. Victories remain in memory
-	# until the player deliberately saves at a statue; never write from combat.
-	pass
+	persist_progress()
 
 func has_unsaved_progress() -> bool:
 	var scene := get_tree().current_scene
@@ -391,6 +408,11 @@ func load_game(slot: int = 0) -> bool:
 	restore_position=true
 	evil_bart_defeated=data.evil_bart_defeated
 	story_flags=data.story_flags.duplicate()
+	restoring_progress=true
+	rpg.restore(data.rpg)
+	# Legacy boss clears cannot be farmed by replaying an already completed boss.
+	for pair in [["bart",data.evil_bart_defeated],["boss2",story_flags.get("boss2_defeated",false)],["blankkitten",story_flags.get("blankkitten_defeated",false)]]:
+		if pair[1] and not pair[0] in rpg.rewarded_bosses:rpg.rewarded_bosses.append(pair[0])
 	story_progress.restore(data.story_progress)
 	forest_encounters.reset(data.checkpoint)
 	exploration.restore(data.exploration)
@@ -401,23 +423,50 @@ func load_game(slot: int = 0) -> bool:
 	key_notification_pending=false
 	encounter_active=false
 	var ok := await transition_to("res://scenes/world/overworld.tscn")
+	restoring_progress=false
+	progress_ready=ok
 	if ok:
 		saves.mark_used(slot)
 		if not recovery_message.is_empty():show_notification(recovery_message)
 	return ok
 
 func retry_last_save() -> void:
+	await respawn_checkpoint()
+
+func respawn_checkpoint() -> void:
 	if busy:return
-	if fresh_run:
-		await new_game(active_slot)
-	else:
-		await load_game(active_slot)
+	encounter_active=false
+	forest_encounters.active.clear()
+	area_id=forest_encounters.checkpoint.area
+	return_position=Vector2(forest_encounters.checkpoint.position[0],forest_encounters.checkpoint.position[1])
+	restore_position=true
+	persist_progress()
+	await transition_to("res://scenes/world/overworld.tscn")
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_WM_CLOSE_REQUEST and progress_ready: persist_progress()
+func schedule_progress_save() -> void:
+	if restoring_progress or persistence_scheduled:return
+	persistence_scheduled=true
+	_flush_progress.call_deferred()
+func _flush_progress() -> void:
+	persistence_scheduled=false
+	persist_progress()
+func persist_progress() -> bool:
+	if restoring_progress or not progress_ready:return false
+	var point=forest_encounters.checkpoint
+	var data := snapshot(point.area,Vector2(point.position[0],point.position[1]))
+	var ok := saves.write_progress(data)
+	if not ok: show_notification(saves.last_error)
+	else: saves.mark_used(active_slot)
+	return ok
 
 func open_save_point(statue: Node2D) -> void:
 	var world := get_tree().current_scene
 	if busy or encounter_active or get_tree().paused or world==null or world.name!="Overworld" or world.dialogue.active or world.checking_spawn or world_menu_open() or statue.global_position.distance_to(world.player.global_position)>statue.interaction_radius:return
 	world.hide_interaction()
 	forest_encounters.activate_checkpoint(area_id,statue.position+Vector2(0,58))
+	persist_progress()
 	save_point_active=true
 	get_tree().paused=true
 	confirm_action("Save current progress to Slot %d?"%active_slot,func():
@@ -526,7 +575,7 @@ func confirm_action(message: String, action: Callable) -> void:
 func request_main_menu() -> void:
 	if cave_event_active: return
 	if has_unsaved_progress():
-		confirm_action("Return to the main menu and discard unsaved progress?", main_menu)
+		confirm_action("Return to the main menu? You will resume at your checkpoint.", main_menu)
 	else:
 		main_menu()
 

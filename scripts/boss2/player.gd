@@ -34,6 +34,7 @@ func try_protected_activation(focused: bool) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
+	if item_mode: return
 	super._input(event)
 	if event.is_action_pressed("ability") and not event.is_echo() and not get_tree().paused:
 		try_protected_activation(Input.is_action_pressed("focus"))
@@ -54,6 +55,11 @@ func update_sprint(delta: float, held: bool, focused: bool) -> void:
 		stamina = minf(1,stamina+delta/recharge_seconds)
 
 func _physics_process(delta: float) -> void:
+	if item_mode:
+		previous_hit_center=hit_center()
+		update_sprint(delta,false,false)
+		velocity=Vector2.ZERO
+		return
 	previous_hit_center = hit_center()
 	var focused := Input.is_action_pressed("focus")
 	update_sprint(delta,Input.is_action_pressed("ability"),focused)

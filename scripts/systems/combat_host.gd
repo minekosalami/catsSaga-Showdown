@@ -6,6 +6,7 @@ const ARENA := Vector2i(540, 900)
 var arena_container: SubViewportContainer
 var arena: SubViewport
 var battle: Node2D
+var rpg_ui: Control
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -18,6 +19,8 @@ func _ready() -> void:
 	battle = battle_scene.instantiate()
 	battle.process_mode = Node.PROCESS_MODE_DISABLED if Session.battle_entry_pending else Node.PROCESS_MODE_PAUSABLE
 	arena.add_child(battle)
+	rpg_ui=preload("res://scripts/rpg/battle_ui.gd").new()
+	add_child(rpg_ui)
 	if Session.battle_entry_pending:
 		# Initialize behind the encounter overlay without advancing music/gameplay.
 		battle.music_player.stop()
@@ -27,11 +30,12 @@ func _ready() -> void:
 
 func _layout_arena() -> void:
 	# Transform the container only; its viewport never stretches or resizes.
-	var uniform_scale := minf(size.x / float(arena_size.x), size.y / float(arena_size.y))
+	var uniform_scale := minf(size.x * 0.52 / float(arena_size.x), size.y / float(arena_size.y))
 	arena_container.scale = Vector2.ONE * uniform_scale
 	arena_container.position = (size - Vector2(arena_size) * uniform_scale) * 0.5
 
 func record_victory() -> void:
+	rpg_ui.complete()
 	if Session.encounter_active:
 		Session.evil_bart_defeated = true
 		Session.grant_flooded_key()

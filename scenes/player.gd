@@ -2,6 +2,11 @@ extends Area2D
 
 signal health_changed(new_health: int)
 signal game_over
+signal hp_damaged
+var item_mode := false
+var shield_remaining := 0.0
+var max_health: int:
+	get: return Session.rpg.max_hp()
 
 # The sole enemy-projectile damage shape uses internal battle pixels.
 @export_range(0.5, 32.0, 0.5) var damage_hitbox_radius: float = 7.5:
@@ -21,7 +26,7 @@ signal game_over
 var shoot_timer: float = 0.0
 const SHOOT_INTERVAL: float = 0.15
 
-var health: int = 3
+var health: int = 20
 var invulnerability_timer: float = 0.0
 const INVULNERABILITY_DURATION: float = 1.0
 
@@ -52,6 +57,7 @@ const BEAM_CHEAT_CODE: String = "BEAM"
 
 
 func _ready() -> void:
+	health=Session.rpg.max_hp()
 	# Give each instance its own shape so tuning one player cannot affect another.
 	$CollisionShape2D.shape = $CollisionShape2D.shape.duplicate()
 	($CollisionShape2D.shape as CircleShape2D).radius = damage_hitbox_radius
@@ -74,7 +80,7 @@ func _collect_visual_nodes(node: Node) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ability") and not event.is_echo():
+	if event.is_action_pressed("ability") and not event.is_echo() and not item_mode:
 		activate_saturate()
 		return
 	if not event is InputEventKey:
@@ -133,6 +139,7 @@ func toggle_debug_hitbox() -> void:
 
 
 func _process(delta: float) -> void:
+	shield_remaining=maxf(0,shield_remaining-delta)
 	if invulnerability_timer > 0.0:
 		invulnerability_timer = maxf(
 			0.0,
@@ -152,13 +159,16 @@ func _process(delta: float) -> void:
 	# Normal shooting with Z.
 	shoot_timer -= delta
 
-	if Input.is_action_pressed("attack") and shoot_timer <= 0.0:
+	if not item_mode and Input.is_action_pressed("attack") and shoot_timer <= 0.0:
 		shoot()
 		shoot_timer = SHOOT_INTERVAL
 
 
 
 func _physics_process(delta: float) -> void:
+	if item_mode:
+		velocity=Vector2.ZERO
+		return
 	if health <= 0:
 		return
 	# Movement uses the same fixed step as enemy-projectile collisions.
@@ -264,7 +274,9 @@ func _update_visual_effects() -> void:
 
 
 func shoot() -> void:
+	if item_mode: return
 	var bullet = bullet_scene.instantiate()
+	bullet.damage=Session.rpg.attack()
 
 	preload("res://scripts/systems/combat_context.gd").root_for(self).add_child(bullet)
 	bullet.global_position = global_position + Vector2(0, -25)
@@ -275,13 +287,16 @@ func take_damage(amount: int) -> void:
 	if preload("res://scripts/systems/combat_context.gd").root_for(self).get("victory_started") == true:
 		return
 
-	if invincible:
+	if invincible or shield_remaining>0 or amount<=0:
 		return
 
 	if invulnerability_timer > 0.0 or health <= 0:
 		return
 
-	health = maxi(0, health - amount)
+	var combat = preload("res://scripts/systems/combat_context.gd").root_for(self)
+	var damage_per_old_hp := 3 if "kind" in combat else 7
+	health = maxi(0, health - amount*damage_per_old_hp)
+	hp_damaged.emit()
 	invulnerability_timer = INVULNERABILITY_DURATION
 	hit_flash_timer = HIT_FLASH_DURATION
 
@@ -306,7 +321,7 @@ func take_damage(amount: int) -> void:
 		_play_death_effect()
 		game_over.emit()
 		print("GAME OVER")
-		get_tree().paused = true
+		Session.respawn_checkpoint.call_deferred()
 
 
 func _spawn_hit_particles(is_death: bool) -> void:

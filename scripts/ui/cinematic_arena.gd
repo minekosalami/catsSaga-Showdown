@@ -14,7 +14,7 @@ var pulse := 0.0
 var motes: Array[Dictionary] = []
 var impact := 0.0
 var observed_boss: Node
-var last_boss_health := -1
+var last_boss_health := -1.0
 var last_player_health := 3
 var boss_sprite: Sprite2D
 var boss_offset := Vector2.ZERO
@@ -113,7 +113,7 @@ func _process(delta: float) -> void:
 			boss_sprite.scale = boss_scale*Vector2(1+(pulse*.018+boss_recoil*.045)*amount,1-(pulse*.01+boss_recoil*.035)*amount)
 			boss_sprite.rotation = sin(clock*1.1)*.025*amount
 
-func _boss_health_changed(health: int, _maximum: int, _phase: int) -> void:
+func _boss_health_changed(health: float, _maximum: int, _phase: int) -> void:
 	if health < last_boss_health:
 		impact = maxf(impact,0.32)
 		boss_flash = 1.0
