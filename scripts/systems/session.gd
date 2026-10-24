@@ -16,6 +16,8 @@ var battle_entry_pending: bool = false
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 @export var region_fade_duration: float = 0.3
 var story_flags: Dictionary = {}
+var forest_encounters := preload("res://scripts/encounters/service.gd").new()
+var weather := preload("res://scripts/journey/weather.gd").new()
 var story_progress := preload("res://scripts/story/progress.gd").new()
 var exploration := preload("res://scripts/maps/exploration.gd").new()
 var map_reveal_cheat := false
@@ -45,6 +47,8 @@ var migration_message := ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
+	add_child(forest_encounters)
+	add_child(weather)
 	migration_message = saves.migrate_legacy()
 	active_slot = maxi(1,saves.most_recent_slot())
 	saves.select_slot(active_slot)
@@ -141,6 +145,7 @@ func new_game(slot: int = 1) -> void:
 	evil_bart_defeated = false
 	story_flags.clear()
 	story_progress.restore({})
+	forest_encounters.reset()
 	story_flags[preload("res://scripts/journey/layout.gd").REVISION] = true
 	exploration.reset()
 	map_reveal_cheat = false
@@ -343,7 +348,7 @@ func return_to_cave() -> void:
 	await transition_to("res://scenes/world/overworld.tscn")
 
 func snapshot(area: String, point: Vector2) -> Dictionary:
-	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "story_progress": story_progress.snapshot(), "exploration": exploration.snapshot()})
+	return saves.validate({"version": 1, "playtime":playtime,"area": area, "position": [point.x, point.y], "evil_bart_defeated": evil_bart_defeated, "story_flags": story_flags.duplicate(), "story_progress": story_progress.snapshot(), "checkpoint":forest_encounters.checkpoint.duplicate(true), "exploration": exploration.snapshot()})
 
 func save_current() -> bool:
 	var world := get_tree().current_scene
@@ -387,6 +392,7 @@ func load_game(slot: int = 0) -> bool:
 	evil_bart_defeated=data.evil_bart_defeated
 	story_flags=data.story_flags.duplicate()
 	story_progress.restore(data.story_progress)
+	forest_encounters.reset(data.checkpoint)
 	exploration.restore(data.exploration)
 	playtime=data.playtime
 	manual_checkpoint=data.duplicate(true)
@@ -411,6 +417,7 @@ func open_save_point(statue: Node2D) -> void:
 	var world := get_tree().current_scene
 	if busy or encounter_active or get_tree().paused or world==null or world.name!="Overworld" or world.dialogue.active or world.checking_spawn or world_menu_open() or statue.global_position.distance_to(world.player.global_position)>statue.interaction_radius:return
 	world.hide_interaction()
+	forest_encounters.activate_checkpoint(area_id,statue.position+Vector2(0,58))
 	save_point_active=true
 	get_tree().paused=true
 	confirm_action("Save current progress to Slot %d?"%active_slot,func():

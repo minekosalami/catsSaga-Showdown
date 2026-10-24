@@ -1,0 +1,15 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://scripts/encounters/battle.gd" id="battle"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="player"]
+[ext_resource type="Script" path="res://scripts/encounters/player.gd" id="player_script"]
+[ext_resource type="Script" path="res://scripts/encounters/hud.gd" id="hud"]
+[ext_resource type="AudioStream" path="res://assets/soundtrack/Forest Capillaries - 007.mp3" id="song"]
+[node name="OrdinaryShowdown" type="Node2D" groups=["combat_root"]]
+script = ExtResource("battle")
+[node name="Player" parent="." instance=ExtResource("player")]
+position = Vector2(270,780)
+script = ExtResource("player_script")
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("hud")
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." groups=["combat_music"]]
+stream = ExtResource("song")

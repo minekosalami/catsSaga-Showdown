@@ -1,0 +1,31 @@
+{
+  "source": "https://github.com/t-affeldt/regional_weather",
+  "revision": "e1616762104d1fae38c9974d95d64592cb5d5561",
+  "files": {
+    "SOURCE-NOTICES.md": "a0023e9e269d3dbb706451050873fa1ca3f2871a3381a3e2caa85f896ac52231",
+    "weather_rain.ogg": "11c0a271a32578cfda50b35b33059d7d8d34ad17aa3824c777d1a2f8f42d9fb4",
+    "weather_rain_heavy.ogg": "dcc15aedd123ce3240ceecaf58b347594b464e0a2788b7921e65a549f4fe77cd"
+  },
+  "licenses": {
+    "weather_rain.ogg": "Arctura, CC BY 3.0, https://freesound.org/people/Arctura/sounds/34065/",
+    "weather_rain_heavy.ogg": "Q.K., CC0, https://github.com/minetest-mods/mymonths/tree/master/sounds"
+  },
+  "evidence": "Named field-recording sources and licenses in upstream README; light rain source ID predates generative AI. Original encoded files unchanged. No code/textures from the mod imported.",
+  "historical_additions": {
+    "weather_rain.ogg": "5b3ddf895c2eac8d6abd36f8937c2ce7a963fd15 (2020-04-13)",
+    "weather_rain_heavy.ogg": "32ab2c4d23120e32101bc852aca373a1533cd67b (2020-04-22)"
+  },
+  "wood_creak": {
+    "source": "https://github.com/luanti-org/minetest_game",
+    "revision": "72e52f52d04026ca7cc9c712862e8365caf91550",
+    "path": "mods/doors/sounds/doors_door_open.ogg",
+    "creator": "CGEffex, modified by BlockMen",
+    "license": "CC BY 3.0",
+    "use": "Existing wooden opening/creak recording, played quietly at bridge position; no generated audio",
+    "sha256": "e256ed15794ef17a6a2df0c9a79b97e1e8e8d697ab063b4870a752ed4b791a73"
+  },
+  "matching_historical_revision": {
+    "weather_rain.ogg": "32ab2c4d23120e32101bc852aca373a1533cd67b (2020-04-22)",
+    "weather_rain_heavy.ogg": "32ab2c4d23120e32101bc852aca373a1533cd67b (2020-04-22)"
+  }
+}

@@ -39,6 +39,7 @@ var conversation_flag: String = ""
 var awaiting_victory_dialogue: bool = false
 var checking_spawn: bool = false
 var pending_encounter := "bart"
+var encounters: Node
 var story_shop: CanvasLayer
 var automatic_encounter_pending := false
 var coin_label: Label
@@ -97,6 +98,9 @@ func _ready() -> void:
 	map_ui.set_script(preload("res://scripts/maps/map_ui.gd"))
 	add_child(map_ui)
 	map_ui.setup(self)
+	encounters=preload("res://scripts/encounters/director.gd").new()
+	encounters.name="ForestEncounters"
+	add_child(encounters)
 	if checking_spawn:
 		player.movement_locked = true
 		call_deferred("_validate_saved_position")
