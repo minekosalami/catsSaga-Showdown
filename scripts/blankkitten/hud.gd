@@ -130,7 +130,7 @@ func action(stack: VBoxContainer, text: String, callback: Callable) -> Button:
 
 func update_clock(clock: float) -> void:
 	var health: int = battle.player.health
-	health_label.text = "HP  " + "● ".repeat(health) + "○ ".repeat(5-health)
+	health_label.text = "HP %d / %d" % [health,battle.player.max_health]
 	timer_label.text = "%02d:%02d / 02:25" % [int(clock)/60,int(clock)%60]
 	stage_label.text = Cue.NAMES[battle.stage]
 	var settings := get_node("/root/GameSettings")
@@ -160,7 +160,7 @@ func stage_changed(stage: int, clock: float) -> void:
 
 func show_result(won: bool, reason := "") -> void:
 	result_label.text = "VICTORY()" if won else "GAME OVER()"
-	retry_button.text="RETRY()" if won else "LOAD LAST SAVE"
+	retry_button.text="RETRY()" if won else "RETURN TO CHECKPOINT"
 	result.get_child(0).get_node("Subtitle").text = "" if won or reason.is_empty() else reason
 	return_button.visible = won
 	practice_choice.clear()

@@ -60,12 +60,32 @@ func _refresh() -> void:
 func _graph(lines: Array, options: Array, speaker := "SHOPKEEPER") -> void:
 	world.dialogue.start_graph({"start":"shop","nodes":{"shop":{"speaker":speaker,"lines":lines,"choices":options}}})
 func welcome() -> void:
+	_buy_layout(false)
 	_graph(["Welcome to the PAWn shop! Where one cat's trash is another cat's treasure!"],[{"text":"BUY","end":"shop_buy"},{"text":"TALK","end":"shop_talk"}])
+func _buy_layout(enabled: bool) -> void:
+	# Keep the unchanged portraits and wand above the expanded item-choice list.
+	keeper.anchor_bottom=.31 if enabled else .46
+	merchandise.anchor_top=.04 if enabled else .16
+	merchandise.anchor_bottom=.28 if enabled else .44
+	price.anchor_top=.29 if enabled else .47
+	price.anchor_bottom=.33 if enabled else .55
+func buy_menu() -> void:
+	_buy_layout(true)
+	var options: Array=[]
+	if not Session.story_progress.wand_acquired:options.append({"text":"Cupid's Wand — 9,999 NeCoins","end":"shop_purchase"})
+	for id in Session.rpg.ITEMS:
+		var item: Dictionary=Session.rpg.ITEMS[id]
+		options.append({"text":"%s — %d NeCoins (×%d)"%[item.name,item.price,Session.rpg.inventory[id]],"end":"shop_item_"+id})
+	options.append({"text":"Back","end":"shop_welcome"})
+	_graph(["BUY · %d NeCoins"%Session.story_progress.necoins],options,"")
 func _finished() -> void:
+	if world.dialogue.outcome.begins_with("shop_item_"):
+		if not Session.rpg.purchase(world.dialogue.outcome.trim_prefix("shop_item_"),Session.story_progress):Session.show_notification("Insufficient NeCoins.")
+		buy_menu.call_deferred()
+		return
 	match world.dialogue.outcome:
 		"shop_buy":
-			if Session.story_progress.wand_acquired:welcome.call_deferred()
-			else: _graph.call_deferred(["Cupid's Wand — 9,999 NeCoins"],[{"text":"BUY","end":"shop_purchase"},{"text":"Back","end":"shop_welcome"}],"")
+			buy_menu.call_deferred()
 		"shop_purchase":
 			if not Session.story_progress.acquire_wand(true):Session.show_notification("Insufficient NeCoins.")
 			welcome.call_deferred()

@@ -28,7 +28,7 @@ func _ready() -> void:
 	var space := Control.new()
 	space.custom_minimum_size.y=18
 	menu_container.add_child(space)
-	for item in [["Continue","ContinueButton",_continue_game],["New Game","NewGameButton",_start_game],["Settings","SettingsButton",Session.open_options],["Credits","CreditsButton",_show_credits],["Quit","QuitButton",_quit_game]]:
+	for item in [["Continue","ContinueButton",_continue_game],["New Game","NewGameButton",_start_game],["Settings","SettingsButton",Session.open_options],["Records","RecordsButton",_show_records],["Credits","CreditsButton",_show_credits],["Quit","QuitButton",_quit_game]]:
 		var b := Style.button(menu_container,item[0],item[2])
 		b.name=item[1]
 	menu_container.get_node("ContinueButton").disabled=Session.saves.most_recent_slot()==0
@@ -85,12 +85,12 @@ func _start_game() -> void:
 		load_button.custom_minimum_size=Vector2(220,44)
 		load_button.disabled=data.is_empty()
 		if slot==1:button.grab_focus()
-	var hint := heading(page,"Save progress at save stars.\nA replaced slot is written only when you save.",13)
+	var hint := heading(page,"Save progress at save stars.\nEarned progress saves automatically; save stars set your checkpoint.",13)
 	hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	Style.button(page,"Back",go_back)
 func _select_new_slot(slot: int) -> void:
 	if Session.saves.slot_exists(slot):
-		Session.confirm_action("Start a new game in Slot %d? Saving at a save star will replace its previous progress."%slot,_begin_new_game.bind(slot))
+		Session.confirm_action("Start a new game in Slot %d? This replaces its earned progress and checkpoint."%slot,_begin_new_game.bind(slot))
 	else:_begin_new_game(slot)
 func _begin_new_game(slot: int=1) -> void:
 	if transitioning or Session.busy:return
@@ -106,6 +106,24 @@ func _load_slot(slot: int) -> void:
 		return
 	transitioning=true
 	Session.load_game(slot)
+func _show_records() -> void:
+	_new_page("records","Showdown Records")
+	Session.records.load_records()
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size=Vector2(560,360)
+	page.add_child(scroll)
+	var rows := VBoxContainer.new();rows.size_flags_horizontal=Control.SIZE_EXPAND_FILL;rows.add_theme_constant_override("separation",10)
+	scroll.add_child(rows)
+	var names: Dictionary=preload("res://scripts/rpg/records.gd").NAMES.duplicate()
+	for id in Session.records.best:
+		if not names.has(id):names[id]=id.capitalize()
+	for id in names:
+		var value: float=Session.records.best.get(id,-1.0)
+		var score_text := "— Not defeated" if value<0 else preload("res://scripts/rpg/score.gd").display(value)+" · "+preload("res://scripts/rpg/score.gd").grade(value)
+		var line := HBoxContainer.new();rows.add_child(line)
+		var name_label := heading(line,names[id],15);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT
+		heading(line,score_text,15)
+	Style.button(page,"Back",go_back).grab_focus()
 func _show_credits() -> void:
 	_new_page("credits","Credits")
 	var text := RichTextLabel.new()
@@ -124,10 +142,11 @@ func go_back() -> bool:
 	page.hide()
 	page.queue_free()
 	menu_container.show()
-	menu_container.get_node("CreditsButton" if kind=="credits" else "NewGameButton").grab_focus()
+	menu_container.get_node("CreditsButton" if kind=="credits" else ("RecordsButton" if kind=="records" else "NewGameButton")).grab_focus()
 	_fade(menu_container)
 	return true
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and go_back():get_viewport().set_input_as_handled()
 func _quit_game() -> void:
+	Session.persist_progress()
 	get_tree().quit()

@@ -1,8 +1,12 @@
 extends Node2D
 signal defeated
 signal damaged
+signal hp_damaged
+var item_mode := false
+var shield_remaining := 0.0
+var max_health: int:
+	get: return Session.rpg.max_hp()
 const Cue = preload("res://scripts/blankkitten/timeline.gd")
-const MAX_HEALTH := 5
 const RADIUS := 13.75
 const INNER_EDGE := 1.0
 const CHEAT_CODE := "CATA"
@@ -13,7 +17,7 @@ var cheat_progress := 0
 @export var jump_speed := 465.0
 @export var release_speed := 175.0
 @export var hit_grace := 0.85
-var health := MAX_HEALTH
+var health := 20
 var velocity := Vector2.ZERO
 var previous_position := Vector2.ZERO
 var gravity_mode := false
@@ -30,6 +34,7 @@ var ground_shadow: Sprite2D
 
 func _ready() -> void:
 	battle = get_parent()
+	health=Session.rpg.max_hp()
 	process_physics_priority = -10
 	previous_position = position
 	ground_shadow = Sprite2D.new()
@@ -52,7 +57,7 @@ func _input(event: InputEvent) -> void:
 			if cheat_progress == CHEAT_CODE.length():
 				toggle_invincibility()
 				cheat_progress = 0
-	if event.is_action("attack") and not event.is_echo():
+	if event.is_action("attack") and not event.is_echo() and not item_mode:
 		jump_held = event.pressed
 		if event.pressed and not movement_locked:
 			jump_requested = true
@@ -66,7 +71,8 @@ func toggle_invincibility() -> void:
 func step(delta: float, direction: Vector2) -> void:
 	previous_position = position
 	invulnerability = maxf(0, invulnerability - delta)
-	if movement_locked:
+	shield_remaining=maxf(0,shield_remaining-delta)
+	if movement_locked or item_mode:
 		velocity = Vector2.ZERO
 		jump_requested = false
 		jump_released = false
@@ -103,15 +109,17 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 func take_damage() -> void:
-	if invincible or transition_safe or invulnerability > 0 or battle.game_over or battle.victory_started:
+	if invincible or shield_remaining>0 or transition_safe or invulnerability > 0 or battle.game_over or battle.victory_started:
 		return
-	health = maxi(0,health-1)
+	health = maxi(0,health-4)
+	hp_damaged.emit()
 	invulnerability = hit_grace
 	queue_redraw()
 	damaged.emit()
 	battle.feedback.hit(position,battle.elapsed_time)
 	if health == 0:
 		defeated.emit()
+		Session.respawn_checkpoint.call_deferred()
 
 func player_tint(time: float) -> Color:
 	var duration := Cue.END-Cue.STARTS[7]

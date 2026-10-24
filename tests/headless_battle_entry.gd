@@ -122,7 +122,7 @@ func probe(path: String, identifier: String, from_world: bool = true) -> void:
 	var since_reveal := float(Time.get_ticks_msec() - completion.ticks) / 1000.0
 	check(host.battle.music_player.playing and host.battle.music_player.get_playback_position() <= since_reveal + 0.1, "soundtrack starts at original zero after reveal")
 	check(player.can_process(), "player controls restored")
-	if "health" in player: check(player.health == (5 if identifier == "blankkitten" else 3), "fresh battle restores health")
+	if "health" in player: check(player.health == session.rpg.max_hp(), "fresh battle restores health")
 	check(overlay.star.get_script() == load("res://scripts/blankkitten/star.gd"), "existing star renderer reused")
 	for sound in overlay.sounds:
 		check(sound.stream is AudioStreamWAV and sound.pitch_scale == 1 and not sound.playing, "original isolated synthesized cue cleaned up")
@@ -140,13 +140,13 @@ func run() -> void:
 	await probe("res://scenes/boss2/combat_host.tscn", "boss2")
 	await probe("res://scenes/blankkitten/combat_host.tscn", "blankkitten")
 	await probe("res://scenes/blankkitten/combat_host.tscn", "blankkitten", false)
-	await probe("res://scenes/incarna/combat_host.tscn", "incarna")
+	check(not await session.transition_to("res://scenes/incarna/combat_host.tscn",true),"archived Incarna remains excluded")
 	await session.new_game()
 	var previous: Node = current_scene
 	var sprite: Sprite2D = previous.player.sprite
 	check(not await session.transition_to("res://scenes/missing-battle.tscn", true), "failed load reports failure")
 	check(current_scene == previous and sprite.visible and previous.player.can_process() and not session.busy and not session.battle_transition.visible, "failed load restores source, controls and screen")
-	check(session.saves.read_save().area == "entrance", "entry/failure does not alter saved progression")
+	check(session.saves.read_slot(session.active_slot).area == "entrance", "entry/failure does not alter saved progression")
 	# Flush the failed entry's deferred completion before awaiting the next entry.
 	await create_timer(0.05, true, true, true).timeout
 	print("Checking external interruption")

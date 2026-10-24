@@ -68,7 +68,7 @@ func run() -> void:
 	var player: Area2D = game.player
 	player.position = Vector2(270,650)
 	player.velocity = Vector2.ZERO
-	check(not player.invincible and player.health == 3 and player.get_node("CollisionShape2D").shape.radius == 7.5, "fresh battle starts with active 7.5-pixel damage hitbox and CATA disabled")
+	check(not player.invincible and player.health == 20 and player.get_node("CollisionShape2D").shape.radius == 7.5, "fresh battle starts with active 7.5-pixel damage hitbox and CATA disabled")
 	check(player.get_node("CollisionShape2D").position.is_equal_approx(player.get_node("Sprite2D").position), "damage circle follows visible sprite center rather than displaced root")
 	check(not player.get_node("HitboxDebug").visible, "developer hitbox overlay is hidden in normal gameplay")
 	if OS.is_debug_build():
@@ -87,7 +87,7 @@ func run() -> void:
 	key(KEY_D, true)
 	await create_timer(0.25).timeout
 	key(KEY_D, false)
-	check(player.position.x > original.x + 30 and player.health == 2, "moving player consistently takes damage on crossing visible enemy projectile")
+	check(player.position.x > original.x + 30 and player.health == 13, "moving player consistently takes damage on crossing visible enemy projectile")
 	check(player.invulnerability_timer > 0, "moving collision grants normal damage invulnerability")
 	player.position = original
 	player.velocity = Vector2.ZERO
@@ -100,13 +100,13 @@ func run() -> void:
 	key(KEY_D, true)
 	await create_timer(0.25).timeout
 	key(KEY_D, false)
-	check(player.health == 2, "moving player is not damaged by a visible near miss outside both circles")
+	check(player.health == 13, "moving player is not damaged by a visible near miss outside both circles")
 	player.position = original
 	player.velocity = Vector2.ZERO
 	player.set_physics_process(false)
 	for section in [[7.0,1],[21.0,2],[49.0,4],[63.0,5],[91.0,3]]:
 		await clear_bullets()
-		player.health = 3
+		player.health = 20
 		player.invulnerability_timer = 0
 		game.boss.elapsed = section[0]
 		game.boss.song_section = section[1]
@@ -115,30 +115,30 @@ func run() -> void:
 		game.boss.attack()
 		check(get_nodes_in_group("enemy_bullets").all(func(projectile): return projectile.collision_mask == 2 and projectile.get_node("CollisionShape2D").shape.radius == 6.5), "song section " + str(section[1]) + " emits player-targeted bullets with matching visible cores")
 		await create_timer(0.5).timeout
-		check(player.health == 2, "song section " + str(section[1]) + " aimed pattern damages non-invincible player")
+		check(player.health == 13, "song section " + str(section[1]) + " aimed pattern damages non-invincible player")
 	for offset in [Vector2(-60,-60), Vector2(60,-60), Vector2(-60,0), Vector2(60,0)]:
 		await clear_bullets()
-		player.health = 3
+		player.health = 20
 		player.invulnerability_timer = 0
 		game.boss.position = player.get_node("CollisionShape2D").global_position - game.global_position + offset
 		game.boss.fire_fan(1,0,150,Color.WHITE)
 		await create_timer(0.7).timeout
-		check(player.health == 2, "single aimed bullet targets visible damage center from direction " + str(offset))
+		check(player.health == 13, "single aimed bullet targets visible damage center from direction " + str(offset))
 	game.boss.position = player.get_node("CollisionShape2D").global_position - game.global_position + Vector2(0,-60)
 	await clear_bullets()
-	player.health = 3
+	player.health = 20
 	player.invulnerability_timer = 0
 	game.boss.fire_ring(12,150,0,Color.WHITE)
 	await create_timer(0.5).timeout
-	check(player.health == 2, "ring projectiles use same reliable damage detection")
+	check(player.health == 13, "ring projectiles use same reliable damage detection")
 	await clear_bullets()
-	player.health = 3
+	player.health = 20
 	player.invulnerability_timer = 0
 	game.boss.spiral_angle = PI/2
 	game.boss.spiral_remaining = 1
 	game.boss.fire_spiral_step()
 	await create_timer(0.5).timeout
-	check(player.health == 2, "spiral projectiles use same reliable damage detection")
+	check(player.health == 13, "spiral projectiles use same reliable damage detection")
 	await clear_bullets()
 	game.boss.take_damage(game.boss.health)
 	await create_timer(0.8).timeout

@@ -1,13 +1,13 @@
 extends Area2D
 
-signal health_changed(current_health: int, max_health: int, phase: int)
+signal health_changed(current_health: float, max_health: int, phase: int)
 signal defeated
 signal defeat_finished
 
 @export var enemy_bullet_scene: PackedScene = preload("res://scenes/enemybullet.tscn")
 
 @export_range(1, 10000, 1) var max_health: int = 300
-var health: int
+var health: float
 const MAX_PROJECTILES := 320
 
 # Health-based phases for the boss HUD.
@@ -481,11 +481,11 @@ func set_attack_cooldown() -> void:
 			shoot_timer = 1.0
 
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: float) -> void:
 	if defeated_already or amount <= 0:
 		return
 
-	health = clampi(health - amount, 0, max_health)
+	health = clampf(health - amount, 0, max_health)
 
 	update_phase()
 	health_changed.emit(health, max_health, phase)

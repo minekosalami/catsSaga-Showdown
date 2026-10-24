@@ -98,7 +98,7 @@ func button(column: VBoxContainer,text: String,action: Callable) -> Button:
 
 func update_clock(time: float) -> void:
 	if health == null: return
-	health.text = "● ".repeat(battle.player.health)+"○ ".repeat(maxi(0,3-battle.player.health))
+	health.text = "HP %d / %d" % [battle.player.health,battle.player.max_health]
 	health.modulate = Color("#FF786E") if battle.player.health == 1 else Color.WHITE
 	var remaining := maxf(0,Cfg.END-time)
 	timer.text = "%02d:%05.2f" % [int(remaining)/60,fmod(remaining,60)]

@@ -18,6 +18,8 @@ func run() -> void:
 	var session: Node = root.get_node("Session")
 	session.saves.save_path = "user://journey-transitions.json"
 	await session.new_game()
+	session.story_flags["smoki_interacted"]=true
+	session.story_flags["blankkitten_defeated"]=true
 	var music: Node = root.get_node("Music")
 	var stream: AudioStream = music.player.stream
 	var start: float = music.player.get_playback_position()

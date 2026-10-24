@@ -143,6 +143,8 @@ func run() -> void:
 	check(not battle.victory_started,"BlankKitten cannot complete early")
 	battle.elapsed_time=battle.Cue.END
 	battle.finish_survival()
+	await create_timer(.95).timeout
+	current_scene.rpg_ui.close_results()
 	await process_frame
 	while session.busy:await process_frame
 	world=current_scene

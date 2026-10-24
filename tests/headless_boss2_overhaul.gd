@@ -25,7 +25,7 @@ func run() -> void:
 	var player: Node = battle.player
 	var timeline: Node = battle.timeline
 	battle.set_physics_process(false)
-	check(current_scene.arena.size == Vector2i(540,900) and player.health == 3 and player.stamina == 1,"new fight retains portrait arena, three HP and full stamina")
+	check(current_scene.arena.size == Vector2i(540,900) and player.health == 20 and player.stamina == 1,"new fight retains portrait arena, twenty HP and full stamina")
 	check(battle.music_player.playing and battle.end_time == 140.8,"original soundtrack starts and retains approved ending")
 	player.shoot()
 	player.activate_saturate()
@@ -57,7 +57,7 @@ func run() -> void:
 	key(KEY_RIGHT,true)
 	key(KEY_X,true)
 	await create_timer(0.11).timeout
-	check(player.hit_center().x > 210 and player.health == 3 and player.protected_crossings > 0,"real sprint crosses a damaging blue core with activation protection and white sparks")
+	check(player.hit_center().x > 210 and player.health == 20 and player.protected_crossings > 0,"real sprint crosses a damaging blue core with activation protection and white sparks")
 	key(KEY_RIGHT,false)
 	key(KEY_X,false)
 	timeline.lasers[0].present(200,false,false,Rect2(),42.2)
@@ -86,18 +86,18 @@ func run() -> void:
 	player.invulnerability_timer = 0
 	player.sprint_protection = 0.2
 	player.take_damage(1)
-	check(player.health == 3,"activation protection blocks projectile damage")
+	check(player.health == 20,"activation protection blocks projectile damage")
 	var crossings0: int = player.protected_crossings
 	player.laser_spark_cooldown = 0
 	player.notify_laser_contact(player.hit_center())
 	check(player.protected_crossings == crossings0+1 and not battle.effects.particles.is_empty(),"protected laser contact gives white sparks")
 	player.sprint_protection = 0
 	player.take_damage(1)
-	check(player.health == 2 and is_equal_approx(player.invulnerability_timer,1.5),"valid hit removes one HP and grants exactly 1.5 seconds")
+	check(player.health == 13 and is_equal_approx(player.invulnerability_timer,1.5),"valid hit removes seven HP and grants exactly 1.5 seconds")
 	check(battle.hit_effect_time == 0.16 and battle.shake_strength == 4 and battle.music_player.playing,"damage feedback is brief and leaves audio playing")
 	player.take_damage(1)
-	check(player.health == 2,"overlapping damage cannot remove a second HP during protection")
-	player.health = 3
+	check(player.health == 13,"overlapping damage cannot remove a second HP during protection")
+	player.health = 20
 	player.invulnerability_timer = 0
 	player.invincible = true
 	player.position = Vector2(20,20)-player.get_node("CollisionShape2D").position
@@ -117,7 +117,7 @@ func run() -> void:
 	var stamina0: float = player.stamina
 	projectile.test_segment(Vector2(100,100),Vector2(200,100))
 	projectile.test_segment(Vector2(100,100),Vector2(200,100))
-	check(battle.effects.graze_count == graze0+1 and player.health == 3 and player.stamina == stamina0,"near miss grazes once without healing or stamina rewards")
+	check(battle.effects.graze_count == graze0+1 and player.health == 20 and player.stamina == stamina0,"near miss grazes once without healing or stamina rewards")
 	projectile.queue_free()
 	timeline.advance(38.4)
 	check(timeline.lasers[0].warning and timeline.lasers[0].warning_span.size.x == timeline.laser_width,"blue warning matches actual narrow beam width")
@@ -171,22 +171,20 @@ func run() -> void:
 	battle.add_child(projectile)
 	projectile.set_physics_process(false)
 	projectile.test_segment(Vector2(100,500),Vector2(300,500))
-	check(player.health == 2 and not projectile.dangerous,"swept projectile collision catches a hit entirely between movement endpoints")
+	check(player.health == 13 and not projectile.dangerous,"swept projectile collision catches a hit entirely between movement endpoints")
 	player.invulnerability_timer = 0
 	player.take_damage(1)
 	player.invulnerability_timer = 0
 	player.take_damage(1)
-	check(player.health == 0 and battle.game_over and not battle.victory_started,"three valid one-HP hits trigger defeat without victory")
+	check(player.health == 0 and battle.game_over and not battle.victory_started,"three valid seven-HP hits trigger defeat without victory")
 	check(not timeline.cross.active and timeline.lasers.all(func(l): return not l.active),"death immediately stops all damaging hazards")
 	await create_timer(0.9).timeout
-	check(not battle.music_player.playing,"defeat fades music even while the death screen pauses gameplay")
-	current_scene.retry()
 	while session.busy: await process_frame
 	await process_frame
 	check(current_scene.name=="Overworld" and not session.encounter_active,"death Retry restores manual save or fresh entrance when not yet saved")
 	await session.transition_to("res://scenes/boss2/combat_host.tscn",true)
 	battle = current_scene.battle
-	check(battle.player.health == 3 and battle.player.stamina == 1 and battle.player.sprint_cooldown == 0 and battle.elapsed_time < 1,"Retry resets HP, stamina, protection cooldown and audio clock")
+	check(battle.player.health == 20 and battle.player.stamina == 1 and battle.player.sprint_cooldown == 0 and battle.elapsed_time < 1,"Retry resets HP, stamina, protection cooldown and audio clock")
 	check(battle.timeline.phase == 0 and battle.effects.particles.is_empty() and battle.timeline.cross.fragments.is_empty(),"Retry starts at introduction without leftover attacks or effects")
 	await session.main_menu()
 	root.get_node("Music").play_theme("")

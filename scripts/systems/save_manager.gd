@@ -98,9 +98,11 @@ func validate(value: Variant) -> Dictionary:
 		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)) or coordinate<44 or coordinate>journey.SIZES[checkpoint.area][axis]-44:return {}
 	var progress := preload("res://scripts/story/progress.gd").validate(value.get("story_progress",{}))
 	if progress.is_empty(): return {}
+	var rpg := preload("res://scripts/rpg/progress.gd").validate(value.get("rpg",{}))
+	if rpg.is_empty(): return {}
 	var playtime: Variant = value.get("playtime",0.0)
 	if not (playtime is float or playtime is int) or not is_finite(float(playtime)) or playtime<0:return {}
-	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "story_progress":progress, "checkpoint":checkpoint.duplicate(true), "exploration": exploration.snapshot()}
+	return {"playtime":float(playtime), "version": VERSION, "area": area, "position": [float(point.x), float(point.y)], "evil_bart_defeated": defeated, "story_flags": flags.duplicate(), "story_progress":progress, "rpg":rpg, "checkpoint":checkpoint.duplicate(true), "exploration": exploration.snapshot()}
 
 func read_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
@@ -162,13 +164,26 @@ func slot_path(slot: int) -> String:
 func read_slot(slot: int) -> Dictionary:
 	if slot<1 or slot>3:return {}
 	last_error=""
-	var data := read_file(slot_path(slot))
+	var data := read_file(progress_path(slot))
+	if data.is_empty(): data=read_file(progress_path(slot)+".bak")
+	if data.is_empty(): data=read_file(slot_path(slot))
 	if data.is_empty():
 		data=read_file(slot_path(slot)+".bak")
 		if not data.is_empty():last_error="Recovered the previous valid save for Slot %d."%slot
 	return data
 func slot_exists(slot: int) -> bool:
-	return FileAccess.file_exists(slot_path(slot)) or FileAccess.file_exists(slot_path(slot)+".bak")
+	return FileAccess.file_exists(progress_path(slot)) or FileAccess.file_exists(progress_path(slot)+".bak") or FileAccess.file_exists(slot_path(slot)) or FileAccess.file_exists(slot_path(slot)+".bak")
+func progress_path(slot: int) -> String:
+	return "user://progress-slot-%d.json"%slot
+func write_progress(data: Dictionary) -> bool:
+	var previous := save_path
+	var slot := 1
+	for candidate in range(1,4):
+		if previous==slot_path(candidate):slot=candidate
+	save_path=progress_path(slot)
+	var ok := write_save(data)
+	save_path=previous
+	return ok
 func select_slot(slot: int) -> void:
 	save_path=slot_path(slot)
 func mark_used(slot: int) -> void:

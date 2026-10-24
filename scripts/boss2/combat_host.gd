@@ -4,6 +4,7 @@ func record_victory() -> void:
 		if not Session.story_flags.get("boss2_defeated", false):
 			Session.story_flags["boss2_victory_dialogue_pending"] = true
 		Session.story_flags["boss2_defeated"] = true
+		rpg_ui.complete()
 		Session.save_boss_victory()
 func return_to_forest() -> void:
 	Session.return_to_flooded_forest()

@@ -33,15 +33,19 @@ func begin(world: Node, actor: Node) -> void:
 	session.encounter_active=true
 	world.encounters.store_positions()
 	if not await session.transition_to("res://scenes/encounters/combat_host.tscn",true):active.clear()
+func reward_victory() -> void:
+	var actor: Dictionary=population.get(active.get("id",-1),{})
+	if not actor.is_empty() and actor.alive:
+		actor.alive=false
+		get_parent().story_progress.necoins+=Catalog.REWARD
+		get_parent().story_progress.changed.emit()
 func resolve(result: String) -> void:
 	var session=get_parent()
 	if active.is_empty() or active.settled or result not in ["victory","defeat","flee"] or session.busy:return
 	active.settled=true
 	var actor: Dictionary=population.get(active.id,{})
 	if result=="victory" and not actor.is_empty() and actor.alive:
-		actor.alive=false
-		session.story_progress.necoins+=Catalog.REWARD
-		session.story_progress.changed.emit()
+		reward_victory()
 	elif result=="flee" and not actor.is_empty():
 		actor.retreat=true
 		actor.ignore_until=clock+Catalog.FLEE_IGNORE_SECONDS

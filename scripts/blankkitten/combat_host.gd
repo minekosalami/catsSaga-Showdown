@@ -4,8 +4,8 @@ func record_victory() -> void:
 	if battle.practice_mode or battle.development_run: return
 	if Session.encounter_active and Session.encounter_id == "blankkitten":
 		Session.story_flags["blankkitten_defeated"] = true
+		rpg_ui.complete()
 		Session.save_boss_victory()
-		Session.return_from_blankkitten.call_deferred()
 
 func return_to_forest() -> void:
 	Session.return_from_blankkitten()

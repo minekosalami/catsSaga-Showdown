@@ -58,7 +58,7 @@ func _ready() -> void:
 func refresh() -> void:
 	enemy_name.text=battle.Catalog.NAMES[battle.kind]
 	hp.max_value=battle.boss.max_health;hp.value=battle.boss.health
-	player_hp.text="HP %d/3   SATURATE %s"%[battle.player.health,"USED" if battle.player.saturate_used and not battle.player.unlimited_saturate else "READY"]
+	player_hp.text="SATURATE %s"%["USED" if battle.player.saturate_used and not battle.player.unlimited_saturate else "READY"]
 	time_label.text="%05.1fs"%maxf(0,battle.duration-battle.elapsed_time)
 	flee_button.disabled=battle.flee_cooldown>0 or battle.game_over or battle.victory_started
 func show_impact_flash() -> void: pass # Existing player/SATURATE already provide feedback.

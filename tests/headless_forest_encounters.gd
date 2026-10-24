@@ -36,9 +36,10 @@ func run() -> void:
 	check(session.forest_encounters.checkpoint.position==[240.0,912.0],"new checkpoint original spawn")
 	var signatures=[]
 	for kind in 8:
+		session.rpg.restore({})
 		var battle:Node=await start(kind)
 		check(current_scene.arena.size==Vector2i(540,900),"reuse arena resolution")
-		check(battle.player.health==3 and battle.player.speed==450 and battle.player.damage_hitbox_radius==7.5,"reuse Showdown player balance")
+		check(battle.player.health==20 and battle.player.speed==450 and battle.player.damage_hitbox_radius==7.5,"reuse Showdown player balance")
 		check(battle.boss.health==72 and battle.ui.enemy_name.text==Catalog.NAMES[kind],"official enemy and equal HP")
 		check(battle.boss.sprite.texture.resource_path.ends_with("enemy_%d.png"%kind),"correct sprite reading order")
 		check(battle.music_player.playing and battle.elapsed_time<1 and absf(battle.duration-70.818)<.1,"music starts at zero with actual duration")
@@ -58,9 +59,9 @@ func run() -> void:
 		check(battle.projectile_count()-before==pattern.size(),"no late-song density escalation")
 		# Existing parent damage feedback, with ordinary-only longer protection.
 		battle.player.take_damage(1)
-		check(battle.player.health==2 and is_equal_approx(battle.player.invulnerability_timer,1.5),"one HP and 1.5s protection")
+		check(battle.player.health==17 and is_equal_approx(battle.player.invulnerability_timer,1.5),"one HP and 1.5s protection")
 		battle.player.take_damage(1)
-		check(battle.player.health==2,"overlapping hit blocked")
+		check(battle.player.health==17,"overlapping hit blocked")
 		if kind==0:
 			battle.player.invincible=true
 			battle.player.activate_saturate()
@@ -74,6 +75,8 @@ func run() -> void:
 		var coins:int=session.story_progress.necoins
 		battle.boss.take_damage(72)
 		battle.finish("victory") # Duplicate callback must not duplicate reward.
+		await create_timer(.95).timeout
+		current_scene.rpg_ui.close_results()
 		await settle()
 		check(session.story_progress.necoins==coins+10,"one ten-NeCoin victory reward")
 		check(not session.forest_encounters.population[0].alive,"defeated enemy remains absent this visit")
@@ -91,7 +94,7 @@ func run() -> void:
 	check(session.story_progress.snapshot()==earned,"timeout preserves unsaved earned progress")
 	battle=await start(1)
 	battle.player.invulnerability_timer=0
-	battle.player.take_damage(3)
+	battle.player.take_damage(100)
 	await settle()
 	check(not paused and world.name=="Overworld" and session.story_progress.snapshot()==earned,"zero HP returns without rollback/pause lock")
 	# Fixed-seed FLEE verifies both outcomes and same 50% threshold.

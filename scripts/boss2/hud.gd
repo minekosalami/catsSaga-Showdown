@@ -155,7 +155,7 @@ func _ready() -> void:
 
 func update(clock: float) -> void:
 	var health: int = battle.player.health
-	health_label.text = "● ".repeat(health) + "○ ".repeat(maxi(0,3-health)) + " %d / 3" % health
+	health_label.text = "HP %d / %d" % [health,battle.player.max_health]
 	health_label.modulate = Color("#E498BC") if health <= 1 else Color.WHITE
 	if last_health >= 0 and health < last_health:
 		if is_instance_valid(health_tween):
@@ -208,7 +208,7 @@ func show_result(victory: bool) -> void:
 	dialogue_label.hide()
 	arena_overlay.hide()
 	result_label.text = "VICTORY()" if victory else "GAME OVER()"
-	end_screen.find_child("RetryButton",true,false).text="RETRY" if victory else "LOAD LAST SAVE"
+	end_screen.find_child("RetryButton",true,false).text="RETRY" if victory else "RETURN TO CHECKPOINT"
 	result_label.add_theme_font_size_override("font_size",48 if victory else 40)
 	return_button.visible = victory
 	end_screen.show()
