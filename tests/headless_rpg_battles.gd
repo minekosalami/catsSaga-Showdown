@@ -74,6 +74,7 @@ func run() -> void:
 	battle.boss.take_damage(1000)
 	await create_timer(.95).timeout
 	check(ui.done and ui.result.exp==25 and ui.result.coins==10 and ui.result.percent<100,"graded ordinary victory")
+	ui.skip_results()
 	check(session.story_progress.necoins==coins+10 and is_instance_valid(ui.grade_label) and ui.grade_label.scale.is_equal_approx(Vector2.ONE),"reward and grade slam settled")
 	var exp: int=session.rpg.total_exp
 	ui.complete();battle.finish("victory")

@@ -26,7 +26,6 @@ func _ready() -> void:
 	ui.refresh()
 	if not Session.battle_entry_pending:music_player.play(0)
 func _draw() -> void:
-	draw_rect(Rect2(0,0,540,900),Color("#121b20"))
 	draw_rect(Rect2(8,8,524,884),Color("#64766e"),false,1)
 	for y in range(130,840,64):draw_line(Vector2(14,y),Vector2(526,y),Color(.3,.45,.4,.07),1)
 func _process(delta: float) -> void:

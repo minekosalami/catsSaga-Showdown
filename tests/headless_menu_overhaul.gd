@@ -135,6 +135,8 @@ func run() -> void:
 	await shot("06-statue-and-wide-view")
 	await session.travel("deep_forest","FromEntrance")
 	check(FileAccess.get_file_as_string(session.saves.slot_path(1))==first_bytes,"region travel does not autosave")
+	# This UI fixture inspects save stars; the automatic boss is covered by story integration.
+	session.story_flags["blankkitten_defeated"]=true
 	for area in ["deep_forest","bart_area","flooded_forest"]:
 		if session.area_id!=area:await session.travel(area,"Start")
 		world=current_scene

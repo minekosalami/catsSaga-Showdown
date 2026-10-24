@@ -88,7 +88,7 @@ func _ready() -> void:
 	boss_caption = _label(boss_row, look.boss_name.to_upper()+" / PHASE 1", 12,look.accent)
 	boss_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	boss_value = _label(boss_row, "", 11, SketchTheme.MUTED)
-	boss_bar = ProgressBar.new()
+	boss_bar = preload("res://scripts/ui/presentation/meter.gd").new()
 	boss_bar.name = "BossHealthBar"
 	boss_bar.custom_minimum_size.y = 12
 	HUDStyle.progress(boss_bar,look.accent)

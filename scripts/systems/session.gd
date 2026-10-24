@@ -265,6 +265,7 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 		return await _battle_entry(scene_path)
 	var fade_duration := region_fade_duration if region_travel else transition_duration * 0.5
 	Music.prepare_transition(scene_path, fade_duration)
+	preload("res://scripts/ui/presentation/departure.gd").decorate(curtain,get_tree().current_scene)
 	curtain.color = Color.BLACK
 	curtain.position = Vector2.ZERO
 	var fade: Tween
@@ -590,7 +591,7 @@ func show_notification(message: String, notification_name := "DebugNotification"
 	if previous != null:
 		remove_child(previous)
 		previous.queue_free()
-	var label := Label.new()
+	var label := preload("res://scripts/ui/presentation/toast.gd").new()
 	label.name = notification_name
 	add_child(label)
 	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)

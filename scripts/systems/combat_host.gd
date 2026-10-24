@@ -19,6 +19,10 @@ func _ready() -> void:
 	battle = battle_scene.instantiate()
 	battle.process_mode = Node.PROCESS_MODE_DISABLED if Session.battle_entry_pending else Node.PROCESS_MODE_PAUSABLE
 	arena.add_child(battle)
+	if "kind" in battle:
+		var backdrop=preload("res://scripts/ui/presentation/region_background.gd").new()
+		backdrop.name="RegionBackdrop"
+		battle.add_child(backdrop)
 	rpg_ui=preload("res://scripts/rpg/battle_ui.gd").new()
 	add_child(rpg_ui)
 	if Session.battle_entry_pending:

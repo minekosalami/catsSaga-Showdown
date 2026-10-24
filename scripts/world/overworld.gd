@@ -164,10 +164,15 @@ func _build_hud() -> void:
 	margin.add_child(row)
 	var title := Label.new()
 	title.text = "// " + map.display_name.to_upper()
+	title.add_theme_font_size_override("font_size",18)
+	title.add_theme_font_override("font",preload("res://scripts/ui/presentation/style.gd").BOLD)
+	title.add_theme_color_override("font_color",preload("res://scripts/ui/presentation/style.gd").GOLD)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
 	var currency := VBoxContainer.new()
-	row.add_child(currency)
+	var currency_card:=preload("res://scripts/ui/presentation/surface.gd").new()
+	row.add_child(currency_card)
+	currency_card.add_child(currency)
 	var balance := HBoxContainer.new()
 	currency.add_child(balance)
 	var icon := TextureRect.new()
@@ -198,6 +203,7 @@ func _build_hud() -> void:
 
 func _refresh_currency() -> void:
 	coin_label.text="%d NeCoins"%Session.story_progress.necoins
+	preload("res://scripts/ui/presentation/style.gd").pop(coin_label,1.06)
 
 func _process(_delta: float) -> void:
 	player.movement_locked = automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
