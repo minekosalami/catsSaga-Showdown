@@ -46,12 +46,12 @@ var coin_label: Label
 var map_ui: CanvasLayer
 
 func _ready() -> void:
-	# Archived resources remain loadable in the editor, never as a playable save.
-	if not preload("res://scripts/journey/layout.gd").active(Session.area_id):
+	# Restore the original Wonderland scenes; the cave remains archived.
+	if not Session.playable_area(Session.area_id):
 		Session.area_id = "flooded_forest"
 		Session.entry_marker = "Start"
 		Session.restore_position = false
-	map = MAPS[Session.area_id].instantiate()
+	map = (MAPS[Session.area_id] if MAPS.has(Session.area_id) else load(ARCHIVED_MAP_PATHS[Session.area_id])).instantiate()
 	add_child(map)
 	preload("res://scripts/story/world_content.gd").install(self)
 	player = preload("res://scenes/world/player.tscn").instantiate()
@@ -98,9 +98,11 @@ func _ready() -> void:
 	map_ui.set_script(preload("res://scripts/maps/map_ui.gd"))
 	add_child(map_ui)
 	map_ui.setup(self)
-	encounters=preload("res://scripts/encounters/director.gd").new()
-	encounters.name="ForestEncounters"
-	add_child(encounters)
+	preload("res://scripts/story/ambush.gd").install(self)
+	if preload("res://scripts/journey/layout.gd").active(Session.area_id):
+		encounters=preload("res://scripts/encounters/director.gd").new()
+		encounters.name="ForestEncounters"
+		add_child(encounters)
 	if checking_spawn:
 		player.movement_locked = true
 		call_deferred("_validate_saved_position")
@@ -209,7 +211,7 @@ func _refresh_currency() -> void:
 	preload("res://scripts/ui/presentation/style.gd").pop(coin_label,1.06)
 
 func _process(_delta: float) -> void:
-	player.movement_locked = automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
+	player.movement_locked = Session.story_sequence_active or automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):

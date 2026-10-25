@@ -12,6 +12,7 @@ var encounter_active: bool = false
 var encounter_id := "bart"
 var key_notification_pending := false
 var busy: bool = false
+var story_sequence_active := false
 var battle_entry_pending: bool = false
 @export_range(0.3, 0.5) var transition_duration: float = 0.36
 @export var region_fade_duration: float = 0.3
@@ -171,7 +172,9 @@ func new_game(slot: int = 1) -> void:
 	persist_progress()
 
 func travel(destination: String, marker: String, cave_motion: bool = false) -> void:
-	if not preload("res://scripts/journey/layout.gd").active(destination): return
+	if not playable_area(destination): return
+	if preload("res://scripts/wonderland/layout.gd").regions().has(destination) and not story_flags.get("wonderland_arrived",false): return
+	if preload("res://scripts/wonderland/layout.gd").regions().has(area_id) and not preload("res://scripts/wonderland/layout.gd").regions().has(destination): return
 	if busy:
 		return
 	area_id = destination
@@ -181,6 +184,9 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 		if destination == "underground_cave":
 			story_flags["underground_cave_discovered"] = true
 		schedule_progress_save()
+
+func playable_area(area: String) -> bool:
+	return preload("res://scripts/journey/layout.gd").active(area) or preload("res://scripts/wonderland/layout.gd").regions().has(area)
 
 func region_access_allowed(normal_access: bool) -> bool:
 	return unrestricted_region_access or normal_access
@@ -574,7 +580,7 @@ func confirm_action(message: String, action: Callable) -> void:
 	dialog.popup_centered(Vector2i(480, 200))
 
 func request_main_menu() -> void:
-	if cave_event_active: return
+	if cave_event_active or story_sequence_active: return
 	if has_unsaved_progress():
 		confirm_action("Return to the main menu? You will resume at your checkpoint.", main_menu)
 	else:
