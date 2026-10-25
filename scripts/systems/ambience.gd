@@ -52,12 +52,13 @@ func profile_for(area: String) -> String:
  if area == "deep_forest": return "deep_forest"
  if area == "bart_area": return "fluffy_forest"
  var plan := preload("res://scripts/wonderland/layout.gd")
- if plan.OUTDOORS.has(area): return "wonderland"
- if plan.regions().has(area): return "interior"
+ if plan.OUTDOORS.has(area): return area
+ if plan.regions().has(area): return "wonderland_interior"
  return "forest"
 func sync_scene() -> void:
  var scene := get_tree().current_scene
  profile = profile_for(Session.area_id) if scene != null and scene.scene_file_path == "res://scenes/world/overworld.tscn" else ""
+ if is_wonderland(profile) and schedules.has(profile):schedules[profile].bed=elapsed
  quietness = 0
  water_proximity = 0
  water_blend = 0
@@ -79,6 +80,9 @@ func _process(delta: float) -> void:
  for key in schedules:
   weights[key] = move_toward(float(weights.get(key,0.0)),1.0 if key == active else 0.0,delta/1.4)
   if key != active: continue
+  if is_wonderland(key):
+   schedule_wonderland(key)
+   continue
   var times: Dictionary = schedules[key]
   if elapsed >= times.bed:
    var name := "Spooky_Water_Drops" if key == "cave" else "ComboWind"
@@ -101,6 +105,7 @@ func _process(delta: float) -> void:
  for i in range(voices.size()-1,-1,-1):
   var voice: Dictionary = voices[i]
   voice.age += delta
+  if is_wonderland(voice.profile) and voice.profile!=active and float(weights.get(voice.profile,0.0))<=0.0:voice.player.stop()
   if not voice.player.playing:
    voice.player.queue_free()
    voices.remove_at(i)
@@ -111,8 +116,8 @@ func _process(delta: float) -> void:
   var envelope := minf(1,minf(voice.age/maxf(.001,attack),(voice.length-voice.age)/maxf(.001,release)))
   var gain: float = float(weights.get(voice.profile,0.0))*maxf(0,envelope)
   if voice.player.has_meta("ambient_water") and voice.profile != "wetland":gain *= water_blend
-  if voice.player.has_meta("ambient_bed") and voice.profile != "cave":gain *= .55+Session.weather.wind*.65
-  if voice.player.has_meta("ambient_bird"):gain *= 1-Session.weather.rain*.65
+  if voice.player.has_meta("ambient_bed") and voice.profile != "cave" and not is_wonderland(voice.profile):gain *= .55+Session.weather.wind*.65
+  if voice.player.has_meta("ambient_bird") and not is_wonderland(voice.profile):gain *= 1-Session.weather.rain*.65
   var quiet_db := -24*quietness if voice.profile == "cave" else 0.0
   voice.player.volume_db = maxf(-80,voice.base+linear_to_db(maxf(gain,.0001))+quiet_db)
 
@@ -123,3 +128,25 @@ func _exit_tree() -> void:
    voice.player.stream = null
  voices.clear()
  schedules.clear()
+
+func is_wonderland(key:String) -> bool:
+ return key=="wonderland_interior" or preload("res://scripts/wonderland/layout.gd").OUTDOORS.has(key)
+func schedule_wonderland(key:String) -> void:
+ var times:Dictionary=schedules[key]
+ var inside:bool=key=="wonderland_interior"
+ if elapsed>=times.bed:
+  for voice in voices:
+   if voice.profile==key and voice.player.has_meta("ambient_bed") and voice.player.playing and voice.age<voice.length-2.5:
+    times.bed=elapsed+maxf(.1,voice.length-voice.age-2.5);return
+  var bed:=play_recording("ComboWind",-42 if inside else -32,key)
+  times.bed=elapsed+maxf(3,bed.stream.get_length()-2.5)
+  bed.set_meta("ambient_bed",true)
+ if elapsed>=times.bird:
+  if not inside:
+   var bird:String={"wonderland_forest":"birdsongnl","royal_woods":"robin2","mushroom_thicket":"bluejay"}.get(key,"robin2")
+   var voice:=play_recording(bird,-33 if key=="mushroom_thicket" else -30,key,rng.randf_range(.97,1.03))
+   voice.set_meta("ambient_bird",true)
+  times.bird=elapsed+rng.randf_range(25,45)
+ if elapsed>=times.detail:
+  if key=="mushroom_thicket":play_recording("Crickets_At_NightCombo",-40,key)
+  times.detail=elapsed+rng.randf_range(68,90)

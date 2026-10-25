@@ -1,0 +1,118 @@
+{
+  "source": "https://github.com/ElizaWy/LPC",
+  "revision": "f07f7f5892e67c932c68f70bb04472f2c64e46bc",
+  "license": "OGA-BY 3.0",
+  "evidence": "Artist-owned repository; dated 2023 revision; Credits describes the pack as hand drawn; per-sheet artist/source entries retained.",
+  "files": [
+    {
+      "file": "trees_spring.png",
+      "source_path": "Terrain/trees_spring.png",
+      "sha256": "c8bd8c9a8f892b9384cee14f0459cd2dbe112a24adcad47728a4c28f8636b47d"
+    },
+    {
+      "file": "cabinet.png",
+      "source_path": "Objects/Furniture/Cabinet.png",
+      "sha256": "1d3e959626365e288bb7e0b7b89dd65a6b422fe8d17e9f8599c5a1a8e0f2935a"
+    },
+    {
+      "file": "clock.png",
+      "source_path": "Objects/Furniture/Clock, Grandfather.png",
+      "sha256": "2e48831aa80bc7600dd7e827745e001debd5cea06f09071652e8f45b472ab80a"
+    },
+    {
+      "file": "fireplace.png",
+      "source_path": "Objects/Furniture/Fireplace.png",
+      "sha256": "8536955ed50a551b8417c620b387f32fcfd5bb9a26acdef18fe159379f71144b"
+    },
+    {
+      "file": "beds.png",
+      "source_path": "Objects/Furniture/Beds/Beds, Single B.png",
+      "sha256": "f49959d936a85bc424f183e2ba650f5a9e6d98bd362163fbf2e63afe6966856d"
+    },
+    {
+      "file": "rug.png",
+      "source_path": "Objects/Furniture/Rugs/Swirling Vine Rug.png",
+      "sha256": "40255017b36b59fbd08166dd77195df7b12397d69912a6f8395ece3dfebcef1d"
+    },
+    {
+      "file": "Credits.txt",
+      "source_path": "Credits.txt",
+      "sha256": "794bf995ef2498603bc4250155da687ca256a9246a8e2a68ebab3270ee924a15"
+    },
+    {
+      "file": "Terrain-Credits.txt",
+      "source_path": "Terrain/Credits.txt",
+      "sha256": "b0f3a11db7ece49cbf5483a36909a8c31310b9169932052710e6a76172d1a6c0"
+    },
+    {
+      "file": "Furniture-Credits.txt",
+      "source_path": "Objects/Furniture/Credits.txt",
+      "sha256": "a8b68ab8853d14ad1712c5d8203889766ba035bbec17e28cc0bab2ecc65bfdcb"
+    },
+    {
+      "file": "Beds-Credits.txt",
+      "source_path": "Objects/Furniture/Beds/Credits.txt",
+      "sha256": "48ae51a076a0016e533e829de641d2254799b610490ba2e00868fdd4a62d02b0"
+    },
+    {
+      "file": "Rugs-Credits.txt",
+      "source_path": "Objects/Furniture/Rugs/Credits.txt",
+      "sha256": "154ff81f52441afe43d722f7ebd8d19f0fd1a2af363e5d712157cf33c8d603c0"
+    },
+    {
+      "file": "cottage_wall.png",
+      "source_path": "Structure/Walls/Siding, Plain.png",
+      "sha256": "1f09561bbaf8d21da6b12f9b178540e7249b3c9a675ca5f2b27ad8bd6c921c19"
+    },
+    {
+      "file": "wallpaper.png",
+      "source_path": "Structure/Walls/Floral Wallpaper A.png",
+      "sha256": "c75a00628a9535d1c1bd41b504e10de7046358d2cfde99cd3682f8cb55823620"
+    },
+    {
+      "file": "garden_fence.png",
+      "source_path": "Structure/Fences/Ornamental Fence A.png",
+      "sha256": "5bd584f915d4d52ddaefae9775947aff50c0619fdd252ed80182d23400b5d711"
+    },
+    {
+      "file": "Roofing-Credits.txt",
+      "source_path": "Structure/Roofing/Credits.txt",
+      "sha256": "919fe2605031b6af4da844fee424a8c06203b7b1e65ddfdef44bffd80bf8cdfc"
+    },
+    {
+      "file": "Walls-Credits.txt",
+      "source_path": "Structure/Walls/Credits.txt",
+      "sha256": "ceb46b36c03f0d83f7f274046c7d79586a7f36e72cec922ce071d383e51f22fe"
+    },
+    {
+      "file": "Fences-Credits.txt",
+      "source_path": "Structure/Fences/Credits.txt",
+      "sha256": "25395ff1df8d6cf395a481b4d41b7e31bfe0887a39e64850d8142a5c0ebd962c"
+    },
+    {
+      "file": "hipped_roof.png",
+      "source_path": "Structure/Roofing/Hipped Shingle Roof A.png",
+      "sha256": "fbc3b32a439f1906cc567a5da2540fd76e4825a7f496abb99b4a2ce38b060fa5"
+    },
+    {
+      "file": "herringbone.png",
+      "source_path": "Structure/Floor/Herringbone A.png",
+      "sha256": "250375b18208e694102b855ab0a9da65e288f52d8bf4a5bf12a2955cbd451e6b"
+    },
+    {
+      "file": "Floor-Credits.txt",
+      "source_path": "Structure/Floor/Credits.txt",
+      "sha256": "056b180b0196e6f4d519087504452bfbd8d8c7eea1c13c43f1114d1ffdd1acd0"
+    },
+    {
+      "file": "ornate_table.png",
+      "source_path": "Objects/Furniture/Table, Ornate Wood.png",
+      "sha256": "6ff69cbbc6fe292a337802bf302b6d408f35266fa40ea6c17d9d1ec9680e0ba3"
+    },
+    {
+      "file": "lighting.png",
+      "source_path": "Objects/Furniture/Lighting, Outdoors.png",
+      "sha256": "189037e31c5a50653d140c0b93647d3419c8e77006f6950bd6f669f67a749053"
+    }
+  ]
+}

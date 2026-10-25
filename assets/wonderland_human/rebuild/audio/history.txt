@@ -1,0 +1,5 @@
+Unmodified bytes match Minetest Game 0.4.17 (2018-05-18), commit 77d5406440e5ddb7613634b09bf8a53325d1e208.
+Source path: mods/default/sounds/default_glass_footstep.ogg
+Artist: Mito551. CC BY-SA 3.0.
+https://github.com/luanti-org/minetest_game/tree/0.4.17
+SHA256: f5f6c807dbf081523b8375b349e506585dbbe00417c07b9ed2aa94e04492e31a

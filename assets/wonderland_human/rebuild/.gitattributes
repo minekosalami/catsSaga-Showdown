@@ -1,0 +1,2 @@
+# Preserve upstream source bytes, including original notice line endings/spacing.
+* -text -whitespace
