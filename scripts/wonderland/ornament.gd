@@ -22,6 +22,10 @@ extends Node2D
  set(value):
   visual_offset = value
   queue_redraw()
+const ORNATE_TABLE=preload("res://assets/wonderland_human/rebuild/ornate_table.png")
+const OUTDOOR_LIGHT=preload("res://assets/wonderland_human/rebuild/lighting.png")
+const SHINGLES=preload("res://assets/wonderland_human/rebuild/hipped_roof.png")
+const SIDING=preload("res://assets/wonderland_human/rebuild/cottage_wall.png")
 const DETAILS = preload("res://assets/wonderland_human/ninja/details.png")
 const MINT_TREE = preload("res://assets/wonderland_human/ninja/tree_03.png")
 const ROUND_TREE = preload("res://assets/wonderland_human/ninja/tree_04.png")
@@ -38,7 +42,7 @@ func _ready() -> void:
  add_to_group("wonderland_ornaments")
  if kind == "fountain":
   var blend := ShaderMaterial.new()
-  blend.shader = preload("res://shaders/human_ground_blend.gdshader")
+  blend.shader = preload("res://shaders/wonderland_fountain.gdshader")
   material = blend
 func tick(time: float) -> void:
  clock = time
@@ -56,6 +60,10 @@ func panel(sheet: Texture2D,cell: Vector2i,size: Vector2i,point: Vector2,tint :=
    var sy := 0 if y == 0 else (2 if y == size.y-1 else 1)
    tile(sheet,cell+Vector2i(sx,sy),point+Vector2(x,y)*16,1,tint)
 func table(width: int,tea := true) -> void:
+ if tea:
+  draw_texture_rect_region(ORNATE_TABLE,Rect2(-40,-112,80,112),Rect2(104,16,80,112))
+  draw_texture_rect_region(ORNATE_TABLE,Rect2(-24,-80,48,64),Rect2(40,64,48,64))
+  return
  var length := maxi(3,width/2)
  for x in length:
   tile(INDOOR,Vector2i(0 if x == 0 else (2 if x == length-1 else 1),0),Vector2((x-length*.5)*32,-32),2)
@@ -72,7 +80,7 @@ func roof(rows: int,base: Vector2,tint: Color) -> void:
  for y in rows:
   var left: Vector2 = base+Vector2(-(y+1)*16,-(rows-y)*16)
   tile(RPG,Vector2i(27,21),left,1,tint)
-  for x in range(1,(y+1)*2-1):tile(RPG,Vector2i(32,21),left+Vector2(x*16,0),1,tint)
+  for x in range(1,(y+1)*2-1):draw_texture_rect_region(SHINGLES,Rect2(left+Vector2(x*16,0),Vector2(16,16)),Rect2(40+posmod(x,4)*16,16+posmod(y,4)*16,16,16),tint)
   tile(RPG,Vector2i(28,21),left+Vector2(((y+1)*2-1)*16,0),1,tint)
 func furniture_shelf(books := true) -> void:
  for y in range(3):
@@ -82,7 +90,8 @@ func house(style := "house") -> void:
  var height := maxi(3,roundi(footprint.y/16)-width/2-1)
  var left := roundf(visual_offset.x-width*8)
  var top := -height*16.0
- masonry(Vector2i(width,height),Vector2(left,top),Color("#fff1d9"))
+ for y in height:
+  for x in width:draw_texture_rect_region(SIDING,Rect2(left+x*16,top+y*16,16,16),Rect2(640+16+posmod(x,7)*16,posmod(y,5)*16,16,16),Color("#fff1d9"))
  roof(width/2+1,Vector2(visual_offset.x,top),accent.lightened(.2))
  for x in range(width):tile(RPG,Vector2i(39,8),Vector2(left+x*16,top+2),1,Color("#e0c2a8"))
  tile(RPG,Vector2i(27,5),Vector2(left+16,top-32))
@@ -145,8 +154,8 @@ func _draw() -> void:
     draw_texture_rect_region(FOREST,Rect2(p,Vector2(144,96)),Rect2(0,96,48,32))
    for x in [-90,90]:tile(RPG,Vector2i(41,24),Vector2(x,-112),2)
   "teapot":tile(RPG,Vector2i(55,15),Vector2(-16,-32),2)
-  "grand_teapot":tile(RPG,Vector2i(55,15),Vector2(-64,-128),8)
-  "grand_teacup":tile(RPG,Vector2i(56,16),Vector2(-64,-128),8)
+  "grand_teapot":tile(RPG,Vector2i(55,15),Vector2(-32,-64),4)
+  "grand_teacup":tile(RPG,Vector2i(56,16),Vector2(-32,-64),4)
   "tea_table":table(8)
   "banquet_table":table(12)
   "chair":tile(INDOOR,Vector2i(1,3),Vector2(-16,-32),2)
@@ -186,9 +195,7 @@ func _draw() -> void:
    var zoom := 1.0 if kind == "interior_door" else 1.5
    patch(DUNGEON,Vector2i(21 if kind in ["arch","interior_door"] else 24,10),Vector2i(3,3),Vector2(-24*zoom,-48*zoom),zoom,Color("#f6bada") if kind != "castle_gate" else Color.WHITE)
   "bridge_rail":tile(RPG,Vector2i(47,24),Vector2(-8,-8))
-  "lantern":
-   tile(RPG,Vector2i(55,9),Vector2(-8,-25))
-   tile(RPG,Vector2i(28,0),Vector2(-8,-10))
+  "lantern":draw_texture_rect_region(OUTDOOR_LIGHT,Rect2(-8,-80,16,80),Rect2(0,0,16,80))
   "grass_tuft":draw_texture_rect_region(DETAILS,Rect2(-8,-12,16,16),Rect2((absi(variant)%4)*64,128,64,64))
   "stones":tile(RPG,Vector2i(44,10),Vector2(-8,-8))
   "key":tile(ONEBIT,Vector2i(33,11),Vector2(-16,-16),2,Color("#f58fc7"))

@@ -1,0 +1,23 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+CAPTURED MAP wonderland_forest
+CAPTURED MAP tea_gardens
+CAPTURED MAP mushroom_thicket
+CAPTURED MAP royal_woods
+CAPTURED MAP wonderland_village
+CAPTURED MAP queens_castle
+CAPTURED MAP castle_hall
+CAPTURED MAP royal_library
+CAPTURED MAP banquet_hall
+CAPTURED MAP throne_room
+CAPTURED MAP mushroom_cottage
+CAPTURED MAP teapot_house
+CAPTURED MAP flower_shop
+CAPTURED MAP clockmakers_house
+CAPTURED MAP bakery
+CAPTURED MAP royal_gift_shop
+CAPTURED MAP storytellers_cottage
+CAPTURED MAP tiny_pink_house

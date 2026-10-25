@@ -1,0 +1,74 @@
+{
+	"bakery": {
+		"floor_tiles": 388
+	},
+	"banquet_hall": {
+		"floor_tiles": 496
+	},
+	"castle_hall": {
+		"floor_tiles": 536
+	},
+	"clockmakers_house": {
+		"floor_tiles": 388
+	},
+	"flower_shop": {
+		"floor_tiles": 388
+	},
+	"mushroom_cottage": {
+		"floor_tiles": 348
+	},
+	"mushroom_thicket": {
+		"flower_clusters": 448,
+		"road_tiles": 906,
+		"trees_or_mushrooms": 162,
+		"water_tiles": 58
+	},
+	"queens_castle": {
+		"flower_clusters": 453,
+		"road_tiles": 652,
+		"trees_or_mushrooms": 162,
+		"water_tiles": 104
+	},
+	"royal_gift_shop": {
+		"floor_tiles": 388
+	},
+	"royal_library": {
+		"floor_tiles": 496
+	},
+	"royal_woods": {
+		"flower_clusters": 744,
+		"road_tiles": 1218,
+		"trees_or_mushrooms": 254,
+		"water_tiles": 83
+	},
+	"storytellers_cottage": {
+		"floor_tiles": 348
+	},
+	"tea_gardens": {
+		"flower_clusters": 439,
+		"road_tiles": 859,
+		"trees_or_mushrooms": 161,
+		"water_tiles": 45
+	},
+	"teapot_house": {
+		"floor_tiles": 320
+	},
+	"throne_room": {
+		"floor_tiles": 472
+	},
+	"tiny_pink_house": {
+		"floor_tiles": 212
+	},
+	"wonderland_forest": {
+		"flower_clusters": 438,
+		"road_tiles": 838,
+		"trees_or_mushrooms": 160,
+		"water_tiles": 79
+	},
+	"wonderland_village": {
+		"flower_clusters": 444,
+		"road_tiles": 1562,
+		"trees_or_mushrooms": 158,
+		"water_tiles": 0
+	}
+}

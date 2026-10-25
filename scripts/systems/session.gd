@@ -177,10 +177,12 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 	if preload("res://scripts/wonderland/layout.gd").regions().has(area_id) and not preload("res://scripts/wonderland/layout.gd").regions().has(destination): return
 	if busy:
 		return
+	var wonderland := preload("res://scripts/wonderland/layout.gd").regions()
+	var storybook: bool = wonderland.has(area_id) and wonderland.has(destination) and not story_sequence_active
 	area_id = destination
 	entry_marker = marker
 	restore_position = false
-	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion):
+	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion, storybook):
 		if destination == "underground_cave":
 			story_flags["underground_cave_discovered"] = true
 		schedule_progress_save()
@@ -258,7 +260,7 @@ func main_menu() -> void:
 	encounter_active = false
 	await transition_to("res://scenes/main_menu.tscn")
 
-func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false) -> bool:
+func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false, storybook: bool = false) -> bool:
 	if scene_path.begins_with("res://scenes/incarna/") or scene_path.begins_with("res://scenes/wonderland/") or scene_path=="res://scenes/world/underground_cave.tscn": return false
 	if busy:
 		return false
@@ -270,6 +272,7 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	if white_wipe:
 		return await _battle_entry(scene_path)
 	var fade_duration := region_fade_duration if region_travel else transition_duration * 0.5
+	if storybook: fade_duration = .75
 	Music.prepare_transition(scene_path, fade_duration)
 	preload("res://scripts/ui/presentation/departure.gd").decorate(curtain,get_tree().current_scene)
 	curtain.color = Color.BLACK
@@ -290,8 +293,15 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 		await motion.finished
 	curtain.modulate.a = 0.0
 	curtain.show()
+	var page: ShaderMaterial
+	if storybook:
+		page = preload("res://scripts/wonderland/storybook_transition.gd").begin(curtain, preload("res://scripts/wonderland/layout.gd").regions()[area_id].name)
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
+	if storybook:
+		fade.tween_method(func(value: float): page.set_shader_parameter("coverage", value), 0.0, 1.0, fade_duration).set_trans(Tween.TRANS_SINE)
+		fade.parallel().tween_property(curtain.get_node("StorybookRegion"), "modulate:a", 1.0, .25).set_delay(.5)
+	else:
+		fade.tween_property(curtain, "modulate:a", 1.0, fade_duration)
 	await fade.finished
 	# Stop old streams before the next scene can start its soundtrack.
 	for audio in get_tree().get_nodes_in_group("combat_music"):
@@ -312,8 +322,14 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 			camera.reset_smoothing()
 			camera.force_update_scroll()
 	fade = create_tween()
-	fade.tween_property(curtain, "modulate:a", 0.0, fade_duration)
+	if storybook:
+		fade.tween_interval(.1)
+		fade.tween_property(curtain.get_node("StorybookRegion"), "modulate:a", 0.0, .25)
+		fade.parallel().tween_method(func(value: float): page.set_shader_parameter("coverage", value), 1.0, 0.0, fade_duration).set_trans(Tween.TRANS_SINE)
+	else:
+		fade.tween_property(curtain, "modulate:a", 0.0, fade_duration)
 	await fade.finished
+	preload("res://scripts/wonderland/storybook_transition.gd").finish(curtain)
 	curtain.hide()
 	curtain.position.y = 0.0
 	curtain.color = Color.BLACK
