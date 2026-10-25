@@ -30,8 +30,10 @@ func run() -> void:
 	var session: Node = root.get_node("Session")
 	session.saves.save_path = "user://validation-bart-overhaul.json"
 	await session.new_game()
-	await session.travel("bart_area", "FromDeep")
-	await session.begin_battle(Vector2(1000,520))
+	# Smoki now lives in Forest Entrance. Entering Fluffy Forest instead starts
+	# an unrelated automatic BlankKitten encounter and invalidates this fixture.
+	await session.travel("entrance", "Start")
+	await session.begin_battle(Vector2(336,912))
 	var game: Node = current_scene.battle
 	game.music_player.seek(7)
 	await create_timer(0.1).timeout
@@ -172,7 +174,7 @@ func run() -> void:
 	game.music_player.seek(7)
 	await create_timer(0.1).timeout
 	boss = game.boss
-	check(boss.health == 300 and boss.max_health == 300 and game.player.health == 3, "Retry starts fresh boss at exactly 300/300")
+	check(boss.health == 300 and boss.max_health == 300 and game.player.health == session.rpg.max_hp(), "Retry starts fresh boss at exactly 300/300 and current RPG max HP")
 	game.set_process(false)
 	boss.elapsed = 123
 	boss._process(0.01)

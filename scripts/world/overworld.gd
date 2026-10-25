@@ -118,8 +118,11 @@ func _ready() -> void:
 		_start_blankkitten.call_deferred()
 
 func _start_blankkitten() -> void:
-	while Session.busy or checking_spawn:
+	while is_inside_tree() and (Session.busy or checking_spawn):
 		await get_tree().process_frame
+	# Leaving during the arrival fade invalidates this world, not the encounter.
+	# Never resume its queued conversation against a detached/freed map.
+	if not is_inside_tree():return
 	var npc=map.get_node_or_null("Characters/BlankKitten")
 	if npc!=null and not Session.story_flags.get("blankkitten_defeated",false):npc.handle_interaction(self)
 	automatic_encounter_pending=false

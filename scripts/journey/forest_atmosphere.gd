@@ -15,11 +15,17 @@ var splash_wait =2.0
 var water_sample_wait =0.0
 var bridge_audio: AudioStreamPlayer2D
 var bridge_wait =0.0
+var water_surface: TileMapLayer
+var understory: TileMapLayer
+var surface_layers: Array[TileMapLayer]=[]
 func _ready() -> void:
 	z_index=6
 	texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
 	region=get_parent().region_id
 	weather=Session.weather
+	water_surface=get_parent().get_node("WaterSurface")
+	understory=get_parent().get_node("Understory")
+	for label in ["Bridges","Water"]:surface_layers.append(get_parent().get_node(label))
 	modulation=CanvasModulate.new();add_child(modulation)
 	canopy=ShaderMaterial.new();canopy.shader=preload("res://shaders/forest_canopy_wind.gdshader")
 	for tree in get_tree().get_nodes_in_group("journey_trees"):
@@ -43,17 +49,21 @@ func apply_canopy() -> void:
 func _process(delta: float) -> void:
 	var world =get_parent().get_parent()
 	if world.get("player")==null:return # Editor/map-cache render stays stable.
-	clock+=delta
+	var visuals=get_node("/root/VisualSettings")
+	var motion: float=visuals.motion*(.35 if visuals.reduced else 1.0)
+	clock+=delta*motion
 	var camera:Camera2D=world.player.get_node("Camera2D")
 	var size:Vector2=get_viewport_rect().size/camera.zoom
 	bounds=Rect2(camera.get_screen_center_position()-size*.5,size)
 	var base:Color={"entrance":Color(1,.98,.91),"deep_forest":Color(.77,.84,.85),"bart_area":Color(.97,.88,.99),"flooded_forest":Color(.78,.88,.96)}[region]
 	modulation.color=base.lerp(base*.76,weather.cloud*.6)
 	canopy.set_shader_parameter("wind",weather.wind)
-	var understory=get_parent().get_node("Understory")
+	canopy.set_shader_parameter("motion",motion)
 	understory.material.set_shader_parameter("wind_strength",weather.wind)
-	var water=get_parent().get_node_or_null("Water")
-	if water!=null and water.material!=null:water.material.set_shader_parameter("rain_strength",weather.rain)
+	understory.material.set_shader_parameter("motion",motion)
+	# Water is the hidden collision footprint. WaterSurface owns visible ripples.
+	water_surface.material.set_shader_parameter("rain_strength",weather.rain)
+	water_surface.material.set_shader_parameter("motion",motion)
 	water_sample_wait-=delta
 	if water_sample_wait<=0:
 		water_sample_wait=.5
@@ -75,9 +85,9 @@ func _process(delta: float) -> void:
 			splash_audio.play()
 	queue_redraw()
 func surface(point: Vector2) -> int:
-	for pair in [["Bridges",2],["Water",1]]:
-		var layer =get_parent().get_node_or_null(pair[0]) as TileMapLayer
-		if layer!=null and layer.get_cell_source_id(layer.local_to_map(layer.to_local(to_global(point))))>=0:return pair[1]
+	for i in surface_layers.size():
+		var layer:=surface_layers[i]
+		if layer.get_cell_source_id(layer.local_to_map(layer.to_local(get_parent().to_global(point))))>=0:return 2-i
 	return 0
 func _draw() -> void:
 	if bounds.size==Vector2.ZERO:return

@@ -9,6 +9,7 @@ var time_label: Label
 var flee_button: Button
 var hp_caption: Label
 var previous_status:=""
+var fight_button: Button
 func _ready() -> void:
 	layer=10;battle=get_parent()
 	var root:=Control.new();add_child(root);root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -31,11 +32,10 @@ func _ready() -> void:
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	bottom.offset_left=16;bottom.offset_right=-16;bottom.offset_top=-52;bottom.offset_bottom=-10
 	var fight:=preload("res://scripts/ui/presentation/button.gd").new()
+	fight_button=fight
 	fight.text="FIGHT  ["+get_node("/root/GameSettings").binding_label("attack")+"]"
 	fight.focus_mode=Control.FOCUS_NONE;fight.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	fight.pressed.connect(func():
-		if battle.player.shoot_timer<=0 and not battle.game_over and not battle.victory_started:
-			battle.player.shoot();battle.player.shoot_timer=battle.player.SHOOT_INTERVAL)
+	fight.pressed.connect(_fight)
 	bottom.add_child(fight)
 	flee_button=preload("res://scripts/ui/presentation/button.gd").new()
 	flee_button.text="FLEE  [V]";flee_button.focus_mode=Control.FOCUS_NONE;flee_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -50,7 +50,13 @@ func refresh() -> void:
 	player_hp.text="SATURATE %s"%["USED" if battle.player.saturate_used and not battle.player.unlimited_saturate else "READY"]
 	time_label.text="%05.1fs"%maxf(0,battle.duration-battle.elapsed_time)
 	flee_button.disabled=battle.flee_cooldown>0 or battle.game_over or battle.victory_started
+	fight_button.disabled=battle.player.item_mode or battle.settled or Session.busy or get_tree().paused
 	if status.text!=previous_status and not status.text.is_empty():
 		Style.pop(status,1.08);previous_status=status.text
+func _fight() -> void:
+	# Mouse controls obey the same item-mode lock as the shared keyboard weapon.
+	if battle.player.item_mode or battle.settled or Session.busy or get_tree().paused:return
+	if battle.player.shoot_timer<=0:
+		battle.player.shoot();battle.player.shoot_timer=battle.player.SHOOT_INTERVAL
 func show_impact_flash() -> void:
 	Style.pop(enemy_name,1.04)

@@ -1,5 +1,6 @@
 shader_type canvas_item;
 uniform float wind_strength = 0.3;
+uniform float motion = 1.0;
 uniform vec2 player_world = vec2(-10000.0);
 varying vec2 world_point;
 varying vec4 modulation;
@@ -13,7 +14,7 @@ void fragment() {
 	vec2 cell=floor(UV*cells);
 	vec2 local=fract(UV*cells);
 	float contact=1.0-smoothstep(16.0,60.0,distance(world_point,player_world));
-	float sway=(sin(TIME*(.6+wind_strength*.4)+world_point.x*.03)*(.003+wind_strength*.008)+contact*.018)*(1.0-local.y);
+	float sway=(sin(TIME*motion*(.6+wind_strength*.4)+world_point.x*.03)*(.003+wind_strength*.008)*motion+contact*.018)*(1.0-local.y);
 	local.x=clamp(local.x+sway,.001,.999);
 	COLOR=texture(TEXTURE,(cell+local)/cells)*modulation;
 }
