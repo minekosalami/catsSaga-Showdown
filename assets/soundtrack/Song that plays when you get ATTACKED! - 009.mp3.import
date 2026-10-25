@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b4gi52gfwfbwe"
+path="res://.godot/imported/Song that plays when you get ATTACKED! - 009.mp3-3c05dda52f00a836d6ef80879aab7579.mp3str"
+
+[deps]
+
+source_file="res://assets/soundtrack/Song that plays when you get ATTACKED! - 009.mp3"
+dest_files=["res://.godot/imported/Song that plays when you get ATTACKED! - 009.mp3-3c05dda52f00a836d6ef80879aab7579.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

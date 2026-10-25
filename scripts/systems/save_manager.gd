@@ -80,22 +80,28 @@ func validate(value: Variant) -> Dictionary:
 		return {}
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true
-	# Preserve every archived flag/fog byte. Old saves load safely in the active
-	# forest without rewriting or deleting the original file during read.
+	# Preserve archived flags/fog and restore Wonderland save locations.
+	# The cave still falls back to the forest without rewriting files on read.
 	var journey := preload("res://scripts/journey/layout.gd")
-	if not journey.active(area):
+	if not journey.active(area) and not extra_areas.has(area):
 		area = "flooded_forest"
 		point = journey.SPAWNS[area]
-	elif not flags.get(journey.REVISION,false):
+	elif journey.active(area) and not flags.get(journey.REVISION,false):
 		point = journey.SPAWNS[area]
+	if extra_areas.has(area) and not flags.has("wonderland_arrived"):
+		# Existing Wonderland saves retain their location and skip the new introduction.
+		flags["wonderland_arrived"] = true
+		flags["wonderland_intro_completed"] = true
+	for key in ["wonderland_arrived","wonderland_intro_completed","wonderland_fast_travel_unlocked"]:
+		if not flags.has(key): flags[key] = false
 	flags[journey.REVISION] = true
 	var checkpoint: Variant=value.get("checkpoint", {"area":area,"position":[point.x,point.y]})
-	if not checkpoint is Dictionary or not checkpoint.get("area","") in journey.ORDER:return {}
+	if not checkpoint is Dictionary or not area_sizes.has(checkpoint.get("area","")) or checkpoint.get("area","")=="underground_cave":return {}
 	var checkpoint_position: Variant=checkpoint.get("position")
 	if not checkpoint_position is Array or checkpoint_position.size()!=2:return {}
 	for axis in 2:
 		var coordinate: Variant=checkpoint_position[axis]
-		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)) or coordinate<44 or coordinate>journey.SIZES[checkpoint.area][axis]-44:return {}
+		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)) or coordinate<44 or coordinate>area_sizes[checkpoint.area][axis]-44:return {}
 	var progress := preload("res://scripts/story/progress.gd").validate(value.get("story_progress",{}))
 	if progress.is_empty(): return {}
 	var rpg := preload("res://scripts/rpg/progress.gd").validate(value.get("rpg",{}))

@@ -1,0 +1,53 @@
+{
+  "engine": "Godot 4.6.3",
+  "headless_suites": [
+    {
+      "suite": "headless_forest_encounters",
+      "checks": 148,
+      "failures": 0,
+      "script_errors": false
+    },
+    {
+      "suite": "headless_menu_overhaul",
+      "checks": 56,
+      "failures": 0,
+      "script_errors": false
+    },
+    {
+      "suite": "headless_rpg",
+      "checks": 103,
+      "failures": 0,
+      "script_errors": false
+    },
+    {
+      "suite": "headless_story_integration",
+      "checks": 81,
+      "failures": 0,
+      "script_errors": false
+    },
+    {
+      "suite": "headless_wonderland_art",
+      "checks": 87,
+      "failures": 0,
+      "script_errors": false
+    },
+    {
+      "suite": "headless_ambush",
+      "checks": 88,
+      "failures": 0,
+      "script_errors": false
+    }
+  ],
+  "headless_total": 563,
+  "native_renderer": "X11 / Mesa llvmpipe, Dummy audio",
+  "limitations": [
+    "Audio listening and hardware performance untested",
+    "Existing shutdown cleanup warnings remain"
+  ],
+  "native_sequence": {
+    "checks": 88,
+    "failures": 0,
+    "screenshots_inspected": 6
+  },
+  "headless_import": "passed"
+}
