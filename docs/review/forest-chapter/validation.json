@@ -1,0 +1,192 @@
+{
+  "engine": "Godot 4.6.3",
+  "suites": [
+    {
+      "suite": "headless_forest_encounters",
+      "exit": 0,
+      "script_error": false,
+      "checks": 148,
+      "failures": 0
+    },
+    {
+      "suite": "headless_ordinary_projectile_hits",
+      "exit": 0,
+      "script_error": false,
+      "checks": 2361,
+      "failures": 0
+    },
+    {
+      "suite": "headless_forest_ai",
+      "exit": 0,
+      "script_error": false,
+      "checks": 18,
+      "failures": 0
+    },
+    {
+      "suite": "headless_story_progress",
+      "exit": 0,
+      "script_error": false,
+      "summary": [
+        "PASS: 67 story progress checks"
+      ],
+      "checks": 67,
+      "failures": 0
+    },
+    {
+      "suite": "headless_story_integration",
+      "exit": 0,
+      "script_error": false,
+      "checks": 81,
+      "failures": 0
+    },
+    {
+      "suite": "headless_rpg",
+      "exit": 0,
+      "script_error": false,
+      "checks": 103,
+      "failures": 0
+    },
+    {
+      "suite": "headless_rpg_battles",
+      "exit": 0,
+      "script_error": false,
+      "checks": 53,
+      "failures": 0
+    },
+    {
+      "suite": "headless_alive_ui",
+      "exit": 0,
+      "script_error": false,
+      "checks": 149,
+      "failures": 0
+    },
+    {
+      "suite": "headless_journey_transitions",
+      "exit": 0,
+      "script_error": false,
+      "checks": 17,
+      "failures": 0
+    },
+    {
+      "suite": "headless_bart_overhaul",
+      "exit": 0,
+      "script_error": false,
+      "log": "extended/headless_bart_overhaul.log",
+      "checks": 47,
+      "failures": 0
+    },
+    {
+      "suite": "headless_boss2_overhaul",
+      "exit": 0,
+      "script_error": false,
+      "checks": 45,
+      "failures": 0
+    },
+    {
+      "suite": "headless_cross_lasers",
+      "exit": 0,
+      "script_error": false,
+      "checks": 44,
+      "failures": 0
+    },
+    {
+      "suite": "headless_sequence_overhaul",
+      "exit": 0,
+      "script_error": false,
+      "checks": 102,
+      "failures": 0
+    },
+    {
+      "suite": "headless_music_hitbox",
+      "exit": 0,
+      "script_error": false,
+      "checks": 37,
+      "failures": 0
+    },
+    {
+      "suite": "headless_music_levels",
+      "exit": 0,
+      "script_error": false,
+      "checks": 38,
+      "failures": 0
+    },
+    {
+      "suite": "headless_camera_stability",
+      "exit": 0,
+      "script_error": false,
+      "checks": 9,
+      "failures": 0
+    },
+    {
+      "suite": "headless_save_stars",
+      "exit": 0,
+      "script_error": false,
+      "checks": 15,
+      "failures": 0
+    },
+    {
+      "suite": "headless_menu_overhaul",
+      "log": "menu-final.log",
+      "script_error": false,
+      "exit": 0,
+      "checks": 56,
+      "failures": 0
+    },
+    {
+      "suite": "headless_forest_chapter",
+      "log": "chapter-bridge.log",
+      "script_error": false,
+      "exit": 0,
+      "checks": 110,
+      "failures": 0
+    },
+    {
+      "suite": "headless_story_reachability",
+      "log": "reach-final.log",
+      "script_error": false,
+      "exit": 0,
+      "summary": [
+        "REACHABILITY failures: 0"
+      ]
+    },
+    {
+      "suite": "fullscreen_scaling",
+      "log": "fullscreen.log",
+      "script_error": false,
+      "exit": 0,
+      "checks": 84,
+      "failures": 0
+    },
+    {
+      "suite": "reload_rpg_progress",
+      "log": "reload.log",
+      "script_error": false,
+      "exit": 0,
+      "summary": [
+        "RPG NEW-PROCESS RELOAD: PASS"
+      ]
+    },
+    {
+      "suite": "full_boss2_survival",
+      "log": "extended/full_boss2_survival.log",
+      "script_error": false,
+      "exit": 0,
+      "checks": 3,
+      "failures": 0
+    },
+    {
+      "suite": "full_blankkitten",
+      "log": "blank-final.log",
+      "checks": 6,
+      "failures": 0,
+      "exit": 0,
+      "script_error": false
+    }
+  ],
+  "assertions_with_reported_counts": 3593,
+  "runtime_failures": 0,
+  "preserved_files": 866,
+  "protected_scene_nodes": 152,
+  "renderer": "Mesa llvmpipe / X11, Dummy audio",
+  "note": "Historical fixture failures were corrected for current Smoki location and RPG health. See review for limitations; this is automated testing, not human difficulty measurement."
+}

@@ -1,0 +1,26 @@
+{
+	"bart_area": {
+		"draw_calls": 208.0,
+		"median_ms": 18.558,
+		"p95_ms": 22.141,
+		"static_memory_mib": 82.2852048873901
+	},
+	"deep_forest": {
+		"draw_calls": 201.0,
+		"median_ms": 16.989,
+		"p95_ms": 22.694,
+		"static_memory_mib": 91.3586378097534
+	},
+	"entrance": {
+		"draw_calls": 152.0,
+		"median_ms": 14.98,
+		"p95_ms": 18.147,
+		"static_memory_mib": 69.3439264297485
+	},
+	"flooded_forest": {
+		"draw_calls": 118.0,
+		"median_ms": 18.488,
+		"p95_ms": 21.639,
+		"static_memory_mib": 91.7096929550171
+	}
+}

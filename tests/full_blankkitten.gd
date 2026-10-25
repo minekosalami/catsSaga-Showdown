@@ -23,7 +23,7 @@ func check(ok: bool, text: String) -> void:
 func run() -> void:
 	var session: Node = root.get_node("Session")
 	session.saves.save_path = "user://validation-blank-full-audio.json"
-	session.area_id = "deep_forest"
+	session.area_id = "bart_area"
 	session.encounter_active = true
 	session.encounter_id = "blankkitten"
 	await session.transition_to("res://scenes/blankkitten/combat_host.tscn",true)
@@ -37,7 +37,9 @@ func run() -> void:
 	while not game.game_over and not game.victory_started: await process_frame
 	var duration := (Time.get_ticks_msec()-began)/1000.0
 	check(game.victory_started and not game.game_over,"complete actual MP3 playback survives without clock overrides or cheats")
-	check(game.player.health == 5,"real physics/audio movement-only route retains five HP")
+	# Victory can level up and refill HP; count actual damage instead of comparing
+	# post-reward HP with the pre-fight maximum (or the old five-hit health model).
+	check(current_scene.rpg_ui.score.hits == 0,"real physics/audio movement-only route takes no damage")
 	var audible: float = game.music_player.get_playback_position()+AudioServer.get_time_since_last_mix()-AudioServer.get_output_latency()
 	check(absf(audible-Cue.END) < 0.1 and game.elapsed_time == Cue.END,"victory follows actual playback at 145.71 s; audio "+str(audible)+", host runtime "+str(duration))
 	check(game.stage_history == [0,1,2,3,4,5,6,7],"real audio visits every stage exactly once")

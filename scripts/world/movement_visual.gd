@@ -65,7 +65,10 @@ func _process(delta: float) -> void:
  if sample_clock<=0:
   sample_clock = .2
   water_nearby = sample_water()
-  Ambience.water_proximity = 1.0 if water_nearby else 0.0
+  # Active forests have a wider shoreline sampler; don't overwrite its smooth
+  # proximity every fifth of a second with this footprint-only 32px probe.
+  if not preload("res://scripts/journey/layout.gd").active(Session.area_id):
+   Ambience.water_proximity = 1.0 if water_nearby else 0.0
  if moving:
   step_distance += distance
   if step_distance>=33:
