@@ -1,0 +1,92 @@
+{
+	"bakery": {
+		"draw_calls": 40.0,
+		"median_ms": 8.68,
+		"p95_ms": 10.753
+	},
+	"banquet_hall": {
+		"draw_calls": 44.0,
+		"median_ms": 9.304,
+		"p95_ms": 13.253
+	},
+	"castle_hall": {
+		"draw_calls": 47.0,
+		"median_ms": 10.534,
+		"p95_ms": 11.884
+	},
+	"clockmakers_house": {
+		"draw_calls": 42.0,
+		"median_ms": 8.859,
+		"p95_ms": 12.956
+	},
+	"flower_shop": {
+		"draw_calls": 49.0,
+		"median_ms": 8.719,
+		"p95_ms": 10.655
+	},
+	"mushroom_cottage": {
+		"draw_calls": 44.0,
+		"median_ms": 9.017,
+		"p95_ms": 11.313
+	},
+	"mushroom_thicket": {
+		"draw_calls": 71.0,
+		"median_ms": 14.033,
+		"p95_ms": 19.548
+	},
+	"queens_castle": {
+		"draw_calls": 41.0,
+		"median_ms": 13.633,
+		"p95_ms": 18.611
+	},
+	"royal_gift_shop": {
+		"draw_calls": 42.0,
+		"median_ms": 7.434,
+		"p95_ms": 8.553
+	},
+	"royal_library": {
+		"draw_calls": 43.0,
+		"median_ms": 8.846,
+		"p95_ms": 12.365
+	},
+	"royal_woods": {
+		"draw_calls": 32.0,
+		"median_ms": 14.855,
+		"p95_ms": 17.893
+	},
+	"storytellers_cottage": {
+		"draw_calls": 45.0,
+		"median_ms": 9.392,
+		"p95_ms": 14.126
+	},
+	"tea_gardens": {
+		"draw_calls": 43.0,
+		"median_ms": 13.168,
+		"p95_ms": 15.356
+	},
+	"teapot_house": {
+		"draw_calls": 48.0,
+		"median_ms": 9.272,
+		"p95_ms": 11.426
+	},
+	"throne_room": {
+		"draw_calls": 50.0,
+		"median_ms": 8.473,
+		"p95_ms": 10.557
+	},
+	"tiny_pink_house": {
+		"draw_calls": 42.0,
+		"median_ms": 6.911,
+		"p95_ms": 7.832
+	},
+	"wonderland_forest": {
+		"draw_calls": 38.0,
+		"median_ms": 14.403,
+		"p95_ms": 17.602
+	},
+	"wonderland_village": {
+		"draw_calls": 66.0,
+		"median_ms": 12.396,
+		"p95_ms": 15.112
+	}
+}

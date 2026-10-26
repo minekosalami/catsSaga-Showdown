@@ -1,0 +1,27 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+CAPTURE after wonderland_forest
+CAPTURE after tea_gardens
+CAPTURE after mushroom_thicket
+CAPTURE after royal_woods
+CAPTURE after wonderland_village
+CAPTURE after queens_castle
+CAPTURE after castle_hall
+CAPTURE after royal_library
+CAPTURE after banquet_hall
+CAPTURE after throne_room
+CAPTURE after mushroom_cottage
+CAPTURE after teapot_house
+CAPTURE after flower_shop
+CAPTURE after clockmakers_house
+CAPTURE after bakery
+CAPTURE after royal_gift_shop
+CAPTURE after storytellers_cottage
+CAPTURE after tiny_pink_house
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

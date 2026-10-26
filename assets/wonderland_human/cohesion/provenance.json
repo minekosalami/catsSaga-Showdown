@@ -1,0 +1,87 @@
+{
+  "source": "https://github.com/ElizaWy/LPC",
+  "revision": "f07f7f5892e67c932c68f70bb04472f2c64e46bc",
+  "license": "OGA-BY 3.0",
+  "files": [
+    {
+      "file": "wood.png",
+      "source_path": "Structure/Floor/Wood Floor A.png",
+      "sha256": "dbce22679bc0469c4063c626504d98b469b2fdf279e9630b7021ffbcfb113f9d"
+    },
+    {
+      "file": "tiles.png",
+      "source_path": "Structure/Floor/Tile B.png",
+      "sha256": "57bdf4da621ec0cf7e8996e8bdbe2767e4c7f81a4cf7f59091b8358d2ce7db65"
+    },
+    {
+      "file": "carpet.png",
+      "source_path": "Structure/Floor/Floral Carpet A.png",
+      "sha256": "1d8b0b39e459d74d7d5d5795d832e5051a15d6c16497560612f1800364014a67"
+    },
+    {
+      "file": "paneling.png",
+      "source_path": "Structure/Walls/Half-Wall Paneling A.png",
+      "sha256": "a6c37e99959ae16d3df731b04d7af245a72767130e696b08b6475aa883675c91"
+    },
+    {
+      "file": "chair.png",
+      "source_path": "Objects/Furniture/Seating/Chair, Dining A.png",
+      "sha256": "af76ce09777e65143f89201648a023ef68587ea1db5a248b06beb2581c381c33"
+    },
+    {
+      "file": "sofa.png",
+      "source_path": "Objects/Furniture/Seating/Loveseat, Small - Casual Patterned A.png",
+      "sha256": "4e7a35ff21f37cda44c1e92600c4c627e569459a609e927480abd331125ab079"
+    },
+    {
+      "file": "table.png",
+      "source_path": "Objects/Furniture/Table, Rough Wood.png",
+      "sha256": "bb1a846dbab420a3d2670937f4892265eb5f33814f9b556a486fa307977c7590"
+    },
+    {
+      "file": "desk.png",
+      "source_path": "Objects/Furniture/Desk, Vanity.png",
+      "sha256": "8c59b2b64c1f244eb79b8b5a07893a8de4f5b23a3d6567c1d485e64a79d29120"
+    },
+    {
+      "file": "counter.png",
+      "source_path": "Objects/Furniture/Countertop.png",
+      "sha256": "d3ff59068bd4aafada8fe162cc3aeefa7ea04ab58093d4be44ac6791ad70a264"
+    },
+    {
+      "file": "stove.png",
+      "source_path": "Objects/Furniture/Fireplace, Cast Iron.png",
+      "sha256": "36c9be7277b56b1bb5f871ea40d4bb58b6aa9256acb723239d475a5b470db7e2"
+    },
+    {
+      "file": "paintings.png",
+      "source_path": "Objects/Wall Items/Paintings, Landscape.png",
+      "sha256": "93c6e7a4f1bb3365e4a5ef60ccf8dcacc0bf19d27a2cbd578f1aff1b631735c8"
+    },
+    {
+      "file": "Seating-Credits.txt",
+      "source_path": "Objects/Furniture/Seating/Credits.txt",
+      "sha256": "25d3bc8e9a150d05735617381208687eef992e34a9d2f2859678fe88d7e781f0"
+    },
+    {
+      "file": "Wall-Items-Credits.txt",
+      "source_path": "Objects/Wall Items/Credits.txt",
+      "sha256": "77d4508c8b68399f666b34995b898c51020f8c15835191351bc2acb7e2c357ca"
+    },
+    {
+      "file": "thrones.png",
+      "source_path": "Objects/Furniture/Seating/Thrones.png",
+      "sha256": "7b68db99ba76ea5c60afab8ec2f91b4fb777c824f01bf1af7d2bce7bfebab89e"
+    },
+    {
+      "file": "windows.png",
+      "source_path": "Structure/Windows/Ornamental Windows A.png",
+      "sha256": "42343e001ffb121a6b751c8cf2391e02ce269a30ec2268de340419f99fd8eaae"
+    },
+    {
+      "file": "Windows-Credits.txt",
+      "source_path": "Structure/Windows/Credits.txt",
+      "sha256": "2e3e7ad9cefe95241d51756bb9757e158b1c77eb24c5703430fa3b6e0ea77f22"
+    }
+  ]
+}
