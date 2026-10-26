@@ -22,6 +22,7 @@ extends Node2D
  set(value):
   visual_offset = value
   queue_redraw()
+const WINDOWS=preload("res://assets/wonderland_human/cohesion/windows.png")
 const ORNATE_TABLE=preload("res://assets/wonderland_human/rebuild/ornate_table.png")
 const OUTDOOR_LIGHT=preload("res://assets/wonderland_human/rebuild/lighting.png")
 const SHINGLES=preload("res://assets/wonderland_human/rebuild/hipped_roof.png")
@@ -39,6 +40,7 @@ const ONEBIT = preload("res://assets/wonderland_human/onebit/monochrome_transpar
 var clock := 0.0
 func _ready() -> void:
  texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+ if get_meta("depth_shadow",false):return
  add_to_group("wonderland_ornaments")
  if kind == "fountain":
   var blend := ShaderMaterial.new()
@@ -180,8 +182,11 @@ func _draw() -> void:
   "clock":
    tile(RPG,Vector2i(26,8),Vector2(-16,-64),2)
    tile(ONEBIT,Vector2i(19,14),Vector2(-8,-50))
-  "flowerpot":tile(INDOOR,Vector2i(16,0),Vector2(-16,-32),2)
-  "window":tile(RPG,Vector2i(40,4),Vector2(-16,-32),2)
+  "flowerpot":tile(INDOOR,Vector2i(16,0),Vector2(-8,-16))
+  "window":
+   # Modular upper/lower human-drawn frames omit repeated middle panes.
+   draw_texture_rect_region(WINDOWS,Rect2(-16,-64,32,32),Rect2(variant%4*32,16,32,32))
+   draw_texture_rect_region(WINDOWS,Rect2(-16,-32,32,32),Rect2(variant%4*32,88,32,32))
   "rug":panel(RPG,Vector2i(10,16),Vector2i(9,4),Vector2(-72,-32))
   "banner":patch(RPG,Vector2i(50,3),Vector2i(1,3),Vector2(-8,-48),1,accent.lightened(.3))
   "throne":
@@ -195,7 +200,7 @@ func _draw() -> void:
    var zoom := 1.0 if kind == "interior_door" else 1.5
    patch(DUNGEON,Vector2i(21 if kind in ["arch","interior_door"] else 24,10),Vector2i(3,3),Vector2(-24*zoom,-48*zoom),zoom,Color("#f6bada") if kind != "castle_gate" else Color.WHITE)
   "bridge_rail":tile(RPG,Vector2i(47,24),Vector2(-8,-8))
-  "lantern":draw_texture_rect_region(OUTDOOR_LIGHT,Rect2(-8,-80,16,80),Rect2(0,0,16,80))
+  "lantern":draw_texture_rect_region(OUTDOOR_LIGHT,Rect2(-16,-80,32,80),Rect2(0,4,32,80))
   "grass_tuft":draw_texture_rect_region(DETAILS,Rect2(-8,-12,16,16),Rect2((absi(variant)%4)*64,128,64,64))
   "stones":tile(RPG,Vector2i(44,10),Vector2(-8,-8))
   "key":tile(ONEBIT,Vector2i(33,11),Vector2(-16,-16),2,Color("#f58fc7"))

@@ -1,0 +1,74 @@
+{
+	"bakery": {
+		"floor_cells_64px": 88,
+		"rooms": 3
+	},
+	"banquet_hall": {
+		"floor_cells_64px": 96,
+		"rooms": 2
+	},
+	"castle_hall": {
+		"floor_cells_64px": 118,
+		"rooms": 2
+	},
+	"clockmakers_house": {
+		"floor_cells_64px": 72,
+		"rooms": 3
+	},
+	"flower_shop": {
+		"floor_cells_64px": 82,
+		"rooms": 2
+	},
+	"mushroom_cottage": {
+		"floor_cells_64px": 70,
+		"rooms": 2
+	},
+	"mushroom_thicket": {
+		"canopies_repositioned": 42,
+		"path_quarters": 3624
+	},
+	"queens_castle": {
+		"canopies_repositioned": 20,
+		"path_quarters": 2608
+	},
+	"royal_gift_shop": {
+		"floor_cells_64px": 68,
+		"rooms": 2
+	},
+	"royal_library": {
+		"floor_cells_64px": 96,
+		"rooms": 2
+	},
+	"royal_woods": {
+		"canopies_repositioned": 64,
+		"path_quarters": 4872
+	},
+	"storytellers_cottage": {
+		"floor_cells_64px": 67,
+		"rooms": 2
+	},
+	"tea_gardens": {
+		"canopies_repositioned": 33,
+		"path_quarters": 3436
+	},
+	"teapot_house": {
+		"floor_cells_64px": 81,
+		"rooms": 4
+	},
+	"throne_room": {
+		"floor_cells_64px": 88,
+		"rooms": 2
+	},
+	"tiny_pink_house": {
+		"floor_cells_64px": 36,
+		"rooms": 2
+	},
+	"wonderland_forest": {
+		"canopies_repositioned": 37,
+		"path_quarters": 3352
+	},
+	"wonderland_village": {
+		"canopies_repositioned": 52,
+		"path_quarters": 6248
+	}
+}

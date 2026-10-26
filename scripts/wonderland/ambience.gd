@@ -92,7 +92,9 @@ func _process(delta:float) -> void:
  for clock_art in clocks:
   if not get_viewport_rect().grow(100).has_point(get_canvas_transform()*clock_art.global_position):continue
   var frame:int=int(clock*2*motion+clock_art.position.x*.017)%3
-  clock_art.texture.region=Rect2(frame*32,0,32,96)
+  var frame_rect:Rect2=clock_art.texture.region
+  frame_rect.position.x=frame*32+fposmod(frame_rect.position.x,32)
+  clock_art.texture.region=frame_rect
  for sign in signs:
   if is_instance_valid(sign) and get_viewport_rect().grow(100).has_point(get_canvas_transform()*sign.global_position):sign.rotation=sin(clock*.75+sign.global_position.x*.01)*.014*motion
  for node in ornaments:
