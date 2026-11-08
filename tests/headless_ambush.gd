@@ -8,8 +8,12 @@ var arrival_save:Dictionary
 var capture:=false
 var phases:Dictionary={}
 var captured:Dictionary={}
+var stayed_put:=true
+var walked_clear:=true
+var smoki_separation:=INF
+var starting_point:=Vector2.ZERO
 func _initialize() -> void:
-	capture=DisplayServer.get_name()!="headless"
+	capture=OS.get_cmdline_user_args().has("--capture") and DisplayServer.get_name()!="headless"
 	create_timer(160).timeout.connect(func():push_error("AMBUSH TIMEOUT");quit(1))
 	run.call_deferred()
 func check(ok: bool, message: String) -> void:
@@ -27,14 +31,25 @@ func screenshot(label: String) -> void:
 func drive(sequence: Node) -> void:
 	while is_instance_valid(sequence):
 		var phase:String=sequence.phase
+		if phase in ["surround","taunt","rescue"]:
+			stayed_put=stayed_put and sequence.world.player.global_position.is_equal_approx(starting_point)
+			for enemy in sequence.enemies:
+				walked_clear=walked_clear and sequence.navigation.clear(enemy.position)
+			if is_instance_valid(sequence.smoki):
+				walked_clear=walked_clear and sequence.navigation.clear(sequence.smoki.position)
+				for enemy in sequence.enemies:smoki_separation=minf(smoki_separation,sequence.smoki.position.distance_to(enemy.position))
 		if not phases.has(phase):
 			phases[phase]=true
+			print("AMBUSH PHASE ",phase)
 			if phase=="taunt":
 				check(sequence.enemies.size()==8,"All eight actors present")
 				check(sequence.smoki==null,"Smoki absent before rescue")
+				for i in 8:
+					check(sequence.enemies[i].position.distance_to(sequence.formation[i])<2,"Cat reaches its obstacle-aware ring position")
+					check(sequence.enemies[i].distance_walked>50,"Cat uses locomotion rather than appearing in place")
 				check(sequence.music.playing,"Song plays during taunt")
 				check(sequence.music.stream.data==load(Sequence.SONG).data,"Approved soundtrack")
-				for enemy in sequence.enemies:check(enemy is Sprite2D and enemy.get_child_count()==0,"Visual-only enemy cannot attack")
+				for enemy in sequence.enemies:check(enemy is Sprite2D and enemy.get_child_count()==1 and enemy.get_child(0) is Sprite2D,"Visual-only enemy cannot attack")
 			if phase=="forest_landed":
 				check(sequence.landed==8,"Eight enemies land without combat")
 				for enemy in sequence.enemies:
@@ -66,17 +81,29 @@ func drive(sequence: Node) -> void:
 				await screenshot(phase)
 		if is_instance_valid(sequence) and is_instance_valid(sequence.world) and sequence.world.dialogue.active:click()
 		await create_timer(.16).timeout
+func settle_navigation() -> void:
+	if current_scene.encounters!=null:
+		while not current_scene.encounters.navigation.ready:await process_frame
+	await physics_frame;await physics_frame
 func run() -> void:
 	session=root.get_node("Session")
 	Sequence=load("res://scripts/story/ambush.gd")
 	await session.new_game()
+	await settle_navigation()
 	await session.travel("flooded_forest","FromBart")
+	await settle_navigation()
 	check(current_scene.map.get_node_or_null("AmbushTrap")==null,"Trap gated before Doppelcat")
 	session.story_flags["boss2_defeated"]=true
 	await session.travel("flooded_forest","FromBart")
+	await settle_navigation()
 	var trap=current_scene.map.get_node("AmbushTrap")
 	check(trap.get_child_count()==6,"Coin plus five arrows")
-	current_scene.player.position=trap.position+Vector2(0,85)
+	var offset:=Vector2(0,85)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--offset="):
+			var xy=arg.trim_prefix("--offset=").split(",");offset=Vector2(float(xy[0]),float(xy[1]))
+	current_scene.player.position=trap.position+offset
+	starting_point=current_scene.player.global_position
 	await physics_frame;await physics_frame
 	var query:=PhysicsShapeQueryParameters2D.new()
 	query.shape=current_scene.player.get_node("CollisionShape2D").shape
@@ -95,6 +122,10 @@ func run() -> void:
 	check(sequence.spoken.size()==1,"Held-key echo cannot skip narration")
 	check(not session.saves.read_slot(1).story_flags.wonderland_arrived,"Pre-arrival save retains replayable state")
 	await drive(sequence)
+	check(stayed_put,"Player stays at actual interaction position until portal departure")
+	check(walked_clear,"Walking actors stay on collision-free ground")
+	check(smoki_separation>=43.9,"Smoki never walks through an ambush cat")
+	print("MOVEMENT origin=",starting_point," minimum Smoki separation=",smoki_separation)
 	check(session.story_flags.get("wonderland_intro_completed",false),"Introduction completes")
 	check(not session.busy and not session.story_sequence_active,"Controls unlocked")
 	check(current_scene.player.visible and not current_scene.player.movement_locked,"Actual player restored")
@@ -130,4 +161,8 @@ func run() -> void:
 	var migrated=session.saves.validate(legacy)
 	check(migrated.area=="wonderland_forest" and migrated.story_flags.wonderland_intro_completed,"Legacy Wonderland location retained")
 	print("AMBUSH: %d checks, %d failures"%[checks,failures])
-	quit(1 if failures else 0)
+	query=null
+	if current_scene.encounters!=null:
+		while not current_scene.encounters.navigation.ready:await process_frame
+	await create_timer(.15).timeout
+	quit.call_deferred(1 if failures else 0)

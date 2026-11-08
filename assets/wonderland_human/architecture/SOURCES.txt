@@ -1,0 +1,4 @@
+LPC Revised — Lanea Zimmerman (Sharm), Eliza Wyatt (DeathsDarling). OGA-BY 3.0.
+https://github.com/ElizaWy/LPC/tree/f07f7f5892e67c932c68f70bb04472f2c64e46bc/Structure
+Original bytes; source paths: Doors/32x48px Doors/12 Panel Door A.png; Doorframe A.png; Doors/64x64px Arched Doors/Arched Double Doors A.png; Arched Doorway A.png; Walls/Brick Wall A.png; Roofing/Brick Chimney A.png.
+Sheet attribution: Door-Credits.txt; ../rebuild/Walls-Credits.txt and Roofing-Credits.txt. Full collection notice: ../rebuild/Credits.txt. The artist-owned collection explicitly describes hand-drawn artwork.

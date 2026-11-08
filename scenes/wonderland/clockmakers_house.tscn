@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/wonderland/ornament.gd" id="4_8bgyh"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/tiles.png" id="4_xom2r"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/rebuild/wallpaper.png" id="5_1l161"]
+[ext_resource type="Shader" path="res://shaders/wonderland_wall_depth.gdshader" id="5_17rps"]
 [ext_resource type="Script" path="res://scripts/wonderland/ambience.gd" id="5_s7occ"]
 [ext_resource type="Script" path="res://scripts/wonderland/environment_prop.gd" id="6_1l161"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/paneling.png" id="6_17rps"]
@@ -35,6 +36,9 @@ texture_region_size = Vector2i(32, 32)
 [sub_resource type="TileSet" id="TileSet_g750c"]
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_17rps")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g750c"]
+shader = ExtResource("5_17rps")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x5uyp"]
 texture = ExtResource("4_xom2r")
@@ -87,49 +91,49 @@ texture_region_size = Vector2i(32, 32)
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_gbbi6")
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_4lebw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_17rps"]
 atlas = ExtResource("9_x5uyp")
 region = Rect2(8, 22, 80, 42)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2ybuc"]
 size = Vector2(70, 30)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_km0fp"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_g750c"]
 atlas = ExtResource("11_qirac")
 region = Rect2(3, 160, 26, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dfu7u"]
 size = Vector2(19, 13)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_unihk"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_x5uyp"]
 atlas = ExtResource("12_aw72r")
 region = Rect2(64, 140, 128, 46)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sy8r2"]
 size = Vector2(112, 24)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_0f53b"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_qirac"]
 atlas = ExtResource("13_dhihh")
 region = Rect2(32, 101, 32, 69)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4qa3w"]
 size = Vector2(22.5, 15)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ckpk3"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_aw72r"]
 atlas = ExtResource("7_lxhs5")
 region = Rect2(7, 22, 18, 71)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8uxhv"]
 size = Vector2(19, 14)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_115km"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_dhihh"]
 atlas = ExtResource("7_lxhs5")
 region = Rect2(7, 22, 18, 71)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tjt2b"]
 size = Vector2(19, 14)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_um8fm"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_cykh8"]
 atlas = ExtResource("7_lxhs5")
 region = Rect2(7, 22, 18, 71)
 
@@ -145,6 +149,7 @@ display_name = "Clockmaker's House"
 map_size = Vector2(1280, 960)
 metadata/camera_bounds = Rect2(0, 0, 1280, 960)
 metadata/wonderland_environment_v2 = true
+metadata/architecture_refined = true
 
 [node name="Entries" type="Node2D" parent="." unique_id=1547593316]
 
@@ -175,9 +180,9 @@ tile_map_data = PackedByteArray("AAAFAAQAAAABAAEAAAAGAAQAAAABAAEAAAAHAAQAAAABAAE
 tile_set = SubResource("TileSet_g750c")
 
 [node name="RoomWalls" type="TileMapLayer" parent="." unique_id=1770372419]
-modulate = Color(0.2901961, 0.20784314, 0.27450982, 1)
 z_index = -7
 texture_filter = 1
+material = SubResource("ShaderMaterial_g750c")
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAAAAAAAAACAAIAAAABAAAAAAACAAIAAAACAAAAAAACAAIAAAADAAAAAAACAAIAAAAEAAAAAAACAAIAAAAFAAAAAAACAAIAAAAGAAAAAAACAAIAAAAHAAAAAAACAAIAAAAIAAAAAAACAAIAAAAJAAAAAAACAAIAAAAKAAAAAAACAAIAAAALAAAAAAACAAIAAAAMAAAAAAACAAIAAAANAAAAAAACAAIAAAAOAAAAAAACAAIAAAAPAAAAAAACAAIAAAAQAAAAAAACAAIAAAARAAAAAAACAAIAAAASAAAAAAACAAIAAAATAAAAAAACAAIAAAAAAAEAAAACAAIAAAABAAEAAAACAAIAAAACAAEAAAACAAIAAAADAAEAAAACAAIAAAAEAAEAAAACAAIAAAAFAAEAAAACAAIAAAAGAAEAAAACAAIAAAAHAAEAAAACAAIAAAAIAAEAAAACAAIAAAAJAAEAAAACAAIAAAAKAAEAAAACAAIAAAALAAEAAAACAAIAAAAMAAEAAAACAAIAAAANAAEAAAACAAIAAAAOAAEAAAACAAIAAAAPAAEAAAACAAIAAAAQAAEAAAACAAIAAAARAAEAAAACAAIAAAASAAEAAAACAAIAAAATAAEAAAACAAIAAAAAAAIAAAACAAIAAAABAAIAAAACAAIAAAACAAIAAAACAAIAAAADAAIAAAACAAIAAAAEAAIAAAACAAIAAAAFAAIAAAACAAIAAAAGAAIAAAACAAIAAAAHAAIAAAACAAIAAAAIAAIAAAACAAIAAAAJAAIAAAACAAIAAAAKAAIAAAACAAIAAAALAAIAAAACAAIAAAAMAAIAAAACAAIAAAANAAIAAAACAAIAAAAOAAIAAAACAAIAAAAPAAIAAAACAAIAAAAQAAIAAAACAAIAAAARAAIAAAACAAIAAAASAAIAAAACAAIAAAATAAIAAAACAAIAAAAAAAMAAAACAAIAAAABAAMAAAACAAIAAAACAAMAAAACAAIAAAADAAMAAAACAAIAAAAEAAMAAAACAAIAAAAFAAMAAAACAAIAAAAGAAMAAAACAAIAAAAHAAMAAAACAAIAAAAIAAMAAAACAAIAAAAJAAMAAAACAAIAAAAKAAMAAAACAAIAAAALAAMAAAACAAIAAAAMAAMAAAACAAIAAAANAAMAAAACAAIAAAAOAAMAAAACAAIAAAAPAAMAAAACAAIAAAAQAAMAAAACAAIAAAARAAMAAAACAAIAAAASAAMAAAACAAIAAAATAAMAAAACAAIAAAAAAAQAAAACAAIAAAABAAQAAAACAAIAAAACAAQAAAACAAIAAAADAAQAAAACAAIAAAAEAAQAAAACAAIAAAAJAAQAAAACAAIAAAAKAAQAAAACAAIAAAALAAQAAAACAAIAAAAMAAQAAAACAAIAAAANAAQAAAACAAIAAAAOAAQAAAACAAIAAAAPAAQAAAACAAIAAAAQAAQAAAACAAIAAAARAAQAAAACAAIAAAASAAQAAAACAAIAAAATAAQAAAACAAIAAAAAAAUAAAACAAIAAAABAAUAAAACAAIAAAACAAUAAAACAAIAAAADAAUAAAACAAIAAAAEAAUAAAACAAIAAAAJAAUAAAACAAIAAAAKAAUAAAACAAIAAAALAAUAAAACAAIAAAAMAAUAAAACAAIAAAAPAAUAAAACAAIAAAAQAAUAAAACAAIAAAARAAUAAAACAAIAAAASAAUAAAACAAIAAAATAAUAAAACAAIAAAAAAAYAAAACAAIAAAABAAYAAAACAAIAAAACAAYAAAACAAIAAAADAAYAAAACAAIAAAAEAAYAAAACAAIAAAAPAAYAAAACAAIAAAAQAAYAAAACAAIAAAARAAYAAAACAAIAAAASAAYAAAACAAIAAAATAAYAAAACAAIAAAAAAAcAAAACAAIAAAABAAcAAAACAAIAAAACAAcAAAACAAIAAAADAAcAAAACAAIAAAAEAAcAAAACAAIAAAAPAAcAAAACAAIAAAAQAAcAAAACAAIAAAARAAcAAAACAAIAAAASAAcAAAACAAIAAAATAAcAAAACAAIAAAAAAAgAAAACAAIAAAABAAgAAAACAAIAAAACAAgAAAACAAIAAAADAAgAAAACAAIAAAAEAAgAAAACAAIAAAAPAAgAAAACAAIAAAAQAAgAAAACAAIAAAARAAgAAAACAAIAAAASAAgAAAACAAIAAAATAAgAAAACAAIAAAAAAAkAAAACAAIAAAABAAkAAAACAAIAAAACAAkAAAACAAIAAAADAAkAAAACAAIAAAAEAAkAAAACAAIAAAAPAAkAAAACAAIAAAAQAAkAAAACAAIAAAARAAkAAAACAAIAAAASAAkAAAACAAIAAAATAAkAAAACAAIAAAAAAAoAAAACAAIAAAABAAoAAAACAAIAAAACAAoAAAACAAIAAAADAAoAAAACAAIAAAAEAAoAAAACAAIAAAAPAAoAAAACAAIAAAAQAAoAAAACAAIAAAARAAoAAAACAAIAAAASAAoAAAACAAIAAAATAAoAAAACAAIAAAAAAAsAAAACAAIAAAABAAsAAAACAAIAAAACAAsAAAACAAIAAAADAAsAAAACAAIAAAAEAAsAAAACAAIAAAAPAAsAAAACAAIAAAAQAAsAAAACAAIAAAARAAsAAAACAAIAAAASAAsAAAACAAIAAAATAAsAAAACAAIAAAAAAAwAAAACAAIAAAABAAwAAAACAAIAAAACAAwAAAACAAIAAAADAAwAAAACAAIAAAAEAAwAAAACAAIAAAAFAAwAAAACAAIAAAAGAAwAAAACAAIAAAAHAAwAAAACAAIAAAAIAAwAAAACAAIAAAALAAwAAAACAAIAAAAMAAwAAAACAAIAAAANAAwAAAACAAIAAAAOAAwAAAACAAIAAAAPAAwAAAACAAIAAAAQAAwAAAACAAIAAAARAAwAAAACAAIAAAASAAwAAAACAAIAAAATAAwAAAACAAIAAAAAAA0AAAACAAIAAAABAA0AAAACAAIAAAACAA0AAAACAAIAAAADAA0AAAACAAIAAAAEAA0AAAACAAIAAAAFAA0AAAACAAIAAAAGAA0AAAACAAIAAAAHAA0AAAACAAIAAAAIAA0AAAACAAIAAAAJAA0AAAACAAIAAAAKAA0AAAACAAIAAAALAA0AAAACAAIAAAAMAA0AAAACAAIAAAANAA0AAAACAAIAAAAOAA0AAAACAAIAAAAPAA0AAAACAAIAAAAQAA0AAAACAAIAAAARAA0AAAACAAIAAAASAA0AAAACAAIAAAATAA0AAAACAAIAAAAAAA4AAAACAAIAAAABAA4AAAACAAIAAAACAA4AAAACAAIAAAADAA4AAAACAAIAAAAEAA4AAAACAAIAAAAFAA4AAAACAAIAAAAGAA4AAAACAAIAAAAHAA4AAAACAAIAAAAIAA4AAAACAAIAAAAJAA4AAAACAAIAAAAKAA4AAAACAAIAAAALAA4AAAACAAIAAAAMAA4AAAACAAIAAAANAA4AAAACAAIAAAAOAA4AAAACAAIAAAAPAA4AAAACAAIAAAAQAA4AAAACAAIAAAARAA4AAAACAAIAAAASAA4AAAACAAIAAAATAA4AAAACAAIAAAA=")
 tile_set = SubResource("TileSet_qirac")
@@ -210,7 +215,7 @@ tile_set = SubResource("TileSet_f54ai")
 [node name="Worktable8" type="Sprite2D" parent="." unique_id=693503828]
 position = Vector2(475, 550)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_4lebw")
+texture = SubResource("AtlasTexture_17rps")
 offset = Vector2(0, -21)
 script = ExtResource("6_1l161")
 kind = "worktable"
@@ -225,7 +230,7 @@ shape = SubResource("RectangleShape2D_2ybuc")
 [node name="Chair9" type="Sprite2D" parent="." unique_id=1953548160]
 position = Vector2(470, 630)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_km0fp")
+texture = SubResource("AtlasTexture_g750c")
 offset = Vector2(0, -16)
 script = ExtResource("6_1l161")
 kind = "chair"
@@ -241,7 +246,7 @@ shape = SubResource("RectangleShape2D_dfu7u")
 [node name="Shopcounter10" type="Sprite2D" parent="." unique_id=1692167038]
 position = Vector2(800, 500)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_unihk")
+texture = SubResource("AtlasTexture_x5uyp")
 offset = Vector2(0, -23)
 script = ExtResource("6_1l161")
 kind = "shopcounter"
@@ -256,7 +261,7 @@ shape = SubResource("RectangleShape2D_sy8r2")
 [node name="Shelf11" type="Sprite2D" parent="." unique_id=377715930]
 position = Vector2(920, 700)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_0f53b")
+texture = SubResource("AtlasTexture_qirac")
 offset = Vector2(0, -34.5)
 script = ExtResource("6_1l161")
 kind = "shelf"
@@ -272,7 +277,7 @@ shape = SubResource("RectangleShape2D_4qa3w")
 [node name="Clock12" type="Sprite2D" parent="." unique_id=959803253]
 position = Vector2(370, 370)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_ckpk3")
+texture = SubResource("AtlasTexture_aw72r")
 offset = Vector2(0, -35.5)
 script = ExtResource("6_1l161")
 kind = "clock"
@@ -287,7 +292,7 @@ shape = SubResource("RectangleShape2D_8uxhv")
 [node name="Clock13" type="Sprite2D" parent="." unique_id=292078071]
 position = Vector2(530, 370)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_115km")
+texture = SubResource("AtlasTexture_dhihh")
 offset = Vector2(0, -35.5)
 script = ExtResource("6_1l161")
 kind = "clock"
@@ -302,7 +307,7 @@ shape = SubResource("RectangleShape2D_tjt2b")
 [node name="Clock14" type="Sprite2D" parent="." unique_id=2078900911]
 position = Vector2(885, 405)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_um8fm")
+texture = SubResource("AtlasTexture_cykh8")
 offset = Vector2(0, -35.5)
 script = ExtResource("6_1l161")
 kind = "clock"

@@ -22,6 +22,12 @@ extends Node2D
  set(value):
   visual_offset = value
   queue_redraw()
+const DOORS=preload("res://assets/wonderland_human/architecture/doors.png")
+const FRAMES=preload("res://assets/wonderland_human/architecture/doorframes.png")
+const BRICKS=preload("res://assets/wonderland_human/architecture/brick.png")
+const CHIMNEY=preload("res://assets/wonderland_human/architecture/chimney.png")
+const CASTLE_DOORS=preload("res://assets/wonderland_human/architecture/castle_doors.png")
+const CASTLE_FRAMES=preload("res://assets/wonderland_human/architecture/castle_frames.png")
 const WINDOWS=preload("res://assets/wonderland_human/cohesion/windows.png")
 const ORNATE_TABLE=preload("res://assets/wonderland_human/rebuild/ornate_table.png")
 const OUTDOOR_LIGHT=preload("res://assets/wonderland_human/rebuild/lighting.png")
@@ -77,53 +83,87 @@ func table(width: int,tea := true) -> void:
 func masonry(size: Vector2i,point: Vector2,tint := Color.WHITE) -> void:
  for y in size.y:
   for x in size.x:tile(RPG,Vector2i(7,2),point+Vector2(x,y)*16,1,tint)
-func roof(rows: int,base: Vector2,tint: Color) -> void:
- # Matched human-drawn left/right slopes and opaque interior tiles.
+func roof_panel(rect:Rect2,palette:int) -> void:
+ # One complete artist-authored hipped-roof module: ridge, side slopes and eave.
+ # Repeat its interior; retain all original corner/edge pixels at native scale.
+ var origin:=Vector2(24+480*(palette/3),160*(palette%3))
+ var border:=16.0
+ for y in range(0,int(rect.size.y),16):
+  for x in range(0,int(rect.size.x),16):
+   var sx:=0 if x==0 else (96 if x>=rect.size.x-border else 16+posmod(x-16,80))
+   var sy:=0 if y==0 else (88 if y>=rect.size.y-border else 16+posmod(y-16,64))
+   draw_texture_rect_region(SHINGLES,Rect2(rect.position+Vector2(x,y),Vector2(16,16)),Rect2(origin+Vector2(sx,sy),Vector2(16,16)))
+func gabled_roof(width:int,base:Vector2,palette:int) -> void:
+ # Stepped gables use the matching LPC diagonal faces, never unrelated flat triangles.
+ var colors:=Vector2(480*(palette/3),160*(palette%3))
+ var rows:=maxi(3,width/32)
  for y in rows:
-  var left: Vector2 = base+Vector2(-(y+1)*16,-(rows-y)*16)
-  tile(RPG,Vector2i(27,21),left,1,tint)
-  for x in range(1,(y+1)*2-1):draw_texture_rect_region(SHINGLES,Rect2(left+Vector2(x*16,0),Vector2(16,16)),Rect2(40+posmod(x,4)*16,16+posmod(y,4)*16,16,16),tint)
-  tile(RPG,Vector2i(28,21),left+Vector2(((y+1)*2-1)*16,0),1,tint)
+  var point:=base+Vector2(-(y+1)*16,-(rows-y)*16)
+  draw_texture_rect_region(SHINGLES,Rect2(point,Vector2(16,16)),Rect2(colors+Vector2(224,16),Vector2(16,16)))
+  for x in range(1,(y+1)*2-1):
+   draw_texture_rect_region(SHINGLES,Rect2(point+Vector2(x*16,0),Vector2(16,16)),Rect2(colors+Vector2(40+posmod(x,5)*16,16+posmod(y,4)*16),Vector2(16,16)))
+  draw_texture_rect_region(SHINGLES,Rect2(point+Vector2(((y+1)*2-1)*16,0),Vector2(16,16)),Rect2(colors+Vector2(304,16),Vector2(16,16)))
+ # Continuous artist-drawn eave across the facade under the pitched face.
+ for x in range(-width/2+16,width/2-16,16):
+  draw_texture_rect_region(SHINGLES,Rect2(base+Vector2(x,-4),Vector2(16,8)),Rect2(colors+Vector2(40+posmod(x,5)*16,96),Vector2(16,8)))
+func siding(rect:Rect2,palette:int) -> void:
+ for y in range(0,int(rect.size.y),16):
+  for x in range(0,int(rect.size.x),16):
+   var sx:=0 if x==0 else (144 if x+16>=rect.size.x else 16+posmod(x,128))
+   var sy:=0 if y==0 else (80 if y+16>=rect.size.y else 16+posmod(y,64))
+   draw_texture_rect_region(SIDING,Rect2(rect.position+Vector2(x,y),Vector2(16,16)),Rect2(palette*160+sx,sy,16,16))
+func doorway(point:Vector2,palette:=0,opened:=false,royal:=false) -> void:
+ if royal:
+  # Preserve native pixels; remove only the frame's repeatable central span.
+  draw_texture_rect_region(CASTLE_DOORS,Rect2(point+Vector2(-32,-64),Vector2(64,64)),Rect2(0,32,64,64),Color(.08,.06,.12) if opened else Color.WHITE)
+  draw_texture_rect_region(CASTLE_FRAMES,Rect2(point+Vector2(-37,-70),Vector2(37,70)),Rect2(27,26,37,70))
+  draw_texture_rect_region(CASTLE_FRAMES,Rect2(point+Vector2(0,-70),Vector2(37,70)),Rect2(96,26,37,70))
+ else:
+  draw_texture_rect_region(DOORS,Rect2(point+Vector2(-16,-48),Vector2(32,48)),Rect2(224,(palette%8)*96+16,32,48),Color(.08,.06,.12) if opened else Color.WHITE)
+  draw_texture_rect_region(FRAMES,Rect2(point+Vector2(-24,-56),Vector2(48,56)),Rect2(24,8,48,56))
+func facade_window(point:Vector2,palette:=2) -> void:
+ draw_texture_rect_region(WINDOWS,Rect2(point+Vector2(-16,-48),Vector2(32,32)),Rect2(palette*32,16,32,32))
+ draw_texture_rect_region(WINDOWS,Rect2(point+Vector2(-16,-16),Vector2(32,16)),Rect2(palette*32,104,32,16))
 func furniture_shelf(books := true) -> void:
  for y in range(3):
   for x in range(4):tile(RPG,Vector2i(41+x%3,12 if books else 13),Vector2(-32+x*16,-48+y*16))
 func house(style := "house") -> void:
- var width := maxi(4,roundi(footprint.x/16))
- var height := maxi(3,roundi(footprint.y/16)-width/2-1)
- var left := roundf(visual_offset.x-width*8)
- var top := -height*16.0
- for y in height:
-  for x in width:draw_texture_rect_region(SIDING,Rect2(left+x*16,top+y*16,16,16),Rect2(640+16+posmod(x,7)*16,posmod(y,5)*16,16,16),Color("#fff1d9"))
- roof(width/2+1,Vector2(visual_offset.x,top),accent.lightened(.2))
- for x in range(width):tile(RPG,Vector2i(39,8),Vector2(left+x*16,top+2),1,Color("#e0c2a8"))
- tile(RPG,Vector2i(27,5),Vector2(left+16,top-32))
- tile(RPG,Vector2i(41,24),Vector2(left+8,-25))
- tile(RPG,Vector2i(41,24),Vector2(left+width*16-24,-25))
- for x in [left,left+width*16-32]:
-  if absf(x+16)>30:tile(RPG,Vector2i(40,4),Vector2(x,-48),2)
- tile(RPG,Vector2i(32,0),Vector2(-16,-32),2)
- if style == "teapot_house":tile(RPG,Vector2i(55,15),Vector2(visual_offset.x-24,top-48),3)
- if style == "clock_house":
-  tile(RPG,Vector2i(26,8),Vector2(visual_offset.x-16,top-40),2)
-  tile(ONEBIT,Vector2i(19,14),Vector2(visual_offset.x-8,top-26))
- if style == "mushroom_house":
-  for x in [left+4,left+width*16-36]:tile(RPG,Vector2i(48,4),Vector2(x,top-16),2)
- if style == "pink_house":
-  for x in [left+16,left+width*16-32]:tile(RPG,Vector2i(41,24),Vector2(x,-29))
+ var width:=maxi(96,roundi(footprint.x/32)*32)
+ var left:=snappedf(visual_offset.x-width*.5,2)
+ var wall_height:=80.0
+ var palette:int={"teapot_house":6,"clock_house":2,"mushroom_house":9,"pink_house":9}.get(style,[0,5,7,3][absi(variant)%4])
+ var roof_color:int={"teapot_house":0,"clock_house":3,"mushroom_house":5,"pink_house":1}.get(style,absi(variant)%6)
+ siding(Rect2(left,-wall_height,width,wall_height),palette)
+ # Asymmetric secondary roof/porch uses the same shaded material and pixel density.
+ gabled_roof(width+32,Vector2(left+width*.5,-wall_height+8),roof_color)
+ draw_texture_rect_region(CHIMNEY,Rect2(left+width-36,-wall_height-80,32,64),Rect2(0,0,32,64))
+ for x in [left+16,left+width-16]:
+  if absf(x)>=30:facade_window(Vector2(x,-15))
+ doorway(Vector2.ZERO,roof_color)
+ if width>=128:roof_panel(Rect2(-32,-72,64,32),roof_color)
+ if style=="teapot_house":tile(RPG,Vector2i(55,15),Vector2(-12,-116),1.5)
+ if style=="clock_house":
+  tile(ONEBIT,Vector2i(19,14),Vector2(-8,-126))
+ if style=="mushroom_house":
+  for x in [left+8,left+width-24]:tile(RPG,Vector2i(48,4),Vector2(x,-12))
+func brick_wall(rect:Rect2) -> void:
+ for y in range(0,int(rect.size.y),32):
+  for x in range(0,int(rect.size.x),32):
+   var uv:=Vector2(0 if x==0 else (64 if x+32>=rect.size.x else 32),0 if y==0 else (64 if y+32>=rect.size.y else 32))
+   draw_texture_rect_region(BRICKS,Rect2(rect.position+Vector2(x,y),Vector2(32,32)),Rect2(uv,Vector2(32,32)),Color("#ffe4ef"))
 func castle() -> void:
- masonry(Vector2i(23,10),Vector2(-184,-176),Color("#ffe2f0"))
- for x in range(-11,12):tile(RPG,Vector2i(16,14),Vector2(x*16-8,-192))
+ # Three joined wings, stepped roof heights and two flanking towers.
+ brick_wall(Rect2(-176,-144,352,128))
+ roof_panel(Rect2(-192,-192,384,64),1)
  for side in [-1,1]:
-  var x: float = side*152-24
-  masonry(Vector2i(3,12),Vector2(x,-208),Color("#ffe0ed"))
-  roof(2,Vector2(x+24,-208),Color("#ed9cce"))
-  for y in [-184,-136,-88]:tile(RPG,Vector2i(40,4),Vector2(x+8,y),2)
-  tile(RPG,Vector2i(53,0),Vector2(x+24,-248),1,Color("#f9b3df"))
- masonry(Vector2i(9,11),Vector2(-72,-192),Color("#ffe8f2"))
- roof(5,Vector2(0,-192),Color("#f3b2db"))
- for x in [-128,-64,32,96]:tile(RPG,Vector2i(40,4),Vector2(x,-144),2)
- tile(RPG,Vector2i(45,0),Vector2(-16,-188),2)
- for x in [-99,83]:patch(RPG,Vector2i(50,3),Vector2i(1,3),Vector2(x,-96),1,Color("#facde6"))
+  var x:float=side*144-32
+  brick_wall(Rect2(x,-224,64,224))
+  gabled_roof(96,Vector2(x+32,-216),1)
+  for y in [-160,-72]:facade_window(Vector2(x+32,y),1)
+ brick_wall(Rect2(-80,-192,160,192))
+ gabled_roof(192,Vector2(0,-184),1)
+ for x in [-48,48]:facade_window(Vector2(x,-112),1)
+ for x in [-100,84]:patch(RPG,Vector2i(50,3),Vector2i(1,3),Vector2(x,-100),1,Color("#facde6"))
 func _draw() -> void:
  match kind:
   "tree":
@@ -175,9 +215,7 @@ func _draw() -> void:
    for x in [-40,-8,24]:tile(RPG,Vector2i(28 if kind == "workbench" else 25,7),Vector2(x,-39))
   "bookcase":furniture_shelf()
   "bread_rack","kitchen_shelf":
-   furniture_shelf(false)
-   for x in [-24,0,24]:
-    for y in [-47,-29,-12]:tile(RPG,Vector2i(55,13) if kind == "bread_rack" else Vector2i(56,16),Vector2(x,y))
+   draw_texture_rect_region(preload("res://assets/wonderland_human/rebuild/cabinet.png"),Rect2(-16,-80,32,80),Rect2(32,96,32,80))
   "oven":tile(INDOOR,Vector2i(14,14),Vector2(-24,-48),3)
   "clock":
    tile(RPG,Vector2i(26,8),Vector2(-16,-64),2)
@@ -196,7 +234,11 @@ func _draw() -> void:
    tile(RPG,Vector2i(15,0),Vector2(-16,-64),2)
    tile(RPG,Vector2i(15,0),Vector2(-8,-67),1)
   "castle":castle()
-  "pink_door","castle_gate","arch","interior_door":
+  "castle_gate":doorway(Vector2.ZERO,0,false,true)
+  "castle_arch":doorway(Vector2.ZERO,0,true,true)
+  "woodland_arch":draw_texture_rect_region(CASTLE_FRAMES,Rect2(-53,-70,106,70),Rect2(27,26,106,70))
+  "interior_door":doorway(Vector2.ZERO,0,true)
+  "pink_door","arch":
    var zoom := 1.0 if kind == "interior_door" else 1.5
    patch(DUNGEON,Vector2i(21 if kind in ["arch","interior_door"] else 24,10),Vector2i(3,3),Vector2(-24*zoom,-48*zoom),zoom,Color("#f6bada") if kind != "castle_gate" else Color.WHITE)
   "bridge_rail":tile(RPG,Vector2i(47,24),Vector2(-8,-8))

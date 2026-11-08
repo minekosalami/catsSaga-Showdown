@@ -43,7 +43,8 @@ func inspect_region(id:String) -> void:
    times.sort()
    performance[id]={"median_frame_ms":times[75],"p95_frame_ms":times[142],"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"nodes":Performance.get_monitor(Performance.OBJECT_NODE_COUNT)}
 func run() -> void:
- capture=DisplayServer.get_name()!="headless";DirAccess.make_dir_recursive_absolute(output)
+ capture=OS.get_cmdline_user_args().has("--capture") and DisplayServer.get_name()!="headless"
+ if capture:DirAccess.make_dir_recursive_absolute(output)
  if capture:DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
  root.size=Vector2i(1280,720);session=root.get_node("Session")
  session.story_flags["wonderland_arrived"]=true;session.story_flags["wonderland_intro_completed"]=true
@@ -55,12 +56,24 @@ func run() -> void:
  await physics_frame;await physics_frame
  await create_timer(.8).timeout
  check(session.curtain.material!=null,"Storybook wipe active during physical seam crossing")
+ check(session.curtain.get_node("StorybookRegion").text=="Tea Gardens","Forward wipe uses actual destination name")
+ check(not session.curtain.material.get_shader_parameter("reverse"),"Forward page direction")
  await screenshot("storybook-transition")
  await settle()
  check(session.area_id=="tea_gardens","Area2D crossing enters Tea Gardens")
  check(music.player.get_instance_id()==music_id and music.player.get_playback_position()>music_pos,"Continuous soundtrack across storybook transition")
  check(not session.curtain.visible and session.curtain.material==null,"Transition cleans up")
- if OS.get_cmdline_user_args().has("--transition-only"):quit(1 if failures else 0);return
+ var back=current_scene.map.get_node("Portals/To_wonderland_forest")
+ current_scene.player.position=back.position
+ await physics_frame;await physics_frame;await create_timer(.5).timeout
+ check(session.curtain.get_node("StorybookRegion").text=="Wonderland Forest","Backtracking wipe uses actual destination name")
+ check(session.curtain.material.get_shader_parameter("reverse"),"Backtracking reverses the page direction")
+ await settle()
+ check(session.area_id=="wonderland_forest","Physical reverse crossing returns to correct region")
+ if OS.get_cmdline_user_args().has("--transition-only"):
+  print("WONDERLAND TRANSITIONS: ",checks," checks, ",failures," failures")
+  await create_timer(.2).timeout
+  quit.call_deferred(1 if failures else 0);return
  for id in Layout.regions():
   var map=load("res://scenes/wonderland/"+id+".tscn").instantiate()
   var marker:String=map.get_node("Entries").get_child(0).name;map.free()
@@ -84,7 +97,8 @@ func run() -> void:
    gate.handle_interaction(current_scene)
    check(not gate.open_now(),"Interaction does not invent unlock")
  if OS.get_cmdline_user_args().has("--visual-only"):
-  var file:=FileAccess.open(output.path_join("performance.json"),FileAccess.WRITE);file.store_string(JSON.stringify(performance,"\t"))
+  if capture:
+   var file:=FileAccess.open(output.path_join("performance.json"),FileAccess.WRITE);file.store_string(JSON.stringify(performance,"\t"))
   print("WONDERLAND VISUAL: ",checks," checks, ",failures," failures");quit(1 if failures else 0);return
  # Saved positions inside new scenery must migrate safely using the existing loader.
  var old=session.snapshot("teapot_house",Vector2(100,100))
@@ -104,6 +118,8 @@ func run() -> void:
  await create_timer(1.6).timeout
  check(amb.audio_fade==0.0,"Ambience mute fades positional layer")
  if capture:
-  var file:=FileAccess.open(output.path_join("performance.json"),FileAccess.WRITE);file.store_string(JSON.stringify(performance,"\t"))
+  if capture:
+   var file:=FileAccess.open(output.path_join("performance.json"),FileAccess.WRITE);file.store_string(JSON.stringify(performance,"\t"))
  print("WONDERLAND LIVE: ",checks," checks, ",failures," failures")
- quit(1 if failures else 0)
+ await create_timer(.15).timeout
+ quit.call_deferred(1 if failures else 0)

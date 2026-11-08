@@ -1,7 +1,8 @@
 extends RefCounted
 ## Region names only. Existing licensed font; no illustrations or story text.
-static func begin(curtain:ColorRect,name:String) -> ShaderMaterial:
+static func begin(curtain:ColorRect,name:String,reverse:=false) -> ShaderMaterial:
  var material:=ShaderMaterial.new();material.shader=preload("res://shaders/wonderland_page.gdshader")
+ material.set_shader_parameter("reverse",reverse)
  curtain.material=material;curtain.modulate=Color.WHITE
  var label:=curtain.get_node_or_null("StorybookRegion") as Label
  if label==null:

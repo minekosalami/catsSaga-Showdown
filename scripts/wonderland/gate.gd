@@ -30,7 +30,7 @@ func _process(_delta: float) -> void:
 	barrier.set_deferred("disabled",opened)
 	if opened != last_open:
 		last_open = opened
-		ornament.kind = "arch" if opened else ("pink_door" if kind == "pink" else "castle_gate")
+		ornament.kind = ("arch" if kind == "pink" else "castle_arch") if opened else ("pink_door" if kind == "pink" else "castle_gate")
 		ornament.queue_redraw()
 func handle_interaction(_world: Node) -> bool:
 	if kind == "pink" and not Session.story_flags.get(Plan.DOOR_OPEN,false) and Session.story_flags.get(Plan.PINK_KEY,false):
