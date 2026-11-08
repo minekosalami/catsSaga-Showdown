@@ -179,10 +179,12 @@ func travel(destination: String, marker: String, cave_motion: bool = false) -> v
 		return
 	var wonderland := preload("res://scripts/wonderland/layout.gd").regions()
 	var storybook: bool = wonderland.has(area_id) and wonderland.has(destination) and not story_sequence_active
+	var route: Array = preload("res://scripts/wonderland/layout.gd").ROUTE
+	var page_reverse: bool = route.has(area_id) and route.has(destination) and route.find(destination)<route.find(area_id)
 	area_id = destination
 	entry_marker = marker
 	restore_position = false
-	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion, storybook):
+	if await transition_to("res://scenes/world/overworld.tscn", false, true, cave_motion, storybook, page_reverse):
 		if destination == "underground_cave":
 			story_flags["underground_cave_discovered"] = true
 		schedule_progress_save()
@@ -260,7 +262,7 @@ func main_menu() -> void:
 	encounter_active = false
 	await transition_to("res://scenes/main_menu.tscn")
 
-func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false, storybook: bool = false) -> bool:
+func transition_to(scene_path: String, white_wipe: bool = false, region_travel: bool = false, cave_motion: bool = false, storybook: bool = false, page_reverse: bool = false) -> bool:
 	if scene_path.begins_with("res://scenes/incarna/") or scene_path.begins_with("res://scenes/wonderland/") or scene_path=="res://scenes/world/underground_cave.tscn": return false
 	if busy:
 		return false
@@ -295,7 +297,7 @@ func transition_to(scene_path: String, white_wipe: bool = false, region_travel: 
 	curtain.show()
 	var page: ShaderMaterial
 	if storybook:
-		page = preload("res://scripts/wonderland/storybook_transition.gd").begin(curtain, preload("res://scripts/wonderland/layout.gd").regions()[area_id].name)
+		page = preload("res://scripts/wonderland/storybook_transition.gd").begin(curtain, preload("res://scripts/wonderland/layout.gd").regions()[area_id].name, page_reverse)
 	fade = create_tween()
 	if storybook:
 		fade.tween_method(func(value: float): page.set_shader_parameter("coverage", value), 0.0, 1.0, fade_duration).set_trans(Tween.TRANS_SINE)

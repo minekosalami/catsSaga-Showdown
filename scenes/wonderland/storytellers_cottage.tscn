@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/wonderland/ornament.gd" id="4_ombad"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/tiles.png" id="4_uxlq5"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/rebuild/wallpaper.png" id="5_55sy0"]
+[ext_resource type="Shader" path="res://shaders/wonderland_wall_depth.gdshader" id="5_e6wky"]
 [ext_resource type="Script" path="res://scripts/wonderland/ambience.gd" id="5_kmpw1"]
 [ext_resource type="Script" path="res://scripts/wonderland/environment_prop.gd" id="6_55sy0"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/paneling.png" id="6_e6wky"]
@@ -36,6 +37,9 @@ texture_region_size = Vector2i(32, 32)
 [sub_resource type="TileSet" id="TileSet_2icsx"]
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_e6wky")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2icsx"]
+shader = ExtResource("5_e6wky")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kij5v"]
 texture = ExtResource("4_uxlq5")
@@ -91,58 +95,58 @@ texture_region_size = Vector2i(32, 32)
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_8mcq1")
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_he65h"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_e6wky"]
 atlas = ExtResource("9_kij5v")
 region = Rect2(134, 0, 52, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oprv2"]
 size = Vector2(50, 22.5)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_05o4k"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2icsx"]
 atlas = ExtResource("11_u4pvc")
 region = Rect2(8, 22, 80, 42)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0a6b5"]
 size = Vector2(70, 25)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_bpfdw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_kij5v"]
 atlas = ExtResource("12_ama53")
 region = Rect2(3, 64, 26, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e3atw"]
 size = Vector2(19, 13)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_a67rq"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_u4pvc"]
 atlas = ExtResource("10_55sy0")
 region = Rect2(1, 16, 94, 72)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6fi8w"]
 size = Vector2(50, 22.5)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_f50e8"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ama53"]
 atlas = ExtResource("7_3sse4")
 region = Rect2(96, 101, 32, 69)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oyjld"]
 size = Vector2(24, 15)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_cw43u"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_fj3pm"]
 atlas = ExtResource("7_3sse4")
 region = Rect2(96, 101, 32, 69)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_064pn"]
 size = Vector2(24, 15)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hcekf"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_3j7ns"]
 atlas = ExtResource("7_3sse4")
 region = Rect2(96, 101, 32, 69)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rfgqj"]
 size = Vector2(24, 15)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_kmvxe"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_nch8w"]
 atlas = ExtResource("15_fj3pm")
-region = Rect2(14, 3, 37, 28)
+region = Rect2(13, 33, 39, 31)
 
 [node name="StorytellersCottage" type="Node2D" unique_id=1856306874]
 y_sort_enabled = true
@@ -153,6 +157,7 @@ display_name = "Storyteller's Cottage"
 map_size = Vector2(1280, 960)
 metadata/camera_bounds = Rect2(0, 0, 1280, 960)
 metadata/wonderland_environment_v2 = true
+metadata/architecture_refined = true
 
 [node name="Entries" type="Node2D" parent="." unique_id=946177212]
 
@@ -183,9 +188,9 @@ tile_map_data = PackedByteArray("AAAEAAUAAAABAAIAAAAFAAUAAAABAAIAAAAGAAUAAAABAAI
 tile_set = SubResource("TileSet_2icsx")
 
 [node name="RoomWalls" type="TileMapLayer" parent="." unique_id=2092984808]
-modulate = Color(0.2901961, 0.20784314, 0.27450982, 1)
 z_index = -7
 texture_filter = 1
+material = SubResource("ShaderMaterial_2icsx")
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAAAAAAAAACAAIAAAABAAAAAAACAAIAAAACAAAAAAACAAIAAAADAAAAAAACAAIAAAAEAAAAAAACAAIAAAAFAAAAAAACAAIAAAAGAAAAAAACAAIAAAAHAAAAAAACAAIAAAAIAAAAAAACAAIAAAAJAAAAAAACAAIAAAAKAAAAAAACAAIAAAALAAAAAAACAAIAAAAMAAAAAAACAAIAAAANAAAAAAACAAIAAAAOAAAAAAACAAIAAAAPAAAAAAACAAIAAAAQAAAAAAACAAIAAAARAAAAAAACAAIAAAASAAAAAAACAAIAAAATAAAAAAACAAIAAAAAAAEAAAACAAIAAAABAAEAAAACAAIAAAACAAEAAAACAAIAAAADAAEAAAACAAIAAAAEAAEAAAACAAIAAAAFAAEAAAACAAIAAAAGAAEAAAACAAIAAAAHAAEAAAACAAIAAAAIAAEAAAACAAIAAAAJAAEAAAACAAIAAAAKAAEAAAACAAIAAAALAAEAAAACAAIAAAAMAAEAAAACAAIAAAANAAEAAAACAAIAAAAOAAEAAAACAAIAAAAPAAEAAAACAAIAAAAQAAEAAAACAAIAAAARAAEAAAACAAIAAAASAAEAAAACAAIAAAATAAEAAAACAAIAAAAAAAIAAAACAAIAAAABAAIAAAACAAIAAAACAAIAAAACAAIAAAADAAIAAAACAAIAAAAEAAIAAAACAAIAAAAFAAIAAAACAAIAAAAGAAIAAAACAAIAAAAHAAIAAAACAAIAAAAIAAIAAAACAAIAAAAJAAIAAAACAAIAAAAKAAIAAAACAAIAAAALAAIAAAACAAIAAAAMAAIAAAACAAIAAAANAAIAAAACAAIAAAAOAAIAAAACAAIAAAAPAAIAAAACAAIAAAAQAAIAAAACAAIAAAARAAIAAAACAAIAAAASAAIAAAACAAIAAAATAAIAAAACAAIAAAAAAAMAAAACAAIAAAABAAMAAAACAAIAAAACAAMAAAACAAIAAAADAAMAAAACAAIAAAAEAAMAAAACAAIAAAAFAAMAAAACAAIAAAAGAAMAAAACAAIAAAAHAAMAAAACAAIAAAAIAAMAAAACAAIAAAAJAAMAAAACAAIAAAAKAAMAAAACAAIAAAALAAMAAAACAAIAAAAMAAMAAAACAAIAAAANAAMAAAACAAIAAAAOAAMAAAACAAIAAAAPAAMAAAACAAIAAAAQAAMAAAACAAIAAAARAAMAAAACAAIAAAASAAMAAAACAAIAAAATAAMAAAACAAIAAAAAAAQAAAACAAIAAAABAAQAAAACAAIAAAACAAQAAAACAAIAAAADAAQAAAACAAIAAAAEAAQAAAACAAIAAAAFAAQAAAACAAIAAAAGAAQAAAACAAIAAAAHAAQAAAACAAIAAAAIAAQAAAACAAIAAAAJAAQAAAACAAIAAAAKAAQAAAACAAIAAAALAAQAAAACAAIAAAAMAAQAAAACAAIAAAANAAQAAAACAAIAAAAOAAQAAAACAAIAAAAPAAQAAAACAAIAAAAQAAQAAAACAAIAAAARAAQAAAACAAIAAAASAAQAAAACAAIAAAATAAQAAAACAAIAAAAAAAUAAAACAAIAAAABAAUAAAACAAIAAAACAAUAAAACAAIAAAADAAUAAAACAAIAAAAHAAUAAAACAAIAAAAIAAUAAAACAAIAAAAJAAUAAAACAAIAAAAKAAUAAAACAAIAAAALAAUAAAACAAIAAAAMAAUAAAACAAIAAAANAAUAAAACAAIAAAAOAAUAAAACAAIAAAAPAAUAAAACAAIAAAAQAAUAAAACAAIAAAARAAUAAAACAAIAAAASAAUAAAACAAIAAAATAAUAAAACAAIAAAAAAAYAAAACAAIAAAABAAYAAAACAAIAAAACAAYAAAACAAIAAAADAAYAAAACAAIAAAAPAAYAAAACAAIAAAAQAAYAAAACAAIAAAARAAYAAAACAAIAAAASAAYAAAACAAIAAAATAAYAAAACAAIAAAAAAAcAAAACAAIAAAABAAcAAAACAAIAAAACAAcAAAACAAIAAAADAAcAAAACAAIAAAAPAAcAAAACAAIAAAAQAAcAAAACAAIAAAARAAcAAAACAAIAAAASAAcAAAACAAIAAAATAAcAAAACAAIAAAAAAAgAAAACAAIAAAABAAgAAAACAAIAAAACAAgAAAACAAIAAAADAAgAAAACAAIAAAAEAAgAAAACAAIAAAAPAAgAAAACAAIAAAAQAAgAAAACAAIAAAARAAgAAAACAAIAAAASAAgAAAACAAIAAAATAAgAAAACAAIAAAAAAAkAAAACAAIAAAABAAkAAAACAAIAAAACAAkAAAACAAIAAAADAAkAAAACAAIAAAAEAAkAAAACAAIAAAAPAAkAAAACAAIAAAAQAAkAAAACAAIAAAARAAkAAAACAAIAAAASAAkAAAACAAIAAAATAAkAAAACAAIAAAAAAAoAAAACAAIAAAABAAoAAAACAAIAAAACAAoAAAACAAIAAAADAAoAAAACAAIAAAAEAAoAAAACAAIAAAAPAAoAAAACAAIAAAAQAAoAAAACAAIAAAARAAoAAAACAAIAAAASAAoAAAACAAIAAAATAAoAAAACAAIAAAAAAAsAAAACAAIAAAABAAsAAAACAAIAAAACAAsAAAACAAIAAAADAAsAAAACAAIAAAAEAAsAAAACAAIAAAAPAAsAAAACAAIAAAAQAAsAAAACAAIAAAARAAsAAAACAAIAAAASAAsAAAACAAIAAAATAAsAAAACAAIAAAAAAAwAAAACAAIAAAABAAwAAAACAAIAAAACAAwAAAACAAIAAAADAAwAAAACAAIAAAAEAAwAAAACAAIAAAAFAAwAAAACAAIAAAAGAAwAAAACAAIAAAAHAAwAAAACAAIAAAAIAAwAAAACAAIAAAALAAwAAAACAAIAAAAMAAwAAAACAAIAAAANAAwAAAACAAIAAAAOAAwAAAACAAIAAAAPAAwAAAACAAIAAAAQAAwAAAACAAIAAAARAAwAAAACAAIAAAASAAwAAAACAAIAAAATAAwAAAACAAIAAAAAAA0AAAACAAIAAAABAA0AAAACAAIAAAACAA0AAAACAAIAAAADAA0AAAACAAIAAAAEAA0AAAACAAIAAAAFAA0AAAACAAIAAAAGAA0AAAACAAIAAAAHAA0AAAACAAIAAAAIAA0AAAACAAIAAAAJAA0AAAACAAIAAAAKAA0AAAACAAIAAAALAA0AAAACAAIAAAAMAA0AAAACAAIAAAANAA0AAAACAAIAAAAOAA0AAAACAAIAAAAPAA0AAAACAAIAAAAQAA0AAAACAAIAAAARAA0AAAACAAIAAAASAA0AAAACAAIAAAATAA0AAAACAAIAAAAAAA4AAAACAAIAAAABAA4AAAACAAIAAAACAA4AAAACAAIAAAADAA4AAAACAAIAAAAEAA4AAAACAAIAAAAFAA4AAAACAAIAAAAGAA4AAAACAAIAAAAHAA4AAAACAAIAAAAIAA4AAAACAAIAAAAJAA4AAAACAAIAAAAKAA4AAAACAAIAAAALAA4AAAACAAIAAAAMAA4AAAACAAIAAAANAA4AAAACAAIAAAAOAA4AAAACAAIAAAAPAA4AAAACAAIAAAAQAA4AAAACAAIAAAARAA4AAAACAAIAAAASAA4AAAACAAIAAAATAA4AAAACAAIAAAA=")
 tile_set = SubResource("TileSet_u4pvc")
@@ -216,9 +221,9 @@ tile_map_data = PackedByteArray("AAAHAAgAAAAdAAAAAAAIAAgAAAAeAAAAAAAJAAgAAAAeAAA
 tile_set = SubResource("TileSet_jf20r")
 
 [node name="Sofa8" type="Sprite2D" parent="." unique_id=669357746]
-position = Vector2(775, 455)
+position = Vector2(660, 450)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_he65h")
+texture = SubResource("AtlasTexture_e6wky")
 offset = Vector2(0, -16)
 script = ExtResource("6_55sy0")
 kind = "sofa"
@@ -234,7 +239,7 @@ shape = SubResource("RectangleShape2D_oprv2")
 [node name="Worktable9" type="Sprite2D" parent="." unique_id=2014808771]
 position = Vector2(715, 620)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_05o4k")
+texture = SubResource("AtlasTexture_2icsx")
 offset = Vector2(0, -21)
 script = ExtResource("6_55sy0")
 kind = "worktable"
@@ -249,7 +254,7 @@ shape = SubResource("RectangleShape2D_0a6b5")
 [node name="Chair10" type="Sprite2D" parent="." unique_id=976427198]
 position = Vector2(805, 680)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_bpfdw")
+texture = SubResource("AtlasTexture_kij5v")
 offset = Vector2(0, -16)
 script = ExtResource("6_55sy0")
 kind = "chair"
@@ -263,9 +268,9 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_e3atw")
 
 [node name="Fireplace11" type="Sprite2D" parent="." unique_id=1382249164]
-position = Vector2(850, 520)
+position = Vector2(850, 405)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_a67rq")
+texture = SubResource("AtlasTexture_u4pvc")
 offset = Vector2(0, -36)
 script = ExtResource("6_55sy0")
 kind = "fireplace"
@@ -280,7 +285,7 @@ shape = SubResource("RectangleShape2D_6fi8w")
 [node name="Shelf12" type="Sprite2D" parent="." unique_id=406359261]
 position = Vector2(300, 410)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_f50e8")
+texture = SubResource("AtlasTexture_ama53")
 offset = Vector2(0, -34.5)
 script = ExtResource("6_55sy0")
 kind = "shelf"
@@ -296,7 +301,7 @@ shape = SubResource("RectangleShape2D_oyjld")
 [node name="Shelf13" type="Sprite2D" parent="." unique_id=1576238540]
 position = Vector2(390, 410)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_cw43u")
+texture = SubResource("AtlasTexture_fj3pm")
 offset = Vector2(0, -34.5)
 script = ExtResource("6_55sy0")
 kind = "shelf"
@@ -312,7 +317,7 @@ shape = SubResource("RectangleShape2D_064pn")
 [node name="Shelf14" type="Sprite2D" parent="." unique_id=1530316823]
 position = Vector2(490, 460)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_hcekf")
+texture = SubResource("AtlasTexture_3j7ns")
 offset = Vector2(0, -34.5)
 script = ExtResource("6_55sy0")
 kind = "shelf"
@@ -326,12 +331,14 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_rfgqj")
 
 [node name="Painting15" type="Sprite2D" parent="." unique_id=2137321406]
+z_index = -3
 position = Vector2(620, 370)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_kmvxe")
-offset = Vector2(0.5, -14)
+texture = SubResource("AtlasTexture_nch8w")
+offset = Vector2(0.5, -15.5)
 script = ExtResource("6_55sy0")
 kind = "painting"
+variant = 2
 
 [node name="Window16" type="Node2D" parent="." unique_id=1485953585]
 z_index = -3

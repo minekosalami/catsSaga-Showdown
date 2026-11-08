@@ -11,7 +11,7 @@ func install() -> void:
  material.set_shader_parameter("opacity",.15 if not get_parent().get_node("WonderlandAmbience").indoor else .12)
  var props=get_tree().get_nodes_in_group("wonderland_environment_props")+get_tree().get_nodes_in_group("wonderland_ornaments")
  for art in props:
-  if not get_parent().is_ancestor_of(art) or art.get_meta("depth_shadow",false):continue
+  if not get_parent().is_ancestor_of(art) or art.get_meta("depth_shadow",false) or art.get_meta("tabletop",false):continue
   if art is Sprite2D and art.kind in ["tree","mushroom"]:trees.append(art)
   if art.kind in ["flowers","rug","window","leaf_litter","wall_background","wall"]:continue
   var shadow:Node2D

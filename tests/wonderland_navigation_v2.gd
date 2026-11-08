@@ -12,12 +12,13 @@ func clear(map:Node2D,point:Vector2,probe:PhysicsShapeQueryParameters2D) -> bool
  probe.transform=Transform2D(0,point)
  return map.is_walkable_position(point) and map.get_world_2d().direct_space_state.intersect_shape(probe,1).is_empty()
 func capture(name:String,point:Vector2) -> void:
- if DisplayServer.get_name()=="headless":return
+ if DisplayServer.get_name()=="headless" or not OS.get_cmdline_user_args().has("--capture"):return
  var camera:Camera2D=current_scene.player.get_node("Camera2D");camera.global_position=point;camera.force_update_scroll()
  await process_frame;await RenderingServer.frame_post_draw
  root.get_texture().get_image().save_png(output.path_join(name+".png"))
 func run() -> void:
- DirAccess.make_dir_recursive_absolute(output);root.size=Vector2i(1280,720)
+ root.size=Vector2i(1280,720)
+ if OS.get_cmdline_user_args().has("--capture"):DirAccess.make_dir_recursive_absolute(output)
  var session=root.get_node("Session");session.story_flags["wonderland_arrived"]=true;session.story_flags["wonderland_intro_completed"]=true
  for id in Layout.regions():
   var packed=load("res://scenes/wonderland/"+id+".tscn");var temp=packed.instantiate();var entry:String=temp.get_node("Entries").get_child(0).name;temp.free()

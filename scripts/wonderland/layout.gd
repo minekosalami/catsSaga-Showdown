@@ -6,8 +6,9 @@ const OUTDOORS := {
 	"mushroom_thicket":{"name":"Mushroom Thicket","offset":Vector2i(320,240),"size":Vector2i(160,120)},
 	"royal_woods":{"name":"Royal Woods","offset":Vector2i(0,120),"size":Vector2i(240,120)},
 	"wonderland_village":{"name":"Wonderland Village","offset":Vector2i(240,120),"size":Vector2i(240,120)},
-	"queens_castle":{"name":"Queen's Castle Grounds","offset":Vector2i(160,0),"size":Vector2i(160,120)}
+	"queens_castle":{"name":"Queen's Castle Grounds","offset":Vector2i(480,240),"size":Vector2i(160,120)}
 }
+const ROUTE := ["wonderland_forest","tea_gardens","royal_woods","wonderland_village","mushroom_thicket","queens_castle"]
 const BUILDINGS := [
 	{"id":"mushroom_cottage","name":"Mushroom Cottage","kind":"mushroom_house","point":Vector2(640,640),"color":Color("#ed647c")},
 	{"id":"teapot_house","name":"Teapot House","kind":"teapot_house","point":Vector2(1472,480),"color":Color("#62d5dc")},
@@ -27,12 +28,10 @@ const CASTLE_ROOMS := {
 ## Links use opposite edge normals and equal world-space seam coordinates.
 const LINKS := [
 	["wonderland_forest","west",1000,"tea_gardens","east",1000],
-	["wonderland_forest","east",1000,"mushroom_thicket","west",1000],
 	["tea_gardens","north",1280,"royal_woods","south",1280],
 	["mushroom_thicket","north",1280,"wonderland_village","south",2560],
-	["royal_woods","north",3200,"queens_castle","south",640],
-	["wonderland_village","north",640,"queens_castle","south",1920],
 	["royal_woods","east",1000,"wonderland_village","west",1000],
+	["mushroom_thicket","east",1000,"queens_castle","west",1000],
 	["castle_hall","west",480,"royal_library","east",480],
 	["castle_hall","east",480,"banquet_hall","west",480],
 	["castle_hall","north",640,"throne_room","south",640]
@@ -57,7 +56,7 @@ static func group(id: String) -> String:
 	return id
 
 static func extent(id: String) -> Vector2i:
-	if OUTDOORS.has(id): return Vector2i(480,360)
+	if OUTDOORS.has(id): return Vector2i(640,360)
 	if CASTLE_ROOMS.has(id): return Vector2i(240,120)
 	return Vector2i(80,60)
 

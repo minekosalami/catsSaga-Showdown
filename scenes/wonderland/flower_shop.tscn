@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/paneling.png" id="5_br4sy"]
 [ext_resource type="Script" path="res://scripts/wonderland/ambience.gd" id="5_f4pap"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/rebuild/wallpaper.png" id="5_ff71u"]
+[ext_resource type="Shader" path="res://shaders/wonderland_wall_depth.gdshader" id="5_fp7pg"]
 [ext_resource type="Script" path="res://scripts/wonderland/environment_prop.gd" id="6_ff71u"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/carpet.png" id="7_fp7pg"]
 [ext_resource type="Texture2D" path="res://assets/wonderland_human/cohesion/counter.png" id="8_ji3me"]
@@ -32,6 +33,9 @@ texture_region_size = Vector2i(32, 32)
 [sub_resource type="TileSet" id="TileSet_ji3me"]
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_fp7pg")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ji3me"]
+shader = ExtResource("5_fp7pg")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6v7s4"]
 texture = ExtResource("3_fr2fr")
@@ -84,14 +88,14 @@ texture_region_size = Vector2i(32, 32)
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_t4hox")
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_fvlei"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_fp7pg"]
 atlas = ExtResource("8_ji3me")
 region = Rect2(64, 140, 128, 46)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x1i61"]
 size = Vector2(112, 22.5)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_svokv"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ji3me"]
 atlas = ExtResource("10_6v7s4")
 region = Rect2(32, 5, 32, 69)
 
@@ -101,39 +105,39 @@ size = Vector2(24, 17)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nafwq"]
 size = Vector2(15, 12)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_g8ixl"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_6v7s4"]
 atlas = ExtResource("9_85iev")
 region = Rect2(96, 32, 32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uvsde"]
 size = Vector2(15, 12)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7kifw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_mvh04"]
 atlas = ExtResource("9_85iev")
 region = Rect2(128, 32, 32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_luxo7"]
 size = Vector2(15, 12)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7giek"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_rx84w"]
 atlas = ExtResource("9_85iev")
 region = Rect2(96, 32, 32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pgspe"]
 size = Vector2(15, 12)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_oxwjf"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_wafpa"]
 atlas = ExtResource("9_85iev")
 region = Rect2(96, 32, 32, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e64dy"]
 size = Vector2(15, 12)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_edxjk"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2v4t5"]
 atlas = ExtResource("9_85iev")
 region = Rect2(96, 32, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_2an5n"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_osbag"]
 atlas = ExtResource("13_mvh04")
 region = Rect2(8, 86, 80, 42)
 
@@ -149,6 +153,7 @@ display_name = "Flower Shop"
 map_size = Vector2(1280, 960)
 metadata/camera_bounds = Rect2(0, 0, 1280, 960)
 metadata/wonderland_environment_v2 = true
+metadata/architecture_refined = true
 
 [node name="Entries" type="Node2D" parent="." unique_id=986870096]
 
@@ -179,9 +184,9 @@ tile_map_data = PackedByteArray("AAAFAAQAAAABAAAAAAAGAAQAAAABAAAAAAAHAAQAAAABAAA
 tile_set = SubResource("TileSet_ji3me")
 
 [node name="RoomWalls" type="TileMapLayer" parent="." unique_id=209862705]
-modulate = Color(0.2901961, 0.20784314, 0.27450982, 1)
 z_index = -7
 texture_filter = 1
+material = SubResource("ShaderMaterial_ji3me")
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAAAAAAAAACAAIAAAABAAAAAAACAAIAAAACAAAAAAACAAIAAAADAAAAAAACAAIAAAAEAAAAAAACAAIAAAAFAAAAAAACAAIAAAAGAAAAAAACAAIAAAAHAAAAAAACAAIAAAAIAAAAAAACAAIAAAAJAAAAAAACAAIAAAAKAAAAAAACAAIAAAALAAAAAAACAAIAAAAMAAAAAAACAAIAAAANAAAAAAACAAIAAAAOAAAAAAACAAIAAAAPAAAAAAACAAIAAAAQAAAAAAACAAIAAAARAAAAAAACAAIAAAASAAAAAAACAAIAAAATAAAAAAACAAIAAAAAAAEAAAACAAIAAAABAAEAAAACAAIAAAACAAEAAAACAAIAAAADAAEAAAACAAIAAAAEAAEAAAACAAIAAAAFAAEAAAACAAIAAAAGAAEAAAACAAIAAAAHAAEAAAACAAIAAAAIAAEAAAACAAIAAAAJAAEAAAACAAIAAAAKAAEAAAACAAIAAAALAAEAAAACAAIAAAAMAAEAAAACAAIAAAANAAEAAAACAAIAAAAOAAEAAAACAAIAAAAPAAEAAAACAAIAAAAQAAEAAAACAAIAAAARAAEAAAACAAIAAAASAAEAAAACAAIAAAATAAEAAAACAAIAAAAAAAIAAAACAAIAAAABAAIAAAACAAIAAAACAAIAAAACAAIAAAADAAIAAAACAAIAAAAEAAIAAAACAAIAAAAFAAIAAAACAAIAAAAGAAIAAAACAAIAAAAHAAIAAAACAAIAAAAIAAIAAAACAAIAAAAJAAIAAAACAAIAAAAKAAIAAAACAAIAAAALAAIAAAACAAIAAAAMAAIAAAACAAIAAAANAAIAAAACAAIAAAAOAAIAAAACAAIAAAAPAAIAAAACAAIAAAAQAAIAAAACAAIAAAARAAIAAAACAAIAAAASAAIAAAACAAIAAAATAAIAAAACAAIAAAAAAAMAAAACAAIAAAABAAMAAAACAAIAAAACAAMAAAACAAIAAAADAAMAAAACAAIAAAAEAAMAAAACAAIAAAAFAAMAAAACAAIAAAAGAAMAAAACAAIAAAAHAAMAAAACAAIAAAAIAAMAAAACAAIAAAAJAAMAAAACAAIAAAAKAAMAAAACAAIAAAALAAMAAAACAAIAAAAMAAMAAAACAAIAAAANAAMAAAACAAIAAAAOAAMAAAACAAIAAAAPAAMAAAACAAIAAAAQAAMAAAACAAIAAAARAAMAAAACAAIAAAASAAMAAAACAAIAAAATAAMAAAACAAIAAAAAAAQAAAACAAIAAAABAAQAAAACAAIAAAACAAQAAAACAAIAAAADAAQAAAACAAIAAAAEAAQAAAACAAIAAAAJAAQAAAACAAIAAAAKAAQAAAACAAIAAAALAAQAAAACAAIAAAAMAAQAAAACAAIAAAANAAQAAAACAAIAAAAOAAQAAAACAAIAAAAPAAQAAAACAAIAAAAQAAQAAAACAAIAAAARAAQAAAACAAIAAAASAAQAAAACAAIAAAATAAQAAAACAAIAAAAAAAUAAAACAAIAAAABAAUAAAACAAIAAAACAAUAAAACAAIAAAADAAUAAAACAAIAAAAEAAUAAAACAAIAAAAJAAUAAAACAAIAAAAKAAUAAAACAAIAAAALAAUAAAACAAIAAAAMAAUAAAACAAIAAAANAAUAAAACAAIAAAAOAAUAAAACAAIAAAAPAAUAAAACAAIAAAAQAAUAAAACAAIAAAARAAUAAAACAAIAAAASAAUAAAACAAIAAAATAAUAAAACAAIAAAAAAAYAAAACAAIAAAABAAYAAAACAAIAAAACAAYAAAACAAIAAAADAAYAAAACAAIAAAAQAAYAAAACAAIAAAARAAYAAAACAAIAAAASAAYAAAACAAIAAAATAAYAAAACAAIAAAAAAAcAAAACAAIAAAABAAcAAAACAAIAAAACAAcAAAACAAIAAAADAAcAAAACAAIAAAAQAAcAAAACAAIAAAARAAcAAAACAAIAAAASAAcAAAACAAIAAAATAAcAAAACAAIAAAAAAAgAAAACAAIAAAABAAgAAAACAAIAAAACAAgAAAACAAIAAAADAAgAAAACAAIAAAAQAAgAAAACAAIAAAARAAgAAAACAAIAAAASAAgAAAACAAIAAAATAAgAAAACAAIAAAAAAAkAAAACAAIAAAABAAkAAAACAAIAAAACAAkAAAACAAIAAAADAAkAAAACAAIAAAAQAAkAAAACAAIAAAARAAkAAAACAAIAAAASAAkAAAACAAIAAAATAAkAAAACAAIAAAAAAAoAAAACAAIAAAABAAoAAAACAAIAAAACAAoAAAACAAIAAAADAAoAAAACAAIAAAAQAAoAAAACAAIAAAARAAoAAAACAAIAAAASAAoAAAACAAIAAAATAAoAAAACAAIAAAAAAAsAAAACAAIAAAABAAsAAAACAAIAAAACAAsAAAACAAIAAAADAAsAAAACAAIAAAAQAAsAAAACAAIAAAARAAsAAAACAAIAAAASAAsAAAACAAIAAAATAAsAAAACAAIAAAAAAAwAAAACAAIAAAABAAwAAAACAAIAAAACAAwAAAACAAIAAAADAAwAAAACAAIAAAAEAAwAAAACAAIAAAAFAAwAAAACAAIAAAAGAAwAAAACAAIAAAAHAAwAAAACAAIAAAAIAAwAAAACAAIAAAALAAwAAAACAAIAAAAMAAwAAAACAAIAAAANAAwAAAACAAIAAAAOAAwAAAACAAIAAAAPAAwAAAACAAIAAAAQAAwAAAACAAIAAAARAAwAAAACAAIAAAASAAwAAAACAAIAAAATAAwAAAACAAIAAAAAAA0AAAACAAIAAAABAA0AAAACAAIAAAACAA0AAAACAAIAAAADAA0AAAACAAIAAAAEAA0AAAACAAIAAAAFAA0AAAACAAIAAAAGAA0AAAACAAIAAAAHAA0AAAACAAIAAAAIAA0AAAACAAIAAAAJAA0AAAACAAIAAAAKAA0AAAACAAIAAAALAA0AAAACAAIAAAAMAA0AAAACAAIAAAANAA0AAAACAAIAAAAOAA0AAAACAAIAAAAPAA0AAAACAAIAAAAQAA0AAAACAAIAAAARAA0AAAACAAIAAAASAA0AAAACAAIAAAATAA0AAAACAAIAAAAAAA4AAAACAAIAAAABAA4AAAACAAIAAAACAA4AAAACAAIAAAADAA4AAAACAAIAAAAEAA4AAAACAAIAAAAFAA4AAAACAAIAAAAGAA4AAAACAAIAAAAHAA4AAAACAAIAAAAIAA4AAAACAAIAAAAJAA4AAAACAAIAAAAKAA4AAAACAAIAAAALAA4AAAACAAIAAAAMAA4AAAACAAIAAAANAA4AAAACAAIAAAAOAA4AAAACAAIAAAAPAA4AAAACAAIAAAAQAA4AAAACAAIAAAARAA4AAAACAAIAAAASAA4AAAACAAIAAAATAA4AAAACAAIAAAA=")
 tile_set = SubResource("TileSet_mvh04")
@@ -214,7 +219,7 @@ tile_set = SubResource("TileSet_r7bqv")
 [node name="Shopcounter8" type="Sprite2D" parent="." unique_id=310831968]
 position = Vector2(820, 560)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_fvlei")
+texture = SubResource("AtlasTexture_fp7pg")
 offset = Vector2(0, -23)
 script = ExtResource("6_ff71u")
 kind = "shopcounter"
@@ -229,7 +234,7 @@ shape = SubResource("RectangleShape2D_x1i61")
 [node name="Cabinet9" type="Sprite2D" parent="." unique_id=1964158127]
 position = Vector2(930, 435)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_svokv")
+texture = SubResource("AtlasTexture_ji3me")
 offset = Vector2(0, -34.5)
 script = ExtResource("6_ff71u")
 kind = "cabinet"
@@ -259,7 +264,7 @@ shape = SubResource("RectangleShape2D_nafwq")
 [node name="Flowers11" type="Sprite2D" parent="." unique_id=783545156]
 position = Vector2(350, 396)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_g8ixl")
+texture = SubResource("AtlasTexture_6v7s4")
 offset = Vector2(0, -16)
 script = ExtResource("6_ff71u")
 kind = "flowers"
@@ -282,7 +287,7 @@ shape = SubResource("RectangleShape2D_uvsde")
 [node name="Flowers13" type="Sprite2D" parent="." unique_id=1400980242]
 position = Vector2(460, 316)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_7kifw")
+texture = SubResource("AtlasTexture_mvh04")
 offset = Vector2(0, -16)
 script = ExtResource("6_ff71u")
 kind = "flowers"
@@ -305,7 +310,7 @@ shape = SubResource("RectangleShape2D_luxo7")
 [node name="Flowers15" type="Sprite2D" parent="." unique_id=228582328]
 position = Vector2(390, 586)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_7giek")
+texture = SubResource("AtlasTexture_rx84w")
 offset = Vector2(0, -16)
 script = ExtResource("6_ff71u")
 kind = "flowers"
@@ -328,7 +333,7 @@ shape = SubResource("RectangleShape2D_pgspe")
 [node name="Flowers17" type="Sprite2D" parent="." unique_id=63907964]
 position = Vector2(930, 666)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_oxwjf")
+texture = SubResource("AtlasTexture_wafpa")
 offset = Vector2(0, -16)
 script = ExtResource("6_ff71u")
 kind = "flowers"
@@ -351,7 +356,7 @@ shape = SubResource("RectangleShape2D_e64dy")
 [node name="Flowers19" type="Sprite2D" parent="." unique_id=733820413]
 position = Vector2(300, 696)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_edxjk")
+texture = SubResource("AtlasTexture_2v4t5")
 offset = Vector2(0, -16)
 script = ExtResource("6_ff71u")
 kind = "flowers"
@@ -360,7 +365,7 @@ variant = 3
 [node name="Worktable20" type="Sprite2D" parent="." unique_id=1849651832]
 position = Vector2(450, 540)
 scale = Vector2(2, 2)
-texture = SubResource("AtlasTexture_2an5n")
+texture = SubResource("AtlasTexture_osbag")
 offset = Vector2(0, -21)
 script = ExtResource("6_ff71u")
 kind = "worktable"

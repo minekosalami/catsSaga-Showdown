@@ -33,7 +33,7 @@ func refresh() -> void:
   "vanity":sheet=preload("res://assets/wonderland_human/cohesion/desk.png");region=Rect2(0,0,64,96)
   "shopcounter":sheet=preload("res://assets/wonderland_human/cohesion/counter.png");region=Rect2(64,136,128,56)
   "stove":sheet=preload("res://assets/wonderland_human/cohesion/stove.png");region=Rect2(0,0,32,64)
-  "painting":sheet=preload("res://assets/wonderland_human/cohesion/paintings.png");region=Rect2(0,0,64,32)
+  "painting":sheet=preload("res://assets/wonderland_human/cohesion/paintings.png");region=[Rect2(0,0,64,32),Rect2(64,0,64,32),Rect2(0,32,64,32),Rect2(96,32,32,32),Rect2(0,64,96,32),Rect2(0,96,96,32)][absi(variant)%6]
   "throne":sheet=preload("res://assets/wonderland_human/cohesion/thrones.png");region=Rect2(0,0,32,64)
   "rug":sheet=preload("res://assets/wonderland_human/rebuild/rug.png");region=Rect2(0,(variant%2)*32,160,32)
  var anchor_width:=region.size.x
