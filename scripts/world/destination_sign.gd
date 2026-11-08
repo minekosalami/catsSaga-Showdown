@@ -16,7 +16,6 @@ func _ready() -> void:
  art.scale = Vector2.ONE*3
  art.position.y = -22
  if Session.area_id == "underground_cave": art.modulate = Color("#c1c6d2")
- elif preload("res://scripts/wonderland/layout.gd").regions().has(Session.area_id): art.modulate = Color("#fff1eb")
  add_child(art)
 func can_interact() -> bool: return true
 func read_text() -> String:
@@ -33,7 +32,6 @@ func handle_interaction(world: Node) -> bool:
  return true
 static func install(map: Node2D) -> void:
  var names := {"entrance":"Forest Entrance","deep_forest":"Deep Forest","bart_area":"Fluffy Forest","flooded_forest":"Flooded Forest","underground_cave":"Underground Cave"}
- for id in preload("res://scripts/wonderland/layout.gd").regions(): names[id] = preload("res://scripts/wonderland/layout.gd").regions()[id].name
  var sources: Array[Node] = []
  for portal in map.get_node("Portals").get_children():
   if portal.get("destination") != null:sources.append(portal)
@@ -56,9 +54,4 @@ static func install(map: Node2D) -> void:
   var offset := Vector2(92,80 if point.y < size.y*.5 else -80) if horizontal_edge else Vector2(80 if point.x < size.x*.5 else -80,80)
   if point.x > 160 and point.x < size.x-160 and point.y > 160 and point.y < size.y-160:offset = Vector2(100,-35 if point.y > size.y*.75 else 55)
   sign.position = (point+offset).clamp(Vector2(64,72),size-Vector2(64,64))
-  var plan := preload("res://scripts/wonderland/layout.gd")
-  if plan.regions().has(Session.area_id) and not plan.OUTDOORS.has(Session.area_id):
-   if point.x < 100:sign.position = Vector2(224,point.y+64)
-   elif point.x > size.x-100:sign.position = Vector2(size.x-224,point.y+64)
-   elif point.y < 100:sign.position = Vector2(point.x+100,300)
   map.add_child(sign)

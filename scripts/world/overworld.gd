@@ -8,25 +8,7 @@ const MAPS := {
 }
 ## Recoverable source paths; inactive scenes are not initialized during play.
 const ARCHIVED_MAP_PATHS := {
-	"underground_cave": "res://scenes/world/underground_cave.tscn",
-	"wonderland_forest": "res://scenes/wonderland/wonderland_forest.tscn",
-	"tea_gardens": "res://scenes/wonderland/tea_gardens.tscn",
-	"mushroom_thicket": "res://scenes/wonderland/mushroom_thicket.tscn",
-	"royal_woods": "res://scenes/wonderland/royal_woods.tscn",
-	"wonderland_village": "res://scenes/wonderland/wonderland_village.tscn",
-	"queens_castle": "res://scenes/wonderland/queens_castle.tscn",
-	"castle_hall": "res://scenes/wonderland/castle_hall.tscn",
-	"royal_library": "res://scenes/wonderland/royal_library.tscn",
-	"banquet_hall": "res://scenes/wonderland/banquet_hall.tscn",
-	"throne_room": "res://scenes/wonderland/throne_room.tscn",
-	"mushroom_cottage": "res://scenes/wonderland/mushroom_cottage.tscn",
-	"teapot_house": "res://scenes/wonderland/teapot_house.tscn",
-	"flower_shop": "res://scenes/wonderland/flower_shop.tscn",
-	"clockmakers_house": "res://scenes/wonderland/clockmakers_house.tscn",
-	"bakery": "res://scenes/wonderland/bakery.tscn",
-	"royal_gift_shop": "res://scenes/wonderland/royal_gift_shop.tscn",
-	"storytellers_cottage": "res://scenes/wonderland/storytellers_cottage.tscn",
-	"tiny_pink_house": "res://scenes/wonderland/tiny_pink_house.tscn"
+	"underground_cave": "res://scenes/world/underground_cave.tscn"
 }
 var map: Node2D
 var player: CharacterBody2D
@@ -46,7 +28,6 @@ var coin_label: Label
 var map_ui: CanvasLayer
 
 func _ready() -> void:
-	# Restore the original Wonderland scenes; the cave remains archived.
 	if not Session.playable_area(Session.area_id):
 		Session.area_id = "flooded_forest"
 		Session.entry_marker = "Start"
@@ -98,7 +79,6 @@ func _ready() -> void:
 	map_ui.set_script(preload("res://scripts/maps/map_ui.gd"))
 	add_child(map_ui)
 	map_ui.setup(self)
-	preload("res://scripts/story/ambush.gd").install(self)
 	if preload("res://scripts/journey/layout.gd").active(Session.area_id):
 		encounters=preload("res://scripts/encounters/director.gd").new()
 		encounters.name="ForestEncounters"
@@ -157,9 +137,6 @@ func _build_hud() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = preload("res://scripts/ui/sketch_theme.gd").create()
-	if preload("res://scripts/wonderland/layout.gd").regions().has(Session.area_id):
-		root.theme.set_color("font_outline_color","Label",Color("#283340"))
-		root.theme.set_constant("outline_size","Label",4)
 	var margin := MarginContainer.new()
 	root.add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -211,7 +188,7 @@ func _refresh_currency() -> void:
 	preload("res://scripts/ui/presentation/style.gd").pop(coin_label,1.06)
 
 func _process(_delta: float) -> void:
-	player.movement_locked = Session.story_sequence_active or automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
+	player.movement_locked = automatic_encounter_pending or checking_spawn or dialogue.active or Session.busy or awaiting_victory_dialogue or Session.world_menu_open() or map_ui.typing_code()
 	nearest_npc = null
 	var closest := INF
 	for npc in get_tree().get_nodes_in_group("interactables"):

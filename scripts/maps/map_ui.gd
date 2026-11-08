@@ -30,7 +30,6 @@ func setup(host: Node2D) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 30
 	var terrain_path := "res://resources/maps/underground_terrain.res" if Session.area_id == "underground_cave" else "res://resources/maps/world_terrain.res"
-	if Layout.EXTRA.has(Session.area_id): terrain_path = "res://resources/maps/"+Layout.Wonderland.group(Session.area_id)+"_terrain.res"
 	if preload("res://scripts/journey/layout.gd").active(Session.area_id): terrain_path = "res://resources/journey/world_terrain.res"
 	var terrain: Texture2D = load(terrain_path)
 	boss_locations = terrain.get_meta("boss_locations", {})
@@ -63,7 +62,6 @@ func setup(host: Node2D) -> void:
 	paper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var title := Label.new()
 	title.text = "UNDERGROUND_MAP()" if Session.area_id == "underground_cave" else "WORLD_MAP()"
-	if Layout.EXTRA.has(Session.area_id): title.text = "WONDERLAND_MAP()" if Layout.Wonderland.OUTDOORS.has(Session.area_id) else "INTERIOR_MAP()"
 	title.position = Vector2(28,18)
 	title.add_theme_font_size_override("font_size",26)
 	map_frame.add_child(title)
@@ -201,7 +199,6 @@ func handle_input(event: InputEvent) -> bool:
 			if Session.story_progress.cat_toy:items.append("Completed cat toy")
 			if Session.story_flags.get("flooded_forest_key_obtained",false): items.append("Flooded Forest Key")
 			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get("cave_red_key_obtained",false): items.append("Red Key")
-			if not preload("res://scripts/journey/layout.gd").active(Session.area_id) and Session.story_flags.get(Layout.Wonderland.PINK_KEY,false): items.append("Pink Wonderland Key")
 			inventory_contents.text = "\n".join(items) if not items.is_empty() else "No items collected."
 			inventory.show()
 			preload("res://scripts/ui/presentation/style.gd").pop(inventory.get_child(1),1.025)
@@ -326,15 +323,6 @@ func visible_boss_markers() -> Array:
 	var cave_discovered: bool = Session.story_flags.get("underground_cave_discovered",false) or Session.exploration.region_discovered("underground_cave")
 	if cave_entrance != null and (cave_discovered or Session.reveal_all_locations):
 		markers.append({"id":"underground_cave","area":"flooded_forest","local_position":cave_entrance,"point":Layout.world_point("flooded_forest",cave_entrance),"defeated":false,"discovered":cave_discovered,"color":Color("#D9DED2") if cave_discovered else Color("#E4B765"),"label":"Underground Cave"})
-	if Layout.same_map(Session.area_id,"flooded_forest"):
-		var door: Vector2 = Layout.Wonderland.FLOODED_DOOR
-		var cell := Vector2i(door/64)
-		var found: bool = Session.exploration.visited("flooded_forest",cell)
-		if found or Session.reveal_all_locations:
-			markers.append({"id":"wonderland_door","area":"flooded_forest","local_position":door,"point":Layout.world_point("flooded_forest",door),"defeated":false,"discovered":found,"color":Color("#efa1cc"),"label":"Wonderland"})
-	if Layout.same_map(Session.area_id,"wonderland_forest") and Session.story_flags.get(Layout.Wonderland.DOOR_OPEN,false):
-		var exit := Vector2(1280,1888)
-		markers.append({"id":"wonderland_surface_exit","area":"wonderland_forest","local_position":exit,"point":Layout.world_point("wonderland_forest",exit),"defeated":false,"discovered":true,"color":Color("#efa1cc"),"label":"Flooded Forest"})
 	return markers
 
 func visible_region_markers() -> Array:

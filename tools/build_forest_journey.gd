@@ -284,7 +284,7 @@ func build(area: String) -> void:
 		if id=="flooded_forest" and i==5:
 			route(PackedVector2Array([Vector2(3630,2154),mark.position]),55)
 	marker("Start",Plan.SPAWNS[id])
-	for alias in ["FromEntrance","FromDeep","FromBart","FromFlooded","FromEntranceShortcut","FromBartShortcut","FromFloodedShortcut","FromCave","FromWonderland"]:
+	for alias in ["FromEntrance","FromDeep","FromBart","FromFlooded","FromEntranceShortcut","FromBartShortcut","FromFloodedShortcut","FromCave"]:
 		marker(alias,Vector2(width-224,Plan.SEAM_Y) if (id=="entrance" and alias=="FromDeep") or (id=="deep_forest" and alias in ["FromBart","FromFlooded"]) or (id=="bart_area" and alias=="FromFloodedShortcut") else Plan.SPAWNS[id],Vector2.LEFT if alias in ["FromBart","FromFloodedShortcut"] else Vector2.RIGHT)
 	var index := Plan.ORDER.find(id)
 	if index>0:portal("ToLeft",Vector2(64,Plan.SEAM_Y),Plan.ORDER[index-1],"FromDeep" if index==1 else ("FromBart" if index==2 else "FromFloodedShortcut"))

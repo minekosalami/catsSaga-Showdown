@@ -62,16 +62,13 @@ func run() -> void:
 			var color := average_tile(ground,cell)*ground.modulate*map.modulate
 			atlas.set_pixelv(offset+cell,color)
 		var layers := map.get_children().filter(func(node: Node): return node is TileMapLayer and node != ground)
-		var wonderland := map.get_node_or_null("WonderlandEntrance")
-		if wonderland != null:
-			layers.append_array(wonderland.get_children().filter(func(node: Node): return node is TileMapLayer))
 		layers.sort_custom(func(a: Node, b: Node): return a.z_index < b.z_index)
 		for layer in layers:
 			if layer.name == "GFXForestFloor":
 				for cell in layer.get_used_cells():
 					var current := atlas.get_pixelv(offset+cell)
 					atlas.set_pixelv(offset+cell,current.lerp(average_tile(layer,cell)*map.modulate,layer.modulate.a))
-			elif layer.name.contains("Water") or layer.name in ["Paths","WindingTrails","WonderlandSpur"]:
+			elif layer.name.contains("Water") or layer.name in ["Paths","WindingTrails"]:
 				for cell in layer.get_used_cells():
 					var color := Color("#3785a6") if layer.name.contains("Water") else average_tile(layer,cell)*map.modulate
 					atlas.set_pixelv(offset+cell,color)

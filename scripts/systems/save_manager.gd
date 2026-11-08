@@ -1,6 +1,28 @@
 extends RefCounted
 
 const VERSION := 1
+
+# Compatibility only: removed locations recover to the existing Flooded Forest spawn.
+const REMOVED_AREA_SIZES := {
+	"wonderland_forest": Vector2(2560, 1920),
+	"tea_gardens": Vector2(2560, 1920),
+	"mushroom_thicket": Vector2(2560, 1920),
+	"royal_woods": Vector2(3840, 1920),
+	"wonderland_village": Vector2(3840, 1920),
+	"queens_castle": Vector2(2560, 1920),
+	"castle_hall": Vector2(1280, 960),
+	"royal_library": Vector2(1280, 960),
+	"banquet_hall": Vector2(1280, 960),
+	"throne_room": Vector2(1280, 960),
+	"mushroom_cottage": Vector2(1280, 960),
+	"teapot_house": Vector2(1280, 960),
+	"flower_shop": Vector2(1280, 960),
+	"clockmakers_house": Vector2(1280, 960),
+	"bakery": Vector2(1280, 960),
+	"royal_gift_shop": Vector2(1280, 960),
+	"storytellers_cottage": Vector2(1280, 960),
+	"tiny_pink_house": Vector2(1280, 960),
+}
 const AREA_SIZES := {"entrance": Vector2(3200, 1824), "deep_forest": Vector2(5120, 2880), "bart_area": Vector2(3200, 1824), "flooded_forest": Vector2(4096, 3072), "underground_cave": Vector2(preload("res://scripts/world/cave_layout.gd").SIZE*32)}
 var save_path: String = "user://save.json"
 var last_error: String = ""
@@ -13,8 +35,7 @@ func validate(value: Variant) -> Dictionary:
 	var area: Variant = value.get("area")
 	var position: Variant = value.get("position")
 	var area_sizes := AREA_SIZES.duplicate()
-	var extra_areas: Dictionary = preload("res://scripts/wonderland/layout.gd").regions()
-	for id in extra_areas: area_sizes[id] = Vector2(extra_areas[id].size)*16
+	area_sizes.merge(REMOVED_AREA_SIZES)
 	if not area is String or not area_sizes.has(area) or not position is Array or position.size() != 2:
 		return {}
 	for coordinate in position:
@@ -75,25 +96,19 @@ func validate(value: Variant) -> Dictionary:
 	for flag in ["flooded_forest_unlocked", "boss2_defeated"]:
 		if not flags.has(flag):
 			flags[flag] = false
+	for removed_area in REMOVED_AREA_SIZES: fog.erase(removed_area)
 	var exploration := preload("res://scripts/maps/exploration.gd").new()
 	if not value.get("exploration",{}) is Dictionary or not exploration.restore(fog):
 		return {}
 	if defeated and not flags.has("bart_victory_dialogue_seen") and not flags.has("bart_victory_dialogue_pending"):
 		flags["bart_victory_dialogue_seen"] = true
-	# Preserve archived flags/fog and restore Wonderland save locations.
-	# The cave still falls back to the forest without rewriting files on read.
+	# Recover removed locations without rewriting files on read.
 	var journey := preload("res://scripts/journey/layout.gd")
-	if not journey.active(area) and not extra_areas.has(area):
+	if not journey.active(area):
 		area = "flooded_forest"
 		point = journey.SPAWNS[area]
 	elif journey.active(area) and not flags.get(journey.REVISION,false):
 		point = journey.SPAWNS[area]
-	if extra_areas.has(area) and not flags.has("wonderland_arrived"):
-		# Existing Wonderland saves retain their location and skip the new introduction.
-		flags["wonderland_arrived"] = true
-		flags["wonderland_intro_completed"] = true
-	for key in ["wonderland_arrived","wonderland_intro_completed","wonderland_fast_travel_unlocked"]:
-		if not flags.has(key): flags[key] = false
 	flags[journey.REVISION] = true
 	var checkpoint: Variant=value.get("checkpoint", {"area":area,"position":[point.x,point.y]})
 	if not checkpoint is Dictionary or not area_sizes.has(checkpoint.get("area","")) or checkpoint.get("area","")=="underground_cave":return {}
@@ -102,6 +117,9 @@ func validate(value: Variant) -> Dictionary:
 	for axis in 2:
 		var coordinate: Variant=checkpoint_position[axis]
 		if not (coordinate is float or coordinate is int) or not is_finite(float(coordinate)) or coordinate<44 or coordinate>area_sizes[checkpoint.area][axis]-44:return {}
+	if REMOVED_AREA_SIZES.has(checkpoint.area):
+		var spawn: Vector2 = journey.SPAWNS.flooded_forest
+		checkpoint = {"area":"flooded_forest", "position":[spawn.x,spawn.y]}
 	var progress := preload("res://scripts/story/progress.gd").validate(value.get("story_progress",{}))
 	if progress.is_empty(): return {}
 	var rpg := preload("res://scripts/rpg/progress.gd").validate(value.get("rpg",{}))

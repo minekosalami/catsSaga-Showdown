@@ -85,8 +85,6 @@ func _process(delta: float) -> void:
    prints.remove_at(i)
 func stamp(actor: Node2D) -> void:
  var world := actor.get_parent()
- var plan := preload("res://scripts/wonderland/layout.gd")
- if plan.regions().has(Session.area_id) and not plan.OUTDOORS.has(Session.area_id) and not water_nearby:return
  var ripple := water_nearby
  if ripple and world.get("map")!=null:
   var bridge := world.map.get_node_or_null("Bridges") as TileMapLayer

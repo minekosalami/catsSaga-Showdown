@@ -1,5 +1,4 @@
 extends SceneTree
-const Plan = preload("res://scripts/wonderland/layout.gd")
 var checks := 0
 var failures := 0
 var session: Node
@@ -76,34 +75,6 @@ func run() -> void:
  check(not movement.prints.is_empty(),"moving player leaves human pawprints")
  await create_timer(2.8).timeout
  check(movement.prints.is_empty(),"footprints expire rather than accumulating")
- for area in ["wonderland_forest","tea_gardens","mushroom_thicket","royal_woods","wonderland_village","queens_castle"]:
-  var probe: Node = load("res://scenes/wonderland/"+area+".tscn").instantiate()
-  var marker: String = probe.get_node("Entries").get_child(0).name
-  probe.free()
-  await session.travel(area,marker)
-  await settle()
-  check(ambience.profile == "wonderland",area+" uses layered nature profile")
-  check(current_scene.map.get_node("WonderlandAmbience/FallingPetals") != null,area+" animates human petal art")
-  var portals: Node = current_scene.map.get_node("Portals")
-  for portal in portals.get_children():
-   check(current_scene.map.get_node_or_null("Sign_"+str(portal.name)) != null,area+" has sign for "+str(portal.name))
-  for item in get_nodes_in_group("interactables"):
-   if current_scene.map.is_ancestor_of(item):check(item.is_in_group("destination_signs") or item.name == "CastleGate","no NPCs or encounters added to "+area)
-  var water: TileMapLayer = current_scene.map.get_node_or_null("FairytaleWater")
-  if water != null:
-   check(not water.get_used_cells().is_empty(),area+" river is painted")
-   var visual: Node = current_scene.map.get_node("WonderlandAmbience")
-   check(visual.waves.size() == 12 and visual.waves[0].get_parent() == current_scene.map,area+" human ripple sprites are attached and cleaned up with the map")
-   var cell := water.get_used_cells()[0]
-   var point := water.map_to_local(cell)*water.scale
-   check(not current_scene.map.is_walkable_position(point),area+" river is not traversable ground")
-   var query := PhysicsPointQueryParameters2D.new()
-   query.position = point
-   query.collision_mask = 1
-   check(not current_scene.get_world_2d().direct_space_state.intersect_point(query).is_empty(),area+" river has actual physics collision")
-   var bridge: TileMapLayer = current_scene.map.get_node("FairytaleBridges")
-   if area != "wonderland_forest":check(not bridge.get_used_cells().is_empty(),area+" existing paths cross on bridges")
-   for bridge_cell in bridge.get_used_cells():check(water.get_cell_source_id(bridge_cell)<0,"bridge carries no solid water tile")
  await session.travel("underground_cave","FromFlooded")
  await settle()
  check(ambience.profile == "cave","cave selects licensed drips and reverb")

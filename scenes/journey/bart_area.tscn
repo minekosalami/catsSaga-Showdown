@@ -2025,10 +2025,6 @@ metadata/facing_direction = Vector2(-1, 0)
 position = Vector2(224, 912)
 metadata/facing_direction = Vector2(1, 0)
 
-[node name="FromWonderland" type="Marker2D" parent="Entries" unique_id=427829036]
-position = Vector2(224, 912)
-metadata/facing_direction = Vector2(1, 0)
-
 [node name="Portals" type="Node2D" parent="." unique_id=1035491619]
 
 [node name="ToLeft" type="Area2D" parent="Portals" unique_id=8311858]
